@@ -1,0 +1,463 @@
+name: build
+
+# WHAT THIS BUILDS: one self-contained deliverable per platform, each holding a
+# SevenuP that runs on a machine with nothing installed on it. That is the whole
+# reason this file is as long as it is.
+#
+# SevenuP is a wxWidgets GUI program, and a wxWidgets GUI program linked the
+# ordinary way is not self-contained: it needs the exact wxWidgets it was built
+# against, present at runtime, in a version whose ABI matches. Nobody restoring
+# a 2006 Spectrum tool wants to install a widget toolkit first. So every job
+# here BUILDS WXWIDGETS FROM SOURCE AS A STATIC LIBRARY and links it in. That
+# costs 10-25 minutes the first time on each platform, which is why the result
+# is cached on the configure flags and the wxWidgets tag.
+#
+# "Self-contained" is then CHECKED rather than assumed, per platform, because
+# the failure mode is silent: a binary that quietly acquired a dependency runs
+# perfectly on the runner that built it and fails on the first machine that
+# downloads it. Each job inspects what its binary asks the loader for and fails
+# here instead.
+#
+# Callable from release.yml so the binaries that get attached to a release are
+# produced by this same file, not by a second copy of it that drifts.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# SUPERSEDED RUNS CANCEL THEMSELVES. Pushing a fix while the previous attempt
+# is still going leaves two runs building the same three platforms, and the
+# older one's answer is about code that no longer exists. On private minutes
+# that is billed twice over, and Windows bills at 2x and macOS at 10x, so the
+# duplicate costs several times what the push did.
+#   cancel-in-progress IS CONDITIONAL, and the condition is the point: a run
+# that is part of publishing a release must never be killed by somebody's push
+# landing mid-build, so only push and pull_request runs are cancellable.
+# Called from release.yml, github.workflow is the caller's name, which puts a
+# release in its own group regardless.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+
+env:
+  # Pinned, not "latest". The 1.21 source needs the three wxWidgets 3 API
+  # fixes this repository carries, and a different major version is a
+  # different set of removals; this is the version the code is known to build
+  # against. Bumping it is a deliberate change, and the cache key follows it.
+  WX_VERSION: v3.3.3
+
+  # EVERY wxWidgets SUBSYSTEM SevenuP DOES NOT CALL. Its whole API surface is
+  # core and base -- roughly 60 classes, checked against the source -- but a
+  # default configure builds the lot, and most of the build time goes into
+  # libraries this program never links. None of these is a feature being given
+  # up; they are code that was never reachable.
+  #   libpng, libjpeg and libtiff stay: wxImage's handlers are what import and
+  # export BMP, GIF, JPG, PNG, PCX, TIF, IFF and XPM, which is a feature.
+  #   CHANGING THIS LIST MEANS BUMPING THE CACHE KEYS BELOW. They end in a
+  # version suffix for exactly this reason: the cached tree is the output of
+  # these flags, and a stale hit would quietly restore the untrimmed build.
+  #   Every name here was checked against wxWidgets' own configure. There is
+  # deliberately no --disable-xml: wxWidgets has no such option, and passing
+  # one it does not recognise makes configure exit rather than warn.
+  WX_TRIM: >-
+    --disable-html --disable-xrc --disable-sockets
+    --disable-aui --disable-stc --disable-richtext --disable-propgrid
+    --disable-ribbon --disable-mediactrl --disable-webview
+    --disable-debugreport --without-opengl
+
+jobs:
+  # ---------------------------------------------------------------- macOS ---
+  # UNIVERSAL, because the audience splits across both architectures: Apple
+  # silicon for anyone on a current machine, Intel for the older hardware a
+  # Spectrum tool tends to live on. wxWidgets can build both slices in one
+  # pass, and the app bundle is a binary plus resources, so one bundle serves
+  # both rather than making somebody choose.
+  macos:
+    name: macos-universal
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Cache the static wxWidgets build
+        id: wxcache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: wx-install
+          key: wx-${{ env.WX_VERSION }}-macos14-universal-static-v3
+
+      # =builtin ON EVERY IMAGE LIBRARY, and this is not belt-and-braces. The
+      # runner has Homebrew on it, configure finds Homebrew's libtiff, libwebp
+      # and pcre2, and those are built for the runner's own architecture only.
+      # wxWidgets then links against them happily and the universal build dies
+      # much later, at the app link, as "symbol(s) not found for architecture
+      # x86_64" with the real cause four screens further up in ld warnings.
+      # Building wxWidgets' own bundled copies keeps the whole tree universal.
+      #   libwebp is dropped rather than built: SevenuP reads and writes BMP,
+      # GIF, JPG, PNG, PCX, TIF, IFF and XPM, and never WebP.
+      #
+      # --disable-shared is the whole point: it produces libwx_*.a, which
+      # wx-config then hands to the link as archives rather than as -lwx
+      # against a dylib somewhere in /opt/homebrew.
+      #   --with-macosx-version-min=11.0 sets the floor. Without it the floor
+      # becomes the runner's SDK and the binary refuses to start on anything
+      # older, which for this audience is the wrong default.
+      - name: Build wxWidgets as a static universal library
+        if: steps.wxcache.outputs.cache-hit != 'true'
+        run: |
+          set -eux
+          git clone --depth 1 --branch "$WX_VERSION" --recurse-submodules \
+            https://github.com/wxWidgets/wxWidgets.git wx-src
+          mkdir wx-build && cd wx-build
+          ../wx-src/configure \
+            --prefix="$GITHUB_WORKSPACE/wx-install" \
+            --disable-shared \
+            --disable-tests \
+            $WX_TRIM \
+            --with-osx_cocoa \
+            --with-macosx-version-min=11.0 \
+            --enable-universal_binary=x86_64,arm64 \
+            --with-libjpeg=builtin \
+            --with-libpng=builtin \
+            --with-libtiff=builtin \
+            --with-zlib=builtin \
+            --with-regex=builtin \
+            --with-expat=builtin \
+            --without-libwebp \
+            --without-subdirs
+          make -j"$(sysctl -n hw.ncpu)"
+          make install
+
+      - name: Build SevenuP.app
+        run: |
+          set -eux
+          cd SRC
+          make -f makefile.osx WX_CONFIG="$GITHUB_WORKSPACE/wx-install/bin/wx-config" \
+            ARCHFLAGS="-arch x86_64 -arch arm64"
+
+      # THE CHECK. A dependency on anything outside /usr/lib and
+      # /System/Library is a dependency the downloader does not have. Homebrew
+      # is called out by name because it is the one that appears by accident:
+      # if the build ever picks up /opt/homebrew's wxWidgets instead of the
+      # static one above, everything still compiles and links, and only this
+      # step says so.
+      - name: Check the app is self-contained, and both architectures are in it
+        run: |
+          set -eu
+          bin=SRC/SevenuP.app/Contents/MacOS/SevenuP
+          echo "--- architectures ---"
+          lipo -info "$bin"
+          lipo -info "$bin" | grep -q 'x86_64' || { echo "::error::no x86_64 slice"; exit 1; }
+          lipo -info "$bin" | grep -q 'arm64'  || { echo "::error::no arm64 slice";  exit 1; }
+          echo "--- what it asks the loader for ---"
+          otool -L "$bin"
+          # Only the indented lines are dependencies. otool prints a header per
+          # architecture for a fat binary, so `tail -n +2` drops the first one
+          # and leaves the second looking like a dependency that is neither in
+          # /usr/lib nor /System/Library -- which failed a binary that was
+          # perfectly fine.
+          if otool -L "$bin" | grep -E '^[[:space:]]+/' | \
+             grep -vE '^[[:space:]]+(/usr/lib/|/System/Library/)'; then
+            echo "::error::the binary links something outside /usr/lib and /System/Library"
+            exit 1
+          fi
+          echo "self-contained: only system libraries and frameworks"
+
+      # It launched on the runner, which is more than `file` can tell you.
+      # SevenuP has no --version to run, so this starts the real GUI against a
+      # generated .scr, gives it a moment, and checks it is still alive: a
+      # missing symbol or a broken bundle kills it immediately.
+      - name: Run it
+        run: |
+          set -eu
+          python3 - <<'PY'
+          b = bytearray(6912)
+          for i in range(6144): b[i] = (i * 7) & 0xFF
+          for i in range(768):  b[6144 + i] = (i % 8) | (((i // 32) % 8) << 3)
+          open('smoke.scr', 'wb').write(b)
+          PY
+          SRC/SevenuP.app/Contents/MacOS/SevenuP "$PWD/smoke.scr" &
+          pid=$!
+          sleep 10
+          if kill -0 "$pid" 2>/dev/null; then
+            echo "still running after 10s"
+            kill "$pid"
+          else
+            wait "$pid" && rc=0 || rc=$?
+            echo "::error::it exited on its own with status $rc"
+            exit 1
+          fi
+
+      # ZIPPED HERE, not by the packaging job. Artifact upload does not carry
+      # the executable bit or symlinks, and an app bundle is nothing but a
+      # directory tree that depends on both: uploaded as a directory it comes
+      # back down unrunnable, and the code signature with it. ditto is the
+      # macOS-aware archiver and is what `Compress-Archive`-style tooling is
+      # not; --keepParent puts SevenuP.app itself inside the zip rather than
+      # its contents.
+      - name: Archive the bundle
+        run: ditto -c -k --sequesterRsrc --keepParent SRC/SevenuP.app SevenuP-macos-universal.zip
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: SevenuP-macos-universal
+          path: SevenuP-macos-universal.zip
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------- Linux ---
+  # APPIMAGE, not a tarball. Static wxWidgets removes the wxWidgets dependency
+  # but not GTK, which wxWidgets' Linux port is built on and which cannot be
+  # statically linked in any sane way. An AppImage carries GTK and its stack
+  # along with the binary, which is what makes the download runnable on a
+  # machine that has not been prepared for it.
+  linux:
+    name: linux-x86_64
+    # PINNED, deliberately not ubuntu-latest. The runner's glibc becomes the
+    # floor for the AppImage, and an AppImage built on 24.04 does not start on
+    # Debian 12 or Ubuntu 22.04. 22.04 drops that floor to glibc 2.35 and costs
+    # this build nothing. Raising this label raises the floor for every user.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Install the GTK headers wxWidgets builds against
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev imagemagick file desktop-file-utils
+
+      - name: Cache the static wxWidgets build
+        id: wxcache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: wx-install
+          key: wx-${{ env.WX_VERSION }}-ubuntu2204-gtk3-static-v2
+
+      - name: Build wxWidgets as a static library
+        if: steps.wxcache.outputs.cache-hit != 'true'
+        run: |
+          set -eux
+          git clone --depth 1 --branch "$WX_VERSION" --recurse-submodules \
+            https://github.com/wxWidgets/wxWidgets.git wx-src
+          mkdir wx-build && cd wx-build
+          ../wx-src/configure \
+            --prefix="$GITHUB_WORKSPACE/wx-install" \
+            --disable-shared \
+            --disable-tests \
+            $WX_TRIM \
+            --with-gtk=3 \
+            --without-subdirs
+          make -j"$(nproc)"
+          make install
+
+      - name: Build SevenuP
+        run: |
+          set -eux
+          cd SRC
+          make -f makefile.unx WX_CONFIG="$GITHUB_WORKSPACE/wx-install/bin/wx-config"
+          file SevenuP
+
+      # linuxdeploy reads the .desktop file to name the AppImage and to decide
+      # what goes in it, so both it and an icon have to exist on disk first.
+      # The icon is converted from the 32x32 XPM the program already uses for
+      # its own window, so the AppImage, the window and the Windows build all
+      # show the same thing.
+      - name: Stage an AppDir
+        run: |
+          set -eux
+          mkdir -p AppDir/usr/bin AppDir/usr/share/applications \
+                   AppDir/usr/share/icons/hicolor/32x32/apps
+          cp SRC/SevenuP AppDir/usr/bin/
+          convert SRC/bitmaps/sevenup.xpm \
+            AppDir/usr/share/icons/hicolor/32x32/apps/sevenup.png
+          cat > AppDir/usr/share/applications/sevenup.desktop <<'DESKTOP'
+          [Desktop Entry]
+          Type=Application
+          Name=SevenuP
+          Comment=ZX Spectrum graphic editor
+          Exec=SevenuP %F
+          Icon=sevenup
+          Categories=Graphics;2DGraphics;RasterGraphics;
+          MimeType=application/x-spectrum-screen;
+          Terminal=false
+          DESKTOP
+          desktop-file-validate AppDir/usr/share/applications/sevenup.desktop
+
+      # glib looks for GIO modules in ONE directory, and left alone that is the
+      # host's /usr/lib/<triple>/gio/modules. Those are built against the
+      # host's glib, which on any reasonably current distribution is newer than
+      # the glib bundled here, so they fail to load and print on every start:
+      #
+      #   libgvfscommon.so: undefined symbol: g_task_set_static_name
+      #   Failed to load module: .../libgvfsdbus.so
+      #
+      # Nothing breaks -- the losses are gvfs volume monitoring and the dconf
+      # settings backend, neither of which a Spectrum bitmap editor uses -- but
+      # it looks like a broken program to whoever started it from a terminal.
+      # Pointing glib at the bundle's own directory keeps it from reaching for
+      # libraries built against a glib that is not the one running.
+      - name: Keep glib away from the host's GIO modules
+        run: |
+          set -eux
+          mkdir -p AppDir/apprun-hooks AppDir/usr/lib/gio/modules
+          cat > AppDir/apprun-hooks/gio-modules.sh <<'HOOK'
+          export GIO_MODULE_DIR="$APPDIR/usr/lib/gio/modules"
+          HOOK
+
+      - name: Build the AppImage
+        run: |
+          set -eux
+          base=https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous
+          curl -fsSL -o linuxdeploy "$base/linuxdeploy-x86_64.AppImage"
+          curl -fsSL -o linuxdeploy-plugin-gtk \
+            https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
+          chmod +x linuxdeploy linuxdeploy-plugin-gtk
+          # The runners have no FUSE, so the AppImages cannot mount themselves;
+          # extracting and running the payload directly is the documented way
+          # round it and is what every CI doing this ends up doing.
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          export DEPLOY_GTK_VERSION=3
+          ./linuxdeploy --appdir AppDir --plugin gtk --output appimage \
+            -d AppDir/usr/share/applications/sevenup.desktop \
+            -i AppDir/usr/share/icons/hicolor/32x32/apps/sevenup.png
+          mv SevenuP*.AppImage SevenuP-linux-x86_64.AppImage
+          chmod +x SevenuP-linux-x86_64.AppImage
+
+      # THE CHECK, in the only terms that mean anything for an AppImage: not
+      # what the inner binary links, which is allowed to name GTK, but whether
+      # the bundle carries those libraries itself. wxWidgets must not appear at
+      # all -- if it does, the static link silently did not happen.
+      - name: Check the AppImage carries its dependencies
+        run: |
+          set -eu
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          ./SevenuP-linux-x86_64.AppImage --appimage-extract >/dev/null
+          echo "--- bundled libraries ---"
+          ls squashfs-root/usr/lib/ | head -40
+          for lib in libgtk-3 libgdk-3 libglib-2.0; do
+            ls squashfs-root/usr/lib/ | grep -q "$lib" || {
+              echo "::error::$lib is not bundled; the AppImage needs it installed"; exit 1; }
+          done
+          if ls squashfs-root/usr/lib/ | grep -i '^libwx'; then
+            echo "::error::wxWidgets is bundled as a shared library, so it was not linked statically"
+            exit 1
+          fi
+          echo "self-contained: GTK bundled, wxWidgets linked in"
+
+      # xvfb, because a GUI on a headless runner has no display to open on.
+      - name: Run it
+        run: |
+          set -eu
+          sudo apt-get install -y xvfb
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          python3 - <<'PY'
+          b = bytearray(6912)
+          for i in range(6144): b[i] = (i * 7) & 0xFF
+          for i in range(768):  b[6144 + i] = (i % 8) | (((i // 32) % 8) << 3)
+          open('smoke.scr', 'wb').write(b)
+          PY
+          xvfb-run -a ./SevenuP-linux-x86_64.AppImage "$PWD/smoke.scr" &
+          pid=$!
+          sleep 15
+          if kill -0 "$pid" 2>/dev/null; then
+            echo "still running after 15s"
+            kill "$pid"
+          else
+            wait "$pid" && rc=0 || rc=$?
+            echo "::error::it exited on its own with status $rc"
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: SevenuP-linux-x86_64
+          path: SevenuP-linux-x86_64.AppImage
+          if-no-files-found: error
+
+  # -------------------------------------------------------------- Windows ---
+  # ONE .EXE AND NOTHING ELSE. MSYS2's own wxWidgets package is a DLL build,
+  # which would mean shipping libwx_*.dll plus the three MinGW runtime DLLs and
+  # hoping nobody separates them from the program. Building wxWidgets static
+  # here, and linking the MinGW runtimes in as well, gets it down to a single
+  # file that runs where it is dropped.
+  windows:
+    name: windows-x86_64
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            git make
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-pkgconf
+
+      - name: Cache the static wxWidgets build
+        id: wxcache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: wx-install
+          key: wx-${{ env.WX_VERSION }}-mingw64-static-v2
+
+      - name: Build wxWidgets as a static library
+        if: steps.wxcache.outputs.cache-hit != 'true'
+        run: |
+          set -eux
+          git clone --depth 1 --branch "$WX_VERSION" --recurse-submodules \
+            https://github.com/wxWidgets/wxWidgets.git wx-src
+          mkdir wx-build && cd wx-build
+          ../wx-src/configure \
+            --prefix="$(cygpath -u "$GITHUB_WORKSPACE")/wx-install" \
+            --disable-shared \
+            --disable-tests \
+            $WX_TRIM \
+            --without-subdirs
+          make -j"$(nproc)"
+          make install
+
+      # windres has to find wx/msw/wx.rc, which lives in the wxWidgets include
+      # tree, and the setup.h that belongs to this particular build. wx-config
+      # knows where both are; --cppflags is passed through so the resource
+      # compiler resolves the same headers the C++ did.
+      - name: Build SevenuP.exe
+        run: |
+          set -eux
+          cd SRC
+          WXC="$(cygpath -u "$GITHUB_WORKSPACE")/wx-install/bin/wx-config"
+          make -f makefile.mingw \
+            WX_CONFIG="$WXC" \
+            WX_RCFLAGS="$($WXC --cppflags)"
+          file SevenuP.exe
+
+      # THE CHECK. objdump lists the DLLs the loader will go looking for. The
+      # Windows system DLLs are expected; anything else -- a libwx_*.dll, or
+      # the MinGW runtime trio -- means a file somebody has to keep next to the
+      # program, which is exactly what this build exists to avoid.
+      - name: Check the .exe is self-contained
+        run: |
+          set -eu
+          cd SRC
+          echo "--- DLLs it will look for ---"
+          objdump -p SevenuP.exe | grep 'DLL Name:' | sort -u
+          if objdump -p SevenuP.exe | grep 'DLL Name:' | \
+             grep -iE 'libwx|libgcc|libstdc\+\+|libwinpthread'; then
+            echo "::error::the .exe needs a non-system DLL beside it"
+            exit 1
+          fi
+          echo "self-contained: system DLLs only"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: SevenuP-windows-x86_64
+          path: SRC/SevenuP.exe
+          if-no-files-found: error
