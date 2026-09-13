@@ -95,7 +95,7 @@ OpenFile::OpenFile(std::string path)      // Constructor for graph loading
         else                    namestart=0;
         int nameend=OpenPath.Length();
         OpenName = OpenPath.Mid(namestart,nameend-4-namestart); // remove extension
-        OpenName+=_('\0');
+        OpenName+='\0';
         OpenGraph=new SP_Graph(0,0);
         if (file.fail())
                 {
@@ -736,7 +736,7 @@ void OpenFile::Save(std::string filenam)   // Save .SEV (or .SCR) graphic
         namestart++;
         int nameend=s2ws(filenam).Length();
         OpenName = s2ws(filenam).Mid(namestart,nameend-4-namestart); // remove extension
-        OpenName+= _('\0');
+        OpenName+= '\0';
         flagsure = 0;
         }
 

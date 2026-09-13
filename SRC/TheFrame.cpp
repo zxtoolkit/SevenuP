@@ -213,8 +213,8 @@ TheFrame::TheFrame(int xpos, int ypos, int width, int height, int argc, wxChar *
        IniPath=getenv(_("HOME"));
        IniPath += _("/Library/SevenuP/SevenuP.ini");
 #endif
-//      int inilen=0;
-//        std::ifstream inifile(IniPath.mb_str(wxConvLocal));
+        int inilen=0;
+        std::ifstream inifile(IniPath.mb_str(wxConvLocal));
         
 #ifdef __WXMAC__
         // If we didn't find the mac SevenuP.ini in ~/Library/SevenuP
@@ -248,22 +248,22 @@ TheFrame::TheFrame(int xpos, int ypos, int width, int height, int argc, wxChar *
             }
 #endif
 
-//        if (inifile.fail())
-//                {
-//                SetStatusText(_("SevenuP.ini failed. Using defaults"),0);
-//                }
-//        else
-//                {
-//                while ((inilen<9999)&&(!inifile.eof()))
-//                        {
-//                        char cunicode;
-//                        inifile.get(cunicode);
-//                        IniFile[inilen++]=(wxChar)cunicode;
-//                        }
-//                IniFile[inilen++]=';';
-//                IniFile[inilen]=0;
-//                ValidIni=1;
-//                }
+        if (inifile.fail())
+                {
+                SetStatusText(_("SevenuP.ini failed. Using defaults"),0);
+                }
+        else
+                {
+                while ((inilen<9999)&&(!inifile.eof()))
+                        {
+                        char cunicode;
+                        inifile.get(cunicode);
+                        IniFile[inilen++]=(wxChar)cunicode;
+                        }
+                IniFile[inilen++]=';';
+                IniFile[inilen]=0;
+                ValidIni=1;
+                }
         zoom=GetIniValue(IniFile,_("\nZoom="),0,12,5);
         AutoZoom=GetIniValue(IniFile,_("\nAutoZoom="),0,1,0);
         size_wx=GetIniValue(IniFile,_("\nSize_wx="),470,1280,500);
@@ -1320,7 +1320,7 @@ void TheFrame::FileRename(wxCommandEvent &event)
         rename.CentreOnParent();
         if (rename.ShowModal() == wxID_OK)
                 {
-                Current->OpenName=rename.GetValue()+_('\0');
+                Current->OpenName=rename.GetValue()+'\0';
                 Current->OpenPath=_("");
                 SetTit();
                 }
