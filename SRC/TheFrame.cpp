@@ -467,8 +467,19 @@ TheFrame::TheFrame(int xpos, int ypos, int width, int height, int argc, wxChar *
         menuSprite->Append(SPR_MOVE,_("Move frame"),_("Move current frame to another position"));
         menuSprite->Append(SPR_REMOVE,_("Remove frame"),_("Remove current frame from sprite"));
         menuSprite->AppendSeparator();
+        // GTK reserves the bare arrow keys for moving focus and refuses to
+        // register them as menu accelerators, warning "\"Left\" must use
+        // modifiers to be used as a keyboard accelerator". Advertising a
+        // shortcut there that cannot fire is worse than showing none, so the
+        // accelerator is left out of the label on GTK. The keys themselves
+        // still work everywhere: MyWindow::OnKey handles them directly.
+#ifdef __WXGTK__
+        menuSprite->Append(SPR_SEL_PREV,_("Select previous frame"),_("Select previous sprite frame"));
+        menuSprite->Append(SPR_SEL_NEXT,_("Select next frame"),_("Select next sprite frame"));
+#else
         menuSprite->Append(SPR_SEL_PREV,_("Select previous frame\tLEFT"),_("Select previous sprite frame"));
         menuSprite->Append(SPR_SEL_NEXT,_("Select next frame\tRIGHT"),_("Select next sprite frame"));
+#endif
         menuSprite->Append(SPR_SEL_GOTO,_("Select frame number..."),_("Select frame"));
 
         menuGrid->Append( GRID_PIXEL,_("&Pixel Grid\tG"),_("Toggle pixel grid"), TRUE);
@@ -821,9 +832,9 @@ void TheFrame::FileNew(wxCommandEvent &event)
                 newitem1 = new wxBoxSizer (wxHORIZONTAL);
                 wxFlexGridSizer *newitem3 = new wxFlexGridSizer( 2, 0, 0 );
                 wxStaticText *newitem4 = new wxStaticText( &dialog, ID_TEXT, _("Size X:"), wxDefaultPosition, wxDefaultSize, 0 );
-                newitem5 = new wxSpinCtrl( &dialog, ID_NEW_SPINCTRL1, wxString::Format(_("%d"),newdefaultx), wxDefaultPosition, wxSize(50,-1), 0, 1, 256, newdefaultx );
+                newitem5 = new wxSpinCtrl( &dialog, ID_NEW_SPINCTRL1, wxString::Format(_("%d"),newdefaultx), wxDefaultPosition, wxDefaultSize, 0, 1, 256, newdefaultx );
                 wxStaticText *newitem6 = new wxStaticText( &dialog, ID_TEXT,_("Size Y:"), wxDefaultPosition, wxDefaultSize, 0 );
-                newitem7 = new wxSpinCtrl( &dialog, ID_NEW_SPINCTRL2, wxString::Format(_("%d"),newdefaulty), wxDefaultPosition, wxSize(50,-1), 0, 1, 192, newdefaulty );
+                newitem7 = new wxSpinCtrl( &dialog, ID_NEW_SPINCTRL2, wxString::Format(_("%d"),newdefaulty), wxDefaultPosition, wxDefaultSize, 0, 1, 192, newdefaulty );
                 wxButton *newitem8 = new wxButton( &dialog, wxID_OK,_("OK"), wxDefaultPosition, wxDefaultSize, 0 );
                 wxButton *newitem9 = new wxButton( &dialog, wxID_CANCEL,_("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
 
@@ -5431,6 +5442,19 @@ void MyWindow::OnKey(wxKeyEvent& event)
         key=event.GetKeyCode();
         switch (key)
                 {
+                // Sprite frame stepping. This used to exist only as the menu
+                // accelerator, which GTK refuses to register, so on Linux
+                // there was no way to reach it at all.
+                case WXK_LEFT:
+                case WXK_RIGHT: {
+                        // The menu ids are private to TheFrame, so the public
+                        // handlers are called directly rather than posting a
+                        // command event. They ignore the event argument.
+                        wxCommandEvent cmd;
+                        if (key==WXK_LEFT) framee->SpritePrev(cmd);
+                        else               framee->SpriteNext(cmd);
+                        break;
+                        }
                 case '1': {
                         framee->cursormode=0;
                         framee->left_func=1;
