@@ -1,5 +1,5 @@
 /* XPM */
-static char *inv_col[] = {
+static const char *inv_col[] = {
 "16 16 3 1",
 "  c None",
 "a c #FF0000",

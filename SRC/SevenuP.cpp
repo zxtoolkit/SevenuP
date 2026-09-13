@@ -1,12 +1,12 @@
 // SevenuP.cpp
 //
-// part of SevenuP 1.20 - a Spectrum graphic editor
+// part of SevenuP 1.21 - a Spectrum graphic editor
 //
 // Init - code
 //
 // Equivalent to main() in wxWindows. Creates the frame.
 //
-// Copyright (C) 2002-2006  Jaime Tejedor Gomez, aka Metalbrain
+// Copyright (C) 2002-2007  Jaime Tejedor Gomez, aka Metalbrain
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -25,6 +25,7 @@
 
 
 #include "wx/wxprec.h"
+#include "wx/intl.h"
 
 #ifndef WX_PRECOMP
   #include "wx/wx.h"
@@ -37,7 +38,7 @@ IMPLEMENT_APP(SevenuP)          // Here starts the wxWindows application
 
 bool SevenuP::OnInit()          // This is executed at startup
 {
-        TheFrame *frame=new TheFrame("SevenuP v1.20", -1, -1, -1, -1, argc, argv);
+        TheFrame *frame=new TheFrame(-1, -1, -1, -1, argc, argv);
                                 // Create the Frame with this title, at
                                 // default position with default size
         frame->Show(TRUE);      // Show it

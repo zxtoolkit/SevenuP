@@ -1,5 +1,5 @@
 /* XPM */
-static char *transp_xpm[] = {
+static const char *transp_xpm[] = {
 "16 16 2 1",
 "a c Black",
 "b c #FFFFFF",

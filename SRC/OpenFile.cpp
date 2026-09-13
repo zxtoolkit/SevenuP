@@ -1,12 +1,12 @@
 // OpenFile.cpp
 //
-// part of SevenuP 1.20 - a Spectrum graphic editor
+// part of SevenuP 1.21 - a Spectrum graphic editor
 //
 // File management - code
 //
 // Creation, opening and saving of graphic files
 //
-// Copyright (C) 2002-2006  Jaime Tejedor Gomez, aka Metalbrain
+// Copyright (C) 2002-2007  Jaime Tejedor Gomez, aka Metalbrain
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -48,8 +48,8 @@ BYTE BPal[16]={28,200,28,200,28,200,28,200,28,248,28,248,28,248,28,248};
 OpenFile::OpenFile()    // NULL constructor
         {
         OpenFrames = 0;
-        OpenName = "";
-        OpenPath = "";
+        OpenName = _("");
+        OpenPath = _("");
         OpenPropierties=0;
         OpenGraph=NULL;
         flagsure = 0;
@@ -60,14 +60,14 @@ OpenFile::OpenFile(int x_si, int y_si, bool masked, int newnumber)
         {
         OpenFrames = 1;
         OpenGraph = new SP_Graph(x_si, y_si, TRUE);
-        OpenName = "NEW";
+        OpenName = _("NEW");
         char ch2='0'+newnumber/10;
         char ch1='0'+newnumber%10;
         char ch0='\0';
         OpenName+=ch2;
         OpenName+=ch1;
         OpenName+=ch0;
-        OpenPath = "";
+        OpenPath = _("");
         flagsure=0;
         OpenPropierties = 1;
         if (masked)
@@ -77,42 +77,42 @@ OpenFile::OpenFile(int x_si, int y_si, bool masked, int newnumber)
                 }
         }
 
-OpenFile::OpenFile(wxString path)      // Constructor for graph loading
+OpenFile::OpenFile(std::string path)      // Constructor for graph loading
         {
         char LoadBuff[45000];
-        std::ifstream file(path,std::ios::binary);
+        std::ifstream file(s2ws(path).mb_str(wxConvLocal),std::ios::binary);
 	int posn; // streampos posn;
         wxString ext;
 
-        ext = path.Right(3);
+        ext = s2ws(path).Right(3);
         ext = ext.Upper();
-        OpenPath = path;
+        OpenPath = s2ws(path);
 
-        int searchindxwin=OpenPath.rfind("\\");
-        int searchindxunix=OpenPath.rfind("/");
+        int searchindxwin=OpenPath.rfind(_("\\"));
+        int searchindxunix=OpenPath.rfind(_("/"));
         int namestart=(searchindxwin>searchindxunix)?searchindxwin:searchindxunix;
         if (namestart>0)        namestart++;
         else                    namestart=0;
         int nameend=OpenPath.Length();
         OpenName = OpenPath.Mid(namestart,nameend-4-namestart); // remove extension
-        OpenName+='\0';
+        OpenName+=_('\0');
         OpenGraph=new SP_Graph(0,0);
         if (file.fail())
                 {
-                wxString strg=path+" doesn't exist!";
-                (void)wxMessageBox(strg, "Warning!");
+                wxString strg=s2ws(path)+_(" doesn't exist!");
+                (void)wxMessageBox(strg, _("Warning!"));
                 OpenGraph->Propied1=0;
                 return;
                 }
-        if (ext=="SCR")
+        if (ext==_("SCR"))
                 {               // Load .SCR file
                 file.read(LoadBuff,6913);
                 if(!file.eof())
                         {
                         file.close();
                         wxString strg;
-                        strg=path+" is an invalid screen file!\n\nPerhaps a Windows screensaver?";
-                        (void)wxMessageBox(strg, "Warning!");
+                        strg=s2ws(path)+_(" is an invalid screen file!\n\nPerhaps a Windows screensaver?");
+                        (void)wxMessageBox(strg, _("Warning!"));
                         OpenGraph->Propied1=0;
                         }
                 else
@@ -152,13 +152,12 @@ OpenFile::OpenFile(wxString path)      // Constructor for graph loading
 				    OpenGraph->SetAttr(character,LoadBuff[parser++]);
 				  else
 				    OpenGraph->SetAttr(character,56);
-
                                 }
                         }
                 OpenPropierties = OpenGraph->Propied1;
 		OpenFrames = (OpenGraph->Propied2)+1;
                 }
-        else if (ext=="SEV")
+        else if (ext==_("SEV"))
                 {               // Load .SEV file
                 file.read(LoadBuff,45000);
                 file.close();
@@ -166,8 +165,8 @@ OpenFile::OpenFile(wxString path)      // Constructor for graph loading
                 if(LoadBuff[0]!='S'||LoadBuff[1]!='e'||LoadBuff[2]!='v'||LoadBuff[3]!='\0')
                         {
                         wxString strg;
-                        strg=path+" is an invalid file!";
-                        (void)wxMessageBox(strg, "Warning!");
+                        strg=s2ws(path)+_(" is an invalid file!");
+                        (void)wxMessageBox(strg, _("Warning!"));
                         OpenGraph->Propied1=0;
                         return;
                         }
@@ -183,8 +182,8 @@ OpenFile::OpenFile(wxString path)      // Constructor for graph loading
                                 if ((P1!=1)||(P2!=0)||(SX>256)||(SY>192))
                                         {
                                         wxString strg;
-                                        strg=path+" is an invalid file!";
-                                        (void)wxMessageBox(strg, "Warning!");
+                                        strg=s2ws(path)+_(" is an invalid file!");
+                                        (void)wxMessageBox(strg, _("Warning!"));
                                         OpenGraph->Propied1=0;
                                         return;
                                         }
@@ -215,8 +214,8 @@ OpenFile::OpenFile(wxString path)      // Constructor for graph loading
                                 if ((P1>2)||(P2>31)||(SX>256)||(SY>192))
                                         {
                                         wxString strg;
-                                        strg=path+" is an invalid file!";
-                                        (void)wxMessageBox(strg, "Warning!");
+                                        strg=s2ws(path)+_(" is an invalid file!");
+                                        (void)wxMessageBox(strg, _("Warning!"));
                                         OpenGraph->Propied1=0;
                                         return;
                                         }
@@ -257,21 +256,21 @@ OpenFile::OpenFile(wxString path)      // Constructor for graph loading
                         else
                                 {
                                 wxString strg;
-                                strg=path+" has an invalid version!";
-                                (void)wxMessageBox(strg, "Warning!");
+                                strg=s2ws(path)+_(" has an invalid version!");
+                                (void)wxMessageBox(strg, _("Warning!"));
                                 OpenGraph->Propied1=0;
                                 }
                         }
                 OpenPropierties = OpenGraph->Propied1;
                 OpenFrames = (OpenGraph->Propied2)+1;
                 }
-	else if (ext=="BMP"||ext=="GIF"||ext=="JPG"||ext=="PNG"||ext=="PCX"||ext=="TIF"||ext=="IFF"||ext=="XPM")
+	else if (ext==_("BMP")||ext==_("GIF")||ext==_("JPG")||ext==_("PNG")||ext==_("PCX")||ext==_("TIF")||ext==_("IFF")||ext==_("XPM"))
                 {
                 OpenPath=OpenPath.Mid(0,nameend-4);
-                OpenPath+=".sev\0";
+                OpenPath+=_(".sev\0");
                 file.close();
                 wxImage *Import;
-                Import = new wxImage(path);
+                Import = new wxImage(s2ws(path));
                 if (Import->Ok())
                         {
                         int imagesizex,imagesizey,speccysizex,speccysizey;
@@ -557,13 +556,13 @@ OpenFile::OpenFile(wxString path)      // Constructor for graph loading
 //      Time4=wxDateTime::UNow();
 //      TimeDiff2=Time4-Time3;
 //      long k=TimeDiff2.GetMilliseconds().ToLong();
-//      std::cout<<"Conversion time = "<<k<<std::endl<<std::flush;
+//      std::cout<<_("Conversion time = ")<<k<<std::endl<<std::flush;
                         }
                 else
                         {
                         wxString strg;
-                        strg=path+" is an invalid file!";
-                        (void)wxMessageBox(strg, "Warning!");
+                        strg=s2ws(path)+_(" is an invalid file!");
+                        (void)wxMessageBox(strg, _("Warning!"));
                         OpenGraph->Propied1=0;
                         return;
                         }
@@ -572,8 +571,8 @@ OpenFile::OpenFile(wxString path)      // Constructor for graph loading
                 {
                 file.close();
                 wxString strg;
-                strg=path+" is an invalid file!";
-                (void)wxMessageBox(strg, "Warning!");
+                strg=s2ws(path)+_(" is an invalid file!");
+                (void)wxMessageBox(strg, _("Warning!"));
                 OpenGraph->Propied1=0;
                 }
         }
@@ -648,7 +647,7 @@ void OpenFile::Distribute(int* prop,int pixels,int cellsize,int paper,int ink,in
                 }
 }
 
-void OpenFile::Export(wxString filenam,int framenumber)   // Save image from graphic
+void OpenFile::Export(std::string filenam,int framenumber)   // Save image from graphic
         {
         wxImage Export;
         SP_Graph *Graphic3;
@@ -659,19 +658,19 @@ void OpenFile::Export(wxString filenam,int framenumber)   // Save image from gra
                 Graphic3=Graphic3->NextGraph;
                 }
         Export = Graphic3->SP_Screen[0]->ConvertToImage();
-        if (Export.SaveFile(filenam)!=TRUE)
+        if (Export.SaveFile(s2ws(filenam))!=TRUE)
                 {
-                wxString strg="Saving "+filenam+" failed!";
-                (void)wxMessageBox(strg, "Warning!");
+                wxString strg=_("Saving ")+s2ws(filenam)+_(" failed!");
+                (void)wxMessageBox(strg, _("Warning!"));
                 }
         }
 
-void OpenFile::Save(wxString filenam)   // Save .SEV (or .SCR) graphic
+void OpenFile::Save(std::string filenam)   // Save .SEV (or .SCR) graphic
         {
         wxString ext;                   //  The SCR case checked here
-        ext = filenam.Right(3);         // happens when we save a screen
+        ext = s2ws(filenam).Right(3);         // happens when we save a screen
         ext = ext.Upper();              // using the menu option "Save"
-        if (ext=="SCR")                 // instead of the usual "Save as"
+        if (ext==_("SCR"))                 // instead of the usual "Save as"
                 {
                 SaveSCR(filenam);
                 return;
@@ -728,21 +727,20 @@ void OpenFile::Save(wxString filenam)   // Save .SEV (or .SCR) graphic
                         }
                 SavingGraph=SavingGraph->NextGraph;
                 }
-        file.open(filenam,std::ios::binary);
-
+        file.open(s2ws(filenam).mb_str(wxConvLocal),std::ios::binary);
         file.write(SaveBuff,size);
         file.close();
-        int searchindxwin=filenam.rfind("\\");
-        int searchindxunix=filenam.rfind("/");
+        int searchindxwin=s2ws(filenam).rfind(_("\\"));
+        int searchindxunix=s2ws(filenam).rfind(_("/"));
         int namestart=(searchindxwin>searchindxunix)?searchindxwin:searchindxunix;
         namestart++;
-        int nameend=filenam.Length();
-        OpenName = filenam.Mid(namestart,nameend-4-namestart); // remove extension
-        OpenName+= '\0';
+        int nameend=s2ws(filenam).Length();
+        OpenName = s2ws(filenam).Mid(namestart,nameend-4-namestart); // remove extension
+        OpenName+= _('\0');
         flagsure = 0;
         }
 
-void OpenFile::SaveSCR(wxString filenam)        // Save .SCR screen
+void OpenFile::SaveSCR(std::string filenam)        // Save .SCR screen
         {
         char SaveBuff[6912];
         char *parser=SaveBuff;
@@ -759,14 +757,14 @@ void OpenFile::SaveSCR(wxString filenam)        // Save .SCR screen
                 {
                 *parser++=OpenGraph->GetAttr(character);
                 }
-        file.open(filenam,std::ios::binary);
+        file.open(s2ws(filenam).mb_str(wxConvLocal),std::ios::binary);
         file.write(SaveBuff,6912);
         file.close();
         flagsure = 0;
         }
 
 // Save .BIN file
-void OpenFile::SaveBIN(wxString filenam,int opts,int p0,int p1,int p2,int p3,int p4,int maskrev,int appendfile, int zigzag,int AttrMask,int AttrMaskValue,int interleave,int z88dk)
+void OpenFile::SaveBIN(std::string filenam,int opts,int p0,int p1,int p2,int p3,int p4,int maskrev,int appendfile, int zigzag,int AttrMask,int AttrMaskValue,int interleave,int z88dk)
         {
         int pr[6];      // Propierties
         int rp[6];      // Reverse priorities
@@ -882,8 +880,8 @@ void OpenFile::SaveBIN(wxString filenam,int opts,int p0,int p1,int p2,int p3,int
                         }
                 }
                 
-	if (appendfile) binfile.open(filenam,std::ios::binary|std::ios::app);
-	else binfile.open(filenam,std::ios::binary);
+	if (appendfile) binfile.open(s2ws(filenam).mb_str(wxConvLocal),std::ios::binary|std::ios::app);
+	else binfile.open(s2ws(filenam).mb_str(wxConvLocal),std::ios::binary);
 	if (z88dk==1)
 		{
 		*parserSize++=OpenGraph->GetSizeY();
@@ -996,19 +994,19 @@ void OpenFile::SaveBIN(wxString filenam,int opts,int p0,int p1,int p2,int p3,int
         binfile.close();
         }
         
-void OpenFile::SaveASM(wxString filenam,int opts,int p0,int p1,int p2,int p3,int p4,int maskrev,int asmtype,int appendfile,int zigzag,int AttrMask,int AttrMaskValue,int interleave,int z88dk,int nolabel)
+void OpenFile::SaveASM(std::string filenam,int opts,int p0,int p1,int p2,int p3,int p4,int maskrev,int asmtype,int appendfile,int zigzag,int AttrMask,int AttrMaskValue,int interleave,int z88dk,int nolabel)
         {
         int outlinelim=8;
         int bytewidth=3;
 
-        wxString HexPref="";
-        wxString DefbStrg="\tDEFB\t";
+        wxString HexPref=_("");
+        wxString DefbStrg=_("\tDEFB\t");
 	wxString Label1=OpenName;
-	wxString Label2=":";
-        wxString strs1_file[] = {"Gfx+Attr","Attr+Gfx","Gfx","Attr"};
-        wxString strs2_file[] = {"X char", "Char line", "Y char", "Mask", "Frame number","Sprite"};
-        wxString strs3_file[] = {"Line","Character","Column","","Frames","Sprite"};
-        wxString strs4_file[] = {"No","Yes","Yes, before graphic","Yes, including attributes","Yes, including attributes and before graphic"};
+	wxString Label2=_(":");
+        wxString strs1_file[] = {_("Gfx+Attr"),_("Attr+Gfx"),_("Gfx"),_("Attr")};
+        wxString strs2_file[] = {_("X char"),_("Char line"),_("Y char"),_("Mask"),_("Frame number"),_("Sprite")};
+        wxString strs3_file[] = {_("Line"),_("Character"),_("Column"),_(""),_("Frames"),_("Sprite")};
+        wxString strs4_file[] = {_("No"),_("Yes"),_("Yes, before graphic"),_("Yes, including attributes"),_("Yes, including attributes and before graphic")};
 
         int pr[6];      // Propierties
         int rp[6];      // Reverse priorities
@@ -1037,59 +1035,59 @@ void OpenFile::SaveASM(wxString filenam,int opts,int p0,int p1,int p2,int p3,int
 
         std::ofstream asmfile;
         if (appendfile)
-	   asmfile.open(filenam,std::ios::binary|std::ios::app);
+	    asmfile.open(s2ws(filenam).mb_str(wxConvLocal),std::ios::binary|std::ios::app);
 	else
-	     asmfile.open(filenam,std::ios::binary);
-        asmfile << "; ASM source file created by SevenuP v1.20"<<std::endl;
-        asmfile << "; SevenuP (C) Copyright 2002-2006 by Jaime Tejedor Gomez, aka Metalbrain"<<std::endl;
+	    asmfile.open(s2ws(filenam).mb_str(wxConvLocal),std::ios::binary);
+        asmfile << "; ASM source file created by SevenuP v1.21"<<std::endl;
+        asmfile << "; SevenuP (C) Copyright 2002-2007 by Jaime Tejedor Gomez, aka Metalbrain"<<std::endl;
 
         switch (asmtype)
                 {
                 case 0: break;
                 case 1: {
                         asmfile << "; Target Assembler: TASM"<<std::endl;
-                        DefbStrg="\t.BYTE\t";
+                        DefbStrg=_("\t.BYTE\t");
                         break;
                         }
                 case 2: {
                         asmfile << "; Target Assembler: The E-Z80 Way"<<std::endl;
-                        DefbStrg="              DEFB ";
+                        DefbStrg=_("              DEFB ");
                         outlinelim=1;
 			Label1=OpenName;
 			if (Label1.Len()>13)
 				{
 				Label1=Label1.Left(13);
 				}
-			Label2="";
+			Label2=_("");
                         break;
                         }
                 case 3: {
                         asmfile << "; Target Assembler: tniASM"<<std::endl;
-                        DefbStrg="\tDB\t";
+                        DefbStrg=_("\tDB\t");
                         break;
                         }
                 case 4: {
-                        HexPref="$";
+                        HexPref=_("$");
                         bytewidth=2;
                         break;
                         }
                 case 5: {
-                        HexPref="0x";
+                        HexPref=_("0x");
                         bytewidth=2;
                         break;
                         }
                 case 6: {
-                        HexPref="$";
+                        HexPref=_("$");
                         bytewidth=2;
                         asmfile << "; Target Assembler: TASM"<<std::endl;
-                        DefbStrg="\t.BYTE\t";
+                        DefbStrg=_("\t.BYTE\t");
                         break;
                         }
                 case 7: {
-                        HexPref="$";
+                        HexPref=_("$");
                         bytewidth=2;
                         asmfile << "; Target Assembler: tniASM"<<std::endl;
-                        DefbStrg="\tDB\t";
+                        DefbStrg=_("\tDB\t");
                         break;
                         }
                 }
@@ -1114,7 +1112,7 @@ void OpenFile::SaveASM(wxString filenam,int opts,int p0,int p1,int p2,int p3,int
                                 {
                                 asmfile << ", ";
                                 }
-                        asmfile<<strs2_file[pr[sortpout]];
+                        asmfile<<ws2s(strs2_file[pr[sortpout]]);
 //                        ent[sortpout]=sortpoutputted;
                         sortpoutputted++;
                         }
@@ -1125,9 +1123,9 @@ void OpenFile::SaveASM(wxString filenam,int opts,int p0,int p1,int p2,int p3,int
                         }
                 }
         asmfile <<std::endl;
-        asmfile << ";Data Outputted:  "<<strs1_file[opts]<<std::endl;
-        asmfile << ";Interleave:      "<<strs3_file[interleave]<<std::endl;
-        asmfile << ";Mask:            "<<strs4_file[OpenPropierties-1+maskrev*(OpenPropierties-1)+2*AttrMask*(OpenPropierties-1)]<<std::endl;
+        asmfile << ";Data Outputted:  "<<ws2s(strs1_file[opts])<<std::endl;
+        asmfile << ";Interleave:      "<<ws2s(strs3_file[interleave])<<std::endl;
+        asmfile << ";Mask:            "<<ws2s(strs4_file[OpenPropierties-1+maskrev*(OpenPropierties-1)+2*AttrMask*(OpenPropierties-1)])<<std::endl;
         if (AttrMask==1)
 		asmfile << ";Attribute Mask:  "<<std::setw(3)<<AttrMaskValue<<std::endl;
 	if ((zigzag==1)&&(rp[1]>rp[0]))
@@ -1135,10 +1133,10 @@ void OpenFile::SaveASM(wxString filenam,int opts,int p0,int p1,int p2,int p3,int
 	if (z88dk==1)
 		asmfile << ";First two bytes are y and x pixel size, for z88dk libraries"<<std::endl;
         asmfile << std::endl;
-	
+
 	if (nolabel==0)
 		{
-        	asmfile <<Label1<<Label2<<std::endl;
+        	asmfile <<ws2s(Label1)<<ws2s(Label2)<<std::endl;
         	}
 
         if (asmtype>3)
@@ -1341,12 +1339,12 @@ void OpenFile::SaveASM(wxString filenam,int opts,int p0,int p1,int p2,int p3,int
 		}
 	if (z88dk==1)
 		{
-		asmfile<<DefbStrg;
-		asmfile << HexPref;
+		asmfile<<ws2s(DefbStrg);
+		asmfile << ws2s(HexPref);
 		if (asmtype!=2) asmfile<<std::setw(bytewidth);
 		asmfile<<OpenGraph->GetSizeY();
 		asmfile<<",";
-		asmfile << HexPref;
+		asmfile<<ws2s(HexPref);
 		if (asmtype!=2) asmfile<<std::setw(bytewidth);
 		asmfile<<OpenGraph->GetSizeX()%256;
                 asmfile<<std::endl;		
@@ -1360,9 +1358,9 @@ void OpenFile::SaveASM(wxString filenam,int opts,int p0,int p1,int p2,int p3,int
                         asmfile<<std::endl;
                         alreadyinline=0;
                         }
-                if (alreadyinline==0) asmfile<<DefbStrg;
+                if (alreadyinline==0) asmfile<<ws2s(DefbStrg);
                 else asmfile<<",";
-		asmfile << HexPref;
+		asmfile << ws2s(HexPref);
 		if (asmtype!=2) asmfile<<std::setw(bytewidth);
                 asmfile<<(int)parser[i];
 		alreadyinline++;
@@ -1374,12 +1372,12 @@ void OpenFile::SaveASM(wxString filenam,int opts,int p0,int p1,int p2,int p3,int
         }
 
 // Save .C source
-void	OpenFile::SaveC(wxString filenam,int opts,int p0,int p1,int p2,int p3,int p4,int maskrev,int appendfile, int zigzag,int AttrMask,int AttrMaskValue,int interleave,int z88dk)
+void	OpenFile::SaveC(std::string filenam,int opts,int p0,int p1,int p2,int p3,int p4,int maskrev,int appendfile, int zigzag,int AttrMask,int AttrMaskValue,int interleave,int z88dk)
         {
-        wxString strs1_file[] = {"Gfx+Attr","Attr+Gfx","Gfx","Attr"};
-        wxString strs2_file[] = {"X char", "Char line", "Y char", "Mask", "Frame number","Sprite"};
-        wxString strs3_file[] = {"Line","Character","Column","","Frames","Sprite"};
-        wxString strs4_file[] = {"No","Yes","Yes, before graphic","Yes, including attributes","Yes, including attributes and before graphic"};
+        wxString strs1_file[] = {_("Gfx+Attr"),_("Attr+Gfx"),_("Gfx"),_("Attr")};
+        wxString strs2_file[] = {_("X char"), _("Char line"), _("Y char"), _("Mask"), _("Frame number"),_("Sprite")};
+        wxString strs3_file[] = {_("Line"),_("Character"),_("Column"),_(""),_("Frames"),_("Sprite")};
+        wxString strs4_file[] = {_("No"),_("Yes"),_("Yes, before graphic"),_("Yes, including attributes"),_("Yes, including attributes and before graphic")};
 
         int pr[6];      // Propierties
         int rp[6];      // Reverse priorities
@@ -1409,10 +1407,10 @@ void	OpenFile::SaveC(wxString filenam,int opts,int p0,int p1,int p2,int p3,int p
         int lop[5]; // Loop variables
 
         std::ofstream cfile;
-	if (appendfile) cfile.open(filenam,std::ios::binary|std::ios::app);
-	else cfile.open(filenam,std::ios::binary);
-        cfile << "/* C source file created by SevenuP v1.20                                */"<<std::endl;
-        cfile << "/* SevenuP (C) Copyright 2002-2006 by Jaime Tejedor Gomez, aka Metalbrain*/"<<std::endl;
+	if (appendfile) cfile.open(s2ws(filenam).mb_str(wxConvLocal),std::ios::binary|std::ios::app);
+	else cfile.open(s2ws(filenam).mb_str(wxConvLocal),std::ios::binary);
+        cfile << "/* C source file created by SevenuP v1.21                                */"<<std::endl;
+        cfile << "/* SevenuP (C) Copyright 2002-2007 by Jaime Tejedor Gomez, aka Metalbrain*/"<<std::endl;
         cfile << std::endl;
         cfile << "/*"<<std::endl;
         cfile << "GRAPHIC DATA:"<<std::endl;
@@ -1433,7 +1431,7 @@ void	OpenFile::SaveC(wxString filenam,int opts,int p0,int p1,int p2,int p3,int p
                                 {
                                 cfile << ", ";
                                 }
-                        cfile<<strs2_file[pr[sortpout]];
+                        cfile<<ws2s(strs2_file[pr[sortpout]]);
 //                        ent[sortpout]=sortpoutputted;
                         sortpoutputted++;
                         }
@@ -1444,9 +1442,9 @@ void	OpenFile::SaveC(wxString filenam,int opts,int p0,int p1,int p2,int p3,int p
                         }
                 }
         cfile <<std::endl;
-        cfile << "Data Outputted:  "<<strs1_file[opts]<<std::endl;
-        cfile << "Interleave:      "<<strs3_file[interleave]<<std::endl;
-        cfile << "Mask:            "<<strs4_file[OpenPropierties-1+maskrev*(OpenPropierties-1)+2*AttrMask*(OpenPropierties-1)]<<std::endl;
+        cfile << "Data Outputted:  "<<ws2s(strs1_file[opts])<<std::endl;
+        cfile << "Interleave:      "<<ws2s(strs3_file[interleave])<<std::endl;
+        cfile << "Mask:            "<<ws2s(strs4_file[OpenPropierties-1+maskrev*(OpenPropierties-1)+2*AttrMask*(OpenPropierties-1)])<<std::endl;
         if (AttrMask==1)
 		cfile << "Attribute Mask:  "<<std::setw(3)<<AttrMaskValue<<std::endl;
 	if ((zigzag==1)&&(rp[1]>rp[0]))
@@ -1653,7 +1651,7 @@ void	OpenFile::SaveC(wxString filenam,int opts,int p0,int p1,int p2,int p3,int p
 
         int alreadyinline=0;
 
-        cfile << "unsigned char "<<OpenName<<"["<<sais+2*z88dk<<"] = {"<<std::endl;
+        cfile << "unsigned char "<<ws2s(OpenName)<<"["<<sais+2*z88dk<<"] = {"<<std::endl;
         // Meter código z88dk
         if (z88dk==1)
         	{
@@ -1676,11 +1674,264 @@ void	OpenFile::SaveC(wxString filenam,int opts,int p0,int p1,int p2,int p3,int p
         cfile.close();
         }
 
-void    OpenFile::ExportData(wxString filenam,int opts,int p0,int p1,int p2,int p3,int p4,int maskrev,int asmtype,int appendfile, int zigzag, int AttrMask, int AttrMaskValue, int interleave, int z88dk, int nolabel)
+void    OpenFile::ExportData(std::string filenam,int opts,int p0,int p1,int p2,int p3,int p4,int maskrev,int asmtype,int appendfile, int zigzag, int AttrMask, int AttrMaskValue, int interleave, int z88dk, int nolabel)
         {
         wxString ext;
-        ext=filenam.Right(3).Upper();
-        if (ext=="ASM") SaveASM(filenam,opts,p0,p1,p2,p3,p4,maskrev,asmtype,appendfile,zigzag,AttrMask,AttrMaskValue,interleave,z88dk,nolabel);
-        else if (ext=="BIN") SaveBIN(filenam,opts,p0,p1,p2,p3,p4,maskrev,appendfile,zigzag,AttrMask,AttrMaskValue,interleave,z88dk);
+        ext=s2ws(filenam).Right(3).Upper();
+        if (ext==_("ASM")) SaveASM(filenam,opts,p0,p1,p2,p3,p4,maskrev,asmtype,appendfile,zigzag,AttrMask,AttrMaskValue,interleave,z88dk,nolabel);
+        else if (ext==_("BIN")) SaveBIN(filenam,opts,p0,p1,p2,p3,p4,maskrev,appendfile,zigzag,AttrMask,AttrMaskValue,interleave,z88dk);
         else SaveC(filenam,opts,p0,p1,p2,p3,p4,maskrev,appendfile,zigzag,AttrMask,AttrMaskValue,interleave,z88dk);
+        }
+
+void 	OpenFile::ImportBIN(std::string filenam,int opts,int p0,int p1,int p2,int p3,int p4,int maskrev,int zigzag,int AttrMask,int AttrMaskValue,int interleave,int z88dk)
+        {
+        // std::ifstream::pos_type tamano;
+        int tamano;
+        int pr[6];      // Propierties
+        int rp[6];      // Reverse priorities
+        int expectedsize;
+        SP_Graph *GraphSave[2];
+        SP_Graph *GraphFrame[OpenFrames];
+        
+        std::ifstream binfile(s2ws(filenam).mb_str(wxConvLocal),std::ios::binary|std::ios::ate);
+	tamano=(int)binfile.tellg();
+	binfile.seekg (0, std::ios::beg);
+	expectedsize=(((8*OpenPropierties)*(opts!=3)+(1+AttrMask*(OpenPropierties-1))*(opts!=2))*OpenGraph->y_charsize*OpenGraph->x_charsize*OpenFrames)+2*z88dk;
+
+	if (tamano!=expectedsize)
+		{
+		wxString strg;
+      		strg.Printf(_("Size: %d, expected: %d"),tamano,expectedsize);
+        	(void)wxMessageBox(strg,_("Warning!"));
+                return;
+        	}
+
+	GraphFrame[0]=OpenGraph;
+        for (int i=1;i<OpenFrames;i++)
+        	{
+		GraphFrame[i]=GraphFrame[i-1]->NextGraph;
+                }
+
+        pr[0]=p0;               // Assign priorities
+        pr[1]=p1;
+        pr[2]=p2;
+        pr[3]=p3;
+        pr[4]=p4;
+        pr[5]=5;
+	rp[5]=5;
+        for (int i=0;i<5;i++)   // Get reverse priorities
+                {
+                for (int k=0;k<5;k++)
+                        {
+                        if (pr[i]==k) rp[k]=i;
+                        }
+                }
+
+        int lim[6]={OpenGraph->x_charsize,8,OpenGraph->y_charsize,OpenPropierties,OpenFrames,1}; // Graphic limits
+        int atlim[6]={OpenGraph->x_charsize,1,OpenGraph->y_charsize,OpenPropierties,OpenFrames,1};    // Attribute limits
+
+        int lop[5]; // Loop variables
+
+        char LoadBuff[45000];
+	char GraphBuff[40000];
+	char AttrBuff[5000];
+        char SizeBuff[2];
+        char *parserGraph=GraphBuff;
+        char *parserAttr=AttrBuff;
+        char *parserSize=SizeBuff;
+        char *parser=LoadBuff;
+        int saisGr=0;
+        int saisAt=0;
+	int sais=0;
+	
+	if (z88dk==1)
+		{
+		binfile.read(SizeBuff,2);
+		}
+
+	// DeMixer
+
+	saisGr=OpenGraph->x_charsize*8*OpenGraph->y_charsize*OpenPropierties*OpenFrames;
+	saisAt=OpenGraph->x_charsize*OpenGraph->y_charsize*OpenFrames;
+	if ((OpenPropierties==2)&&(AttrMask==1))
+		{
+		saisAt*=2;
+		}
+
+	switch(opts)
+		{
+		case 0:	// Graph+Attr
+		case 1: // Attr+Graph
+			{
+        		binfile.read(LoadBuff,45000);
+			sais=saisGr+saisAt;
+			// Calculate attribute interleaving point
+			if (rp[interleave]<rp[1])
+				{
+				interleave=1;
+				}
+			int multGr=1;
+			for (int i=0;i<=rp[interleave];i++)
+				{
+				multGr*=lim[pr[i]];
+				}
+			int multAt=multGr/8;
+			int multMask=0;
+			int steps=saisGr/multGr;
+			if (saisGr/saisAt==16)
+				{
+				if (rp[3]<rp[interleave])
+					{
+					multAt/=2;
+					}
+				else	{
+					multMask=1;
+					for (int i=(rp[interleave]+1);i<rp[3];i++)
+						{
+						multMask*=lim[pr[i]];
+						}
+					}
+				}
+			int idx=0;
+			for(int i=0;i<steps;i++)
+				{
+				if (opts==0)
+					{
+					for(int j=0;j<multGr;j++)
+						{
+						*parserGraph++=*parser++;
+						}
+					if (multMask==0)
+						{
+						for(int j=0;j<multAt;j++)
+							{
+							*parserAttr++=*parser++;
+							}
+						}
+					else	{
+						if((idx/multMask)%2==maskrev)
+							{
+							for(int j=0;j<multAt;j++)
+								{
+								*parserAttr++=*parser++;
+								}
+							}
+						idx++;
+						}
+					}
+				else	{
+					if (multMask==0)
+						{
+						for(int j=0;j<multAt;j++)
+							{
+							*parserAttr++=*parser++;
+							}
+						}
+					else	{
+						if((idx/multMask)%2==maskrev)
+							{
+							for(int j=0;j<multAt;j++)
+								{
+								*parserAttr++=*parser++;
+								}
+							}
+						idx++;
+						}
+					for(int j=0;j<multGr;j++)
+						{
+						*parserGraph++=*parser++;
+						}
+					}
+				}
+			parserGraph-=saisGr;
+			parserAttr-=saisAt;
+			break;
+			}
+		case 2: // Graph
+			{
+			// BUGGG
+        		binfile.read(GraphBuff,40000);
+			break;
+			}
+		case 3: // Attr
+			{
+        		binfile.read(AttrBuff,5000);
+			break;
+			}
+		}
+        binfile.close();
+
+        for (lop[4]=0;lop[4]<lim[pr[4]];lop[4]++)
+                {
+                for (lop[3]=0;lop[3]<lim[pr[3]];lop[3]++)
+                        {
+                        for (lop[2]=0;lop[2]<lim[pr[2]];lop[2]++)
+                                {
+                                for (lop[1]=0;lop[1]<lim[pr[1]];lop[1]++)
+                                        {
+                                        for (lop[0]=0;lop[0]<lim[pr[0]];lop[0]++)
+                                                {
+						int horiz=lop[rp[0]];
+						if ((zigzag==1)&&(rp[1]>rp[0])&&((lop[rp[1]]%2)==1))
+							{
+							horiz=OpenGraph->x_charsize-horiz-1;
+							}
+						if (OpenPropierties==2)
+                                                	{
+                                                        GraphSave[maskrev]=GraphFrame[lop[rp[4]]];
+                                                        GraphSave[1-maskrev]=GraphFrame[lop[rp[4]]]->Mask;
+                                                        }
+						else	{
+                                                	GraphSave[0]=GraphFrame[lop[rp[4]]];
+                                                        }
+						GraphSave[lop[rp[3]]]->SetByte(8*(horiz+OpenGraph->x_charsize*lop[rp[2]])+lop[rp[1]],*parserGraph++);
+        					}
+                                        }
+                                }
+                        }
+                }
+
+	for (lop[4]=0;lop[4]<atlim[pr[4]];lop[4]++)
+        	{
+                for (lop[3]=0;lop[3]<atlim[pr[3]];lop[3]++)
+                	{
+                        for (lop[2]=0;lop[2]<atlim[pr[2]];lop[2]++)
+                        	{
+                                for (lop[1]=0;lop[1]<atlim[pr[1]];lop[1]++)
+                                	{
+                                        for (lop[0]=0;lop[0]<atlim[pr[0]];lop[0]++)
+                                        	{
+						if (OpenPropierties==1)
+	                                        	{
+	                                        	if(opts==2)
+	                                        		{
+								GraphFrame[lop[rp[4]]]->SetAttr(56,*parserAttr++);
+	                                        		}
+							else	{
+								GraphFrame[lop[rp[4]]]->SetAttr(lop[rp[0]]+OpenGraph->x_charsize*lop[rp[2]],*parserAttr++);
+								}						
+							}
+						else 	{
+							if (maskrev==lop[rp[3]])
+								{
+	                                        		if(opts==2)
+		                                        		{
+									GraphFrame[lop[rp[4]]]->SetAttr(56,*parserAttr++);
+	                                        			}
+								else	{								
+									GraphFrame[lop[rp[4]]]->SetAttr(lop[rp[0]]+OpenGraph->x_charsize*lop[rp[2]],*parserAttr++);
+									}
+								}
+							else	{
+								if (AttrMask==1)
+									{
+									AttrMaskValue=*parserAttr++;
+									}
+								}
+							}
+                                                }
+					}
+                                }
+                        }
+                }
         }

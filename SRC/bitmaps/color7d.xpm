@@ -1,5 +1,5 @@
 /* XPM */
-static char *color7d_xpm[] = {
+static const char *color7d_xpm[] = {
 "16 16 3 1",
 "a c #C8C4C8",
 "b c #FFF8FF",

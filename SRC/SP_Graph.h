@@ -1,10 +1,10 @@
 // SP_Graph.h
 //
-// part of SevenuP 1.20 - a Spectrum graphic editor
+// part of SevenuP 1.21 - a Spectrum graphic editor
 //
 // SP_Graph - the Graphic class and functions
 //
-// Copyright (C) 2002-2006  Jaime Tejedor Gomez, aka Metalbrain
+// Copyright (C) 2002-2007  Jaime Tejedor Gomez, aka Metalbrain
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License

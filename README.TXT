@@ -1,6 +1,6 @@
-	                *******************************
-	                *SevenuP - v1.20 - Source code*
-	                *******************************
+	                **********************************
+	                *SevenuP - v1.21WIP - Source code*
+	                **********************************
 
 
 
@@ -101,7 +101,6 @@ make -f makefile.unx
 strip SevenuP
 
  and use UPX from http://upx.sourceforge.net to compress the binary file.
-Experimental version 1.94 will get a higher compression rate.
 
 
 FreeBSD notes

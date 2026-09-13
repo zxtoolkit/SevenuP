@@ -1,5 +1,5 @@
 /* XPM */
-static char *bright0_xpm[] = {
+static const char *bright0_xpm[] = {
 "16 16 1 1",
 "a c #EF0000",
 "aaaaaaaaaaaaaaaa",

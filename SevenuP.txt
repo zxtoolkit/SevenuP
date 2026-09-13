@@ -1,6 +1,6 @@
-				*******************
-				* SevenuP - v1.20 *
-				*******************
+				**********************
+				* SevenuP - v1.21WIP *
+				**********************
 
 
 
@@ -760,6 +760,9 @@ Version History
 	(Linux) Also compiled a 64 bit binary.
   	(Linux) Switched from UPX 1.25 to 1.94 to get much smaller executable
   		size (and to be able to compress the 64 bit binary).
+2009-??-??:	Version 1.21 (Work In Progress)
+	(Source) Fixed Unicode compilation and also fixed gcc 4.1 compilation 
+		problems. Welcome Ubuntu users!
 
 
 
@@ -807,9 +810,6 @@ Contact
 *******
 
 email:	metalbrain_coder@gmx.net
-MSN:	metalbrain_coder@hotmail.com   (also valid for email, if the upper one fails)
-Yahoo:  metalbrain_coder
-
-(Although I rarely connect to those Instant Message services)
+	metalbrain@gmail.com
 
 http://www.speccy.org/metalbrain

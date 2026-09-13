@@ -1,12 +1,12 @@
 // OpenFile.h
 //
-// part of SevenuP 1.20 - a Spectrum graphic editor
+// part of SevenuP 1.21 - a Spectrum graphic editor
 //
 // File management - headers
 //
 // Creation, opening and saving of graphic files
 //
-// Copyright (C) 2002-2006  Jaime Tejedor Gomez, aka Metalbrain
+// Copyright (C) 2002-2007  Jaime Tejedor Gomez, aka Metalbrain
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -59,18 +59,19 @@ SP_Graph *OpenGraph;                    // Our graphic will be here
 
 OpenFile();                             // Null constructor
 OpenFile(int, int, bool, int);          // Constructor for new graphs
-OpenFile(wxString);                     // Constructor for graph loading
+OpenFile(std::string);                     // Constructor for graph loading
 ~OpenFile();                            // Destructor
 
 void Distribute (int* prop,int pixels,int cellsize,int paper,int ink,int* p);
                                 // Distribution of inked pixels on import
 
-void Save(wxString);                                    // Save .SEV graphic
-void SaveSCR(wxString);                                 // Save .SCR screen
-void ExportData(wxString,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int); // Choose...
-void SaveBIN(wxString,int,int,int,int,int,int,int,int,int,int,int,int,int); // Save .BIN file
-void SaveASM(wxString,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int); // Save .ASM src
-void SaveC(wxString,int,int,int,int,int,int,int,int,int,int,int,int,int);   // Save .C source
-void Export(wxString,int);                              // Export to image
+void Save(std::string);                                    // Save .SEV graphic
+void SaveSCR(std::string);                                 // Save .SCR screen
+void ExportData(std::string,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int); // Choose...
+void SaveBIN(std::string,int,int,int,int,int,int,int,int,int,int,int,int,int); // Save .BIN file
+void SaveASM(std::string,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int); // Save .ASM src
+void SaveC(std::string,int,int,int,int,int,int,int,int,int,int,int,int,int);   // Save .C source
+void Export(std::string,int);                              // Export to image
+void ImportBIN(std::string,int,int,int,int,int,int,int,int,int,int,int,int); // Import from binary file
 };
 #endif // OPENFILE_H

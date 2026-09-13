@@ -1,5 +1,5 @@
 /* XPM */
-static char *inv_bits_xpm[] = {
+static const char *inv_bits_xpm[] = {
 "16 16 3 1",
 "  c None",
 "a c #000000",

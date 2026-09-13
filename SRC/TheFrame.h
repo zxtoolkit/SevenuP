@@ -1,12 +1,12 @@
 // TheFrame.h
 //
-// part of SevenuP 1.20 - a Spectrum graphic editor
+// part of SevenuP 1.21 - a Spectrum graphic editor
 //
 // Main Frame - headers
 //
 // Here's where all edition code lies
 //
-// Copyright (C) 2002-2006  Jaime Tejedor Gomez, aka Metalbrain
+// Copyright (C) 2002-2007  Jaime Tejedor Gomez, aka Metalbrain
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -41,6 +41,7 @@
   #include <wx/event.h>
   #include <wx/gdicmn.h>
   #include <wx/image.h>
+  #include <wx/numdlg.h>  
   #include <wx/scrolwin.h>
   #include <wx/spinctrl.h>
   #include <wx/wfstream.h>
@@ -61,6 +62,7 @@ class TheFrame : public wxFrame
         FILE_NEW = 2001,
         FILE_LOAD,
         FILE_IMPORT,
+        FILE_BINIMPORT,
         FILE_EXPORTDATA,
         FILE_EXPORTIMAGE,
         FILE_CLOSE,
@@ -297,7 +299,7 @@ protected:
 
 public:
                                         // Frame Constructor
-        TheFrame(const wxChar *title, int xpos, int ypos, int width, int height, int argc, char **argv);
+        TheFrame(int xpos, int ypos, int width, int height, int argc, wxChar **argv);
         ~TheFrame();
 
         wxScrolledWindow *canvas; // I want the canvas to be scrollable
@@ -358,6 +360,7 @@ public:
         void FileNew (wxCommandEvent &event);   // Create a new graph
         void FileLoad (wxCommandEvent &event);  // Load a .SEV or .SCR file
         void FileImport (wxCommandEvent &event);// Import an image
+        void FileBinImport (wxCommandEvent &event); // Import from binary
         void FileFastSave (wxCommandEvent &event);  // Save graph
         void FileSave (wxCommandEvent &event); // Save graph giving name
 
@@ -455,7 +458,7 @@ public:
         void GetOutputOptions();        // Display the output options dialog
         void GetEffectsOptions();       // Display the effects options dialog
 
-        int TheFrame::GetZoom() {return zoom;}; // Get current zoom
+        int GetZoom() {return zoom;}; // Get current zoom
 
         void ButtonINK (wxCommandEvent &event);    // Set ink from button
         void ButtonPAPER (wxCommandEvent &event);  // Set paper from button 

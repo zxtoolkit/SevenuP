@@ -1,10 +1,10 @@
 // Globals.h
 //
-// part of SevenuP 1.20 - a Spectrum graphic editor
+// part of SevenuP 1.21 - a Spectrum graphic editor
 //
 // Global definitions
 //
-// Copyright (C) 2002-2006  Jaime Tejedor Gomez, aka Metalbrain
+// Copyright (C) 2002-2007  Jaime Tejedor Gomez, aka Metalbrain
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -31,3 +31,16 @@
 #define ZOOMLEVELS 13   // Number of Zoom levels
 #define ZOOMBITMAPS 3   // Number of Bitmap based zoom levels
 #endif
+
+
+/// Conversion from wxString to string. 
+#define         ws2s(as)   (std::string((as).mb_str(wxConvUTF8))) 
+
+/// Conversion from string to wxString. 
+#define         s2ws(s)   (wxString((s).c_str(),wxConvUTF8)) 
+
+/// Conversion from C-string to wxString 
+#define         cs2ws(s)   (wxString(s,wxConvUTF8)) 
+
+/// Conversion from const* wxChar to string. 
+#define         wc2s(as)   (std::string((wxString(as)).mb_str(wxConvUTF8)))

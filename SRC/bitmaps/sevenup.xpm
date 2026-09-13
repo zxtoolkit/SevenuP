@@ -1,5 +1,5 @@
 /* XPM */
-static char * sevenup_xpm[] = {
+static const char * sevenup_xpm[] = {
 "32 32 256 2",
 ". 	c #242624",
 "+ 	c #44914C",

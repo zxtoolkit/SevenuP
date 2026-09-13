@@ -1,6 +1,6 @@
-				*******************
-				* SevenuP - v1.20 *
-				*******************
+				**********************
+				* SevenuP - v1.21WIP *
+				**********************
 
 
 
@@ -840,6 +840,9 @@ Historia
 	(Linux) Compilado también un ejecutable de 64 bits.
 	(Linux) Cambio de UPX 1.25 a 1.94 para lograr un ejecutable mucho más
 		pequeño (y para que pueda comprimirse la versión de 64 bits).
+2009-??-??:	Version 1.21 (Work In Progress)
+	(Source) Corregida la compilación con Unicode y corregidos fallos de
+		compilación con gcc 4.1 . ¡Bienvenidos usuarios de Ubuntu!
 
 
 
@@ -887,10 +890,6 @@ Contacto
 ********
 
 email:	metalbrain_coder@gmx.net
-MSN:	metalbrain_coder@hotmail.com   (también válido para emails, si falla
-Yahoo:  metalbrain_coder		la de arriba)
-
-(aunque la verdad es que me conecto muy poco a esos servicios de mensajería
-	instantanea)
+	metalbrain@gmail.com
 
 http://www.speccy.org/metalbrain

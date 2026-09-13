@@ -1,12 +1,12 @@
 // TheFrame.cpp
 //
-// part of SevenuP 1.20 - a Spectrum graphic editor
+// part of SevenuP 1.21 - a Spectrum graphic editor
 //
 // Main Frame - code
 //
 // Here's where all edition code lies
 //
-// Copyright (C) 2002-2006  Jaime Tejedor Gomez, aka Metalbrain
+// Copyright (C) 2002-2007  Jaime Tejedor Gomez, aka Metalbrain
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -48,9 +48,9 @@ BYTE MaskPal[4]={7,6,0,4}; // .INI modifyable maybe in a future
 int ZoomValue[ZOOMLEVELS]={1,2,3,4,6,8,12,16,20,25,32,40,48}; //Zoom levels
 
 // Properties...
-        wxString strs4[] = {"Gfx+Attr","Attr+Gfx","Gfx","Attr"};
-        wxString strs5[] = {"X char", "Char line", "Y char", "Mask", "Frame number" };
-        wxString strs6[] = {"Line","Character","Column","Frames","Sprite"};
+        wxString strs4[] = {_("Gfx+Attr"),_("Attr+Gfx"),_("Gfx"),_("Attr")};
+        wxString strs5[] = {_("X char"),_("Char line"),_("Y char"),_("Mask"),_("Frame number")};
+        wxString strs6[] = {_("Line"),_("Character"),_("Column"),_("Frames"),_("Sprite")};
 	
         int priorities_temp[] = {0,1,2,3,4}; // Priorities order while we're
                                            //  on Output priorities dialog
@@ -161,8 +161,8 @@ int ZoomValue[ZOOMLEVELS]={1,2,3,4,6,8,12,16,20,25,32,40,48}; //Zoom levels
 
 // Frame
 
-TheFrame::TheFrame(const wxChar *title, int xpos, int ypos, int width, int height, int argc, char **argv)
-        : wxFrame((wxFrame *) NULL, -1, title, wxPoint(xpos, ypos), wxSize(width, height))
+TheFrame::TheFrame(int xpos, int ypos, int width, int height, int argc, wxChar **argv)
+        : wxFrame((wxFrame *) NULL, -1, _T("SevenuP v1.21"), wxPoint(xpos, ypos), wxSize(width, height))
 {
 
 // GENERAL VARIABLES
@@ -196,25 +196,25 @@ TheFrame::TheFrame(const wxChar *title, int xpos, int ypos, int width, int heigh
 // STATUS BAR
 
         CreateStatusBar(2);     // 2 subdivisions for the status bar
-        SetStatusText("SevenuP",0);
+        SetStatusText(_("SevenuP"),0);
 
 // LOAD CONFIGURATION VARIABLES FROM .INI FILE
 
-        char IniFile[10000];    // Max 10000 char for .ini file
+        wxChar IniFile[10000];    // Max 10000 char for .ini file
         wxString IniPath,ExePath;
         ExePath=argv[0];
-        int searchindxwin=ExePath.rfind("\\");
-        int searchindxunix=ExePath.rfind("/");
+        int searchindxwin=ExePath.rfind(_("\\"));
+        int searchindxunix=ExePath.rfind(_("/"));
         int pathend=(searchindxwin>searchindxunix)?searchindxwin:searchindxunix;
 #ifndef __WXMAC__        
-        IniPath=ExePath.Left(pathend+1)+"SevenuP.ini";
+        IniPath=ExePath.Left(pathend+1)+_("SevenuP.ini");
 #else
        // Look for the Mac SevenuP.ini in ~/Library/SevenuP/
-       IniPath=getenv("HOME");
-       IniPath += "/Library/SevenuP/SevenuP.ini";
+       IniPath=getenv(_("HOME"));
+       IniPath += _("/Library/SevenuP/SevenuP.ini");
 #endif
-        int inilen=0;
-        std::ifstream inifile(IniPath);
+//      int inilen=0;
+//        std::ifstream inifile(IniPath.mb_str(wxConvLocal));
         
 #ifdef __WXMAC__
         // If we didn't find the mac SevenuP.ini in ~/Library/SevenuP
@@ -222,12 +222,12 @@ TheFrame::TheFrame(const wxChar *title, int xpos, int ypos, int width, int heigh
         if (inifile.fail())
             {
                 char path[PATH_MAX];
-                sprintf(path, "%s/Library/SevenuP",getenv("HOME"));
+                sprintf(path, _("%s/Library/SevenuP"),getenv(_("HOME")));
                 mkdir(path, 0755);
                 
-                sprintf(path, "%s/SevenuP.ini", path);
-                FILE* ip = fopen(ExePath.Left(pathend+1)+"../Resources/SevenuP.ini", "r");
-                FILE* op = fopen(path, "w");
+                sprintf(path, _("%s/SevenuP.ini"), path);
+                FILE* ip = fopen(ExePath.Left(pathend+1)+_("../Resources/SevenuP.ini"), _("r"));
+                FILE* op = fopen(path, _("w"));
                 
                 if(ip && op) 
                     {
@@ -248,32 +248,34 @@ TheFrame::TheFrame(const wxChar *title, int xpos, int ypos, int width, int heigh
             }
 #endif
 
-        if (inifile.fail())
-                {
-                SetStatusText("SevenuP.ini failed. Using defaults",0);
-                }
-        else
-                {
-                while ((inilen<9999)&&(!inifile.eof()))
-                        {
-                        inifile.get(IniFile[inilen++]);
-                        }
-                IniFile[inilen++]=';';
-                IniFile[inilen]=0;
-                ValidIni=1;
-                }
-        zoom=GetIniValue(IniFile,"\nZoom=",0,12,5);
-        AutoZoom=GetIniValue(IniFile,"\nAutoZoom=",0,1,0);
-        size_wx=GetIniValue(IniFile,"\nSize_wx=",470,1280,500);
-        size_wy=GetIniValue(IniFile,"\nSize_wy=",260,1024,300);
-        cursormode=GetIniValue(IniFile,"\nCursor_Mode=",0,2,0);
+//        if (inifile.fail())
+//                {
+//                SetStatusText(_("SevenuP.ini failed. Using defaults"),0);
+//                }
+//        else
+//                {
+//                while ((inilen<9999)&&(!inifile.eof()))
+//                        {
+//                        char cunicode;
+//                        inifile.get(cunicode);
+//                        IniFile[inilen++]=(wxChar)cunicode;
+//                        }
+//                IniFile[inilen++]=';';
+//                IniFile[inilen]=0;
+//                ValidIni=1;
+//                }
+        zoom=GetIniValue(IniFile,_("\nZoom="),0,12,5);
+        AutoZoom=GetIniValue(IniFile,_("\nAutoZoom="),0,1,0);
+        size_wx=GetIniValue(IniFile,_("\nSize_wx="),470,1280,500);
+        size_wy=GetIniValue(IniFile,_("\nSize_wy="),260,1024,300);
+        cursormode=GetIniValue(IniFile,_("\nCursor_Mode="),0,2,0);
 
-        col_ink=GetIniValue(IniFile,"\nInk=",0,8,8);
-        col_paper=GetIniValue(IniFile,"\nPaper=",0,8,8);
-        col_bright=GetIniValue(IniFile,"\nBright=",0,2,2);
-        col_flash=GetIniValue(IniFile,"\nFlash=",0,2,2);
+        col_ink=GetIniValue(IniFile,_("\nInk="),0,8,8);
+        col_paper=GetIniValue(IniFile,_("\nPaper="),0,8,8);
+        col_bright=GetIniValue(IniFile,_("\nBright="),0,2,2);
+        col_flash=GetIniValue(IniFile,_("\nFlash="),0,2,2);
 
-        int Prior=GetIniValue(IniFile,"\nPriorities=",0,43210,01234);
+        int Prior=GetIniValue(IniFile,_("\nPriorities="),0,43210,01234);
         int n0,n1,n2,n3,n4;
         int u[10];
         n0=Prior/10000;
@@ -302,49 +304,49 @@ TheFrame::TheFrame(const wxChar *title, int xpos, int ypos, int width, int heigh
                 priorities[3] = 3;
                 priorities[4] = 4;
                 }
-        gridpix=GetIniValue(IniFile,"\nPixel_grid=",0,1,1);
-        gridchr=GetIniValue(IniFile,"\nCharacter_grid=",0,1,1);
+        gridpix=GetIniValue(IniFile,_("\nPixel_grid="),0,1,1);
+        gridchr=GetIniValue(IniFile,_("\nCharacter_grid="),0,1,1);
 
-        newdefaultx=GetIniValue(IniFile,"\nNewSize_x=",1,256,32);
-        newdefaulty=GetIniValue(IniFile,"\nNewSize_y=",1,192,32);
+        newdefaultx=GetIniValue(IniFile,_("\nNewSize_x="),1,256,32);
+        newdefaulty=GetIniValue(IniFile,_("\nNewSize_y="),1,192,32);
 
-        optradioboxdef=GetIniValue(IniFile,"\nSaveAttrOption=",0,3,0);
-	interleave=GetIniValue(IniFile,"\nInterleave=",0,5,0);
+        optradioboxdef=GetIniValue(IniFile,_("\nSaveAttrOption="),0,3,0);
+	interleave=GetIniValue(IniFile,_("\nInterleave="),0,5,0);
 	if (interleave==3) interleave=0;
-        maskfirst=GetIniValue(IniFile,"\nMaskFirst=",0,1,0);
-        AttrMask=GetIniValue(IniFile,"\nAttrMask=",0,1,0);
-        AttrMaskInk=GetIniValue(IniFile,"\nAttrMaskInk=",0,1,0);
-        AttrMaskPaper=GetIniValue(IniFile,"\nAttrMaskPaper=",0,1,0);
-        AttrMaskBright=GetIniValue(IniFile,"\nAttrMaskBright=",0,1,0);
-        AttrMaskFlash=GetIniValue(IniFile,"\nAttrMaskFlash=",0,1,0);
-        zigzag=GetIniValue(IniFile,"\nZigZag=",0,1,0);
-        z88dksize=GetIniValue(IniFile,"\nZ88dksize=",0,1,0);
-        nolabel=GetIniValue(IniFile,"\nNoLabel=",0,1,0);
+        maskfirst=GetIniValue(IniFile,_("\nMaskFirst="),0,1,0);
+        AttrMask=GetIniValue(IniFile,_("\nAttrMask="),0,1,0);
+        AttrMaskInk=GetIniValue(IniFile,_("\nAttrMaskInk="),0,1,0);
+        AttrMaskPaper=GetIniValue(IniFile,_("\nAttrMaskPaper="),0,1,0);
+        AttrMaskBright=GetIniValue(IniFile,_("\nAttrMaskBright="),0,1,0);
+        AttrMaskFlash=GetIniValue(IniFile,_("\nAttrMaskFlash="),0,1,0);
+        zigzag=GetIniValue(IniFile,_("\nZigZag="),0,1,0);
+        z88dksize=GetIniValue(IniFile,_("\nZ88dksize="),0,1,0);
+        nolabel=GetIniValue(IniFile,_("\nNoLabel="),0,1,0);
 
-        appendfile=GetIniValue(IniFile,"\nAppend=",0,1,0);
-        asmtype=GetIniValue(IniFile,"\nAsmType=",0,7,0);
-	defaultexport=GetIniValue(IniFile,"\nDefaultExport=",0,2,0);
+        appendfile=GetIniValue(IniFile,_("\nAppend="),0,1,0);
+        asmtype=GetIniValue(IniFile,_("\nAsmType="),0,7,0);
+	defaultexport=GetIniValue(IniFile,_("\nDefaultExport="),0,2,0);
 
-        effradioboxdef=GetIniValue(IniFile,"\nEff_pixattr=",0,2,0);
-        eff_arr_shift=GetIniValue(IniFile,"\nEff_arr_shift=",0,1,0);
-        eff_arr_char=GetIniValue(IniFile,"\nEff_arr_char=",0,1,0);
+        effradioboxdef=GetIniValue(IniFile,_("\nEff_pixattr="),0,2,0);
+        eff_arr_shift=GetIniValue(IniFile,_("\nEff_arr_shift="),0,1,0);
+        eff_arr_char=GetIniValue(IniFile,_("\nEff_arr_char="),0,1,0);
 
-        RememberOpenFilePath=GetIniValue(IniFile,"\nRememberOpenFilePath=",0,1,1);
-        RememberImportImagePath=GetIniValue(IniFile,"\nRememberImportImagePath=",0,1,1);
-        RememberSavePath=GetIniValue(IniFile,"\nRememberSavePath=",0,1,1);
-        RememberExportDataPath=GetIniValue(IniFile,"\nRememberExportDataPath=",0,1,1);
-        RememberExportImagePath=GetIniValue(IniFile,"\nRememberExportImagePath=",0,1,1);
+        RememberOpenFilePath=GetIniValue(IniFile,_("\nRememberOpenFilePath="),0,1,1);
+        RememberImportImagePath=GetIniValue(IniFile,_("\nRememberImportImagePath="),0,1,1);
+        RememberSavePath=GetIniValue(IniFile,_("\nRememberSavePath="),0,1,1);
+        RememberExportDataPath=GetIniValue(IniFile,_("\nRememberExportDataPath="),0,1,1);
+        RememberExportImagePath=GetIniValue(IniFile,_("\nRememberExportImagePath="),0,1,1);
 
-        OpenFilePath=GetIniValueS(IniFile,"\nOpenFilePath=",".");
-        ImportImagePath=GetIniValueS(IniFile,"\nImportImagePath=",".");
-        SavePath=GetIniValueS(IniFile,"\nSavePath=",".");
-        ExportDataPath=GetIniValueS(IniFile,"\nExportDataPath=",".");
-        ExportImagePath=GetIniValueS(IniFile,"\nExportImagePath=",".");
+        OpenFilePath=GetIniValueS(IniFile,_("\nOpenFilePath="),_("."));
+        ImportImagePath=GetIniValueS(IniFile,_("\nImportImagePath="),_("."));
+        SavePath=GetIniValueS(IniFile,_("\nSavePath="),_("."));
+        ExportDataPath=GetIniValueS(IniFile,_("\nExportDataPath="),_("."));
+        ExportImagePath=GetIniValueS(IniFile,_("\nExportImagePath="),_("."));
 
-        Warn_closefile=GetIniValue(IniFile,"\nWarn_closefile=",0,1,1);
-        Warn_exitprogram=GetIniValue(IniFile,"\nWarn_exitprogram=",0,1,1);
-        Warn_spriteremove=GetIniValue(IniFile,"\nWarn_spriteremove=",0,1,1);
-        Save_showdialog=GetIniValue(IniFile,"\nSave_showdialog=",0,1,1);
+        Warn_closefile=GetIniValue(IniFile,_("\nWarn_closefile="),0,1,1);
+        Warn_exitprogram=GetIniValue(IniFile,_("\nWarn_exitprogram="),0,1,1);
+        Warn_spriteremove=GetIniValue(IniFile,_("\nWarn_spriteremove="),0,1,1);
+        Save_showdialog=GetIniValue(IniFile,_("\nSave_showdialog="),0,1,1);
 
         oldcursormode=cursormode;// Remember non-paste or fill mode
         switch (cursormode)
@@ -399,104 +401,105 @@ TheFrame::TheFrame(const wxChar *title, int xpos, int ypos, int width, int heigh
         menuZoom = new wxMenu;
         menuInfo = new wxMenu;
 
-        menuFile_SelAsm->Append( FILE_ASMSELECT_0, "Generic", "Several assemblers, decimal data",TRUE);
-        menuFile_SelAsm->Append( FILE_ASMSELECT_1, "TASM", "TASM, decimal data",TRUE);
-        menuFile_SelAsm->Append( FILE_ASMSELECT_2, "The E-Z80 Way", "The E-Z80 Way",TRUE);
-        menuFile_SelAsm->Append( FILE_ASMSELECT_3, "tniASM", "tniASM, decimal data",TRUE);
+        menuFile_SelAsm->Append( FILE_ASMSELECT_0, _("Generic"),_("Several assemblers, decimal data"),TRUE);
+        menuFile_SelAsm->Append( FILE_ASMSELECT_1, _("TASM"),_("TASM, decimal data"),TRUE);
+        menuFile_SelAsm->Append( FILE_ASMSELECT_2, _("The E-Z80 Way"),_("The E-Z80 Way"),TRUE);
+        menuFile_SelAsm->Append( FILE_ASMSELECT_3, _("tniASM"),_("tniASM, decimal data"),TRUE);
         menuFile_SelAsm->AppendSeparator();
-        menuFile_SelAsm->Append( FILE_ASMSELECT_4, "Generic hex (with $)","AS80, ZMAC & Z80ASM, hex data",TRUE);
-        menuFile_SelAsm->Append( FILE_ASMSELECT_5, "Generic hex (with 0x)","AS80, Z80v4 & Z80-ASM, hex data",TRUE);
-        menuFile_SelAsm->Append( FILE_ASMSELECT_6, "TASM hex", "TASM, hex data",TRUE);
-        menuFile_SelAsm->Append( FILE_ASMSELECT_7, "tniASM hex", "tniASM, hex data",TRUE);
+        menuFile_SelAsm->Append( FILE_ASMSELECT_4, _("Generic hex (with $)"),_("AS80, ZMAC & Z80ASM, hex data"),TRUE);
+        menuFile_SelAsm->Append( FILE_ASMSELECT_5, _("Generic hex (with 0x)"),_("AS80, Z80v4 & Z80-ASM, hex data"),TRUE);
+        menuFile_SelAsm->Append( FILE_ASMSELECT_6, _("TASM hex"),_("TASM, hex data"),TRUE);
+        menuFile_SelAsm->Append( FILE_ASMSELECT_7, _("tniASM hex"),_("tniASM, hex data"),TRUE);
         menuFile_SelAsm->Check(FILE_ASMSELECT_0+asmtype,TRUE);
 
-        menuFile->Append( FILE_NEW, "&New\tA", "New file" );
-        menuFile->Append( FILE_LOAD, "&Load\tL", "Load file" );
-        menuFile->Append( FILE_IMPORT, "&Import\tI", "Import image" );
+        menuFile->Append( FILE_NEW, _("&New\tA"),_("New file"));
+        menuFile->Append( FILE_LOAD, _("&Load\tL"),_("Load file"));
+        menuFile->Append( FILE_IMPORT, _("&Image Import\tI"),_("Import image"));
+        menuFile->Append( FILE_BINIMPORT, _("&Binary Import"),_("Import from binary"));
         menuFile->AppendSeparator();
-        menuFile->Append( FILE_SAVE, "&Save\tS", "Save file");
-        menuFile->Append( FILE_FASTSAVE, "Fast Save\tCTRL-S", "Fast save");
-        menuFile->Append( FILE_EXPORTDATA, "Export &Data\tD", "Export to binary or source" );
-        menuFile->Append( FILE_EXPORTIMAGE, "&Export Image\tE", "Export to image" );
+        menuFile->Append( FILE_SAVE, _("&Save\tS"),_("Save file"));
+        menuFile->Append( FILE_FASTSAVE,_("Fast Save\tCTRL-S"),_("Fast save"));
+        menuFile->Append( FILE_EXPORTDATA,_("Export &Data\tD"),_("Export to binary or source"));
+        menuFile->Append( FILE_EXPORTIMAGE,_("&Export Image\tE"),_("Export to image"));
         menuFile->AppendSeparator();
-        menuFile->Append( FILE_CLOSE, "Close\tCTRL-W", "Close file" );
+        menuFile->Append( FILE_CLOSE,_("Close\tCTRL-W"),_("Close file"));
         menuFile->AppendSeparator();
-        menuFile->Append( FILE_RENAME, "Rename\tF2", "Rename file" );
+        menuFile->Append( FILE_RENAME,_("Rename\tF2"),_("Rename file"));
         menuFile->AppendSeparator();
-        menuFile->Append( FILE_SAVEOPT, "&Output options\tALT-O", "Select save output format");
-        menuFile->Append( FILE_ASMSELECT, "Assembler output", menuFile_SelAsm, "Select target assembler for ASM code");
+        menuFile->Append( FILE_SAVEOPT,_("&Output options\tALT-O"),_("Select save output format"));
+        menuFile->Append( FILE_ASMSELECT,_("Assembler output"), menuFile_SelAsm,_("Select target assembler for ASM code"));
         menuFile->AppendSeparator();
-        menuFile->Append( FILE_QUIT, "&Quit\tCTRL-Q", "Quit program" );
+        menuFile->Append( FILE_QUIT, _("&Quit\tCTRL-Q"),_("Quit program"));
         menuFile->AppendSeparator();
 
-        menuEdit->Append( EDIT_UNDO, "Undo\tCtrl-Z", "Undo last action");
-        menuEdit->Append( EDIT_REDO, "Redo\tCtrl-X", "Redo last undoed action");
+        menuEdit->Append( EDIT_UNDO,_("Undo\tCtrl-Z"),_("Undo last action"));
+        menuEdit->Append( EDIT_REDO,_("Redo\tCtrl-X"),_("Redo last undoed action"));
         menuEdit->AppendSeparator();
-        menuEdit->Append( EDIT_COPY, "Copy\tCtrl-C", "Copy selected zone");
-        menuEdit->Append( EDIT_PASTE, "Paste\tCtrl-V", "Paste selected zone");
+        menuEdit->Append( EDIT_COPY,_("Copy\tCtrl-C"),_("Copy selected zone"));
+        menuEdit->Append( EDIT_PASTE,_("Paste\tCtrl-V"),_("Paste selected zone"));
 
-        menuFill->Append( FILL_SOLID, "Fill\tF", "Solid Fill");
-        menuFill->Append( FILL_PATTERN, "Textured Fill\tT", "Fill with a copied pattern");
+        menuFill->Append( FILL_SOLID,_("Fill\tF"),_("Solid Fill"));
+        menuFill->Append( FILL_PATTERN,_("Textured Fill\tT"),_("Fill with a copied pattern"));
 
-        menuEffects->Append( EFF_OPT, "Effects &Options\tALT-E", "Set options for effects");
+        menuEffects->Append( EFF_OPT,_("Effects &Options\tALT-E"),_("Set options for effects"));
         menuEffects->AppendSeparator();
-        menuEffects->Append( EFF_INV, "&Invert\tR", "Toggle ink & paper");
+        menuEffects->Append( EFF_INV,_("&Invert\tR"),_("Toggle ink & paper"));
         menuEffects->AppendSeparator();
-        menuEffects->Append( EFF_FLIP_X, "&X Flip\tX", "Flip graphic horizontally");
-        menuEffects->Append( EFF_FLIP_Y, "&Y Flip\tY", "Flip graphic vertically");
+        menuEffects->Append( EFF_FLIP_X,_("&X Flip\tX"),_("Flip graphic horizontally"));
+        menuEffects->Append( EFF_FLIP_Y,_("&Y Flip\tY"),_("Flip graphic vertically"));
         menuEffects->AppendSeparator();
-        menuEffects->Append( EFF_ROT_CLOCK, "Clock Rotation\tB", "Clockwise 90 degrees rotation");
-        menuEffects->Append( EFF_ROT_ANTICLOCK, "Anticlock Rotation\tV", "Anticlockwise 90 degrees rotation");
+        menuEffects->Append( EFF_ROT_CLOCK,_("Clock Rotation\tB"),_("Clockwise 90 degrees rotation"));
+        menuEffects->Append( EFF_ROT_ANTICLOCK,_("Anticlock Rotation\tV"),_("Anticlockwise 90 degrees rotation"));
         menuEffects->AppendSeparator();
-        menuEffects->Append( EFF_ROT_LEFT, "Left", "Rotate/shift left");
-        menuEffects->Append( EFF_ROT_RIGHT, "Right", "Rotate/shift right");
-        menuEffects->Append( EFF_ROT_UP, "Up", "Rotate/shift up");
-        menuEffects->Append( EFF_ROT_DOWN, "Down", "Rotate/shift down");
+        menuEffects->Append( EFF_ROT_LEFT,_("Left"),_("Rotate/shift left"));
+        menuEffects->Append( EFF_ROT_RIGHT,_("Right"),_("Rotate/shift right"));
+        menuEffects->Append( EFF_ROT_UP,_("Up"),_("Rotate/shift up"));
+        menuEffects->Append( EFF_ROT_DOWN,_("Down"),_("Rotate/shift down"));
 
-        menuMask->Append( MASK_USE, "Use mask\tCTRL-M", "Toggle use/don't use mask", TRUE);
-        menuMask->Append( MASK_VIEW, "View mask\tM", "Toggle graphic/mask view", TRUE);
+        menuMask->Append( MASK_USE,_("Use mask\tCTRL-M"),_("Toggle use/don't use mask"), TRUE);
+        menuMask->Append( MASK_VIEW,_("View mask\tM"),_("Toggle graphic/mask view"), TRUE);
         menuMask->AppendSeparator();
-        menuMask->Append( MASK_AUTO, "Auto mask", "Creates a mask around the graphic");
+        menuMask->Append( MASK_AUTO,_("Auto mask"),_("Creates a mask around the graphic"));
 
-        menuSprite->Append(SPR_INS_NEXT, "Insert next frame\tN", "Insert next sprite frame");
-        menuSprite->Append(SPR_INS_PREV, "Insert previous frame\tP", "Insert previous sprite frame");
-        menuSprite->Append(SPR_MOVE, "Move frame", "Move current frame to another position");
-        menuSprite->Append(SPR_REMOVE, "Remove frame", "Remove current frame from sprite");
+        menuSprite->Append(SPR_INS_NEXT,_("Insert next frame\tN"),_("Insert next sprite frame"));
+        menuSprite->Append(SPR_INS_PREV,_("Insert previous frame\tP"),_("Insert previous sprite frame"));
+        menuSprite->Append(SPR_MOVE,_("Move frame"),_("Move current frame to another position"));
+        menuSprite->Append(SPR_REMOVE,_("Remove frame"),_("Remove current frame from sprite"));
         menuSprite->AppendSeparator();
-        menuSprite->Append(SPR_SEL_PREV, "Select previous frame\tLEFT","Select previous sprite frame");
-        menuSprite->Append(SPR_SEL_NEXT, "Select next frame\tRIGHT","Select next sprite frame");
-        menuSprite->Append(SPR_SEL_GOTO, "Select frame number...","Select frame");
+        menuSprite->Append(SPR_SEL_PREV,_("Select previous frame\tLEFT"),_("Select previous sprite frame"));
+        menuSprite->Append(SPR_SEL_NEXT,_("Select next frame\tRIGHT"),_("Select next sprite frame"));
+        menuSprite->Append(SPR_SEL_GOTO,_("Select frame number..."),_("Select frame"));
 
-        menuGrid->Append( GRID_PIXEL, "&Pixel Grid\tG", "Toggle pixel grid", TRUE);
-        menuGrid->Append( GRID_CHAR, "&Char Grid\tCTRL-G", "Toggle character grid", TRUE);
+        menuGrid->Append( GRID_PIXEL,_("&Pixel Grid\tG"),_("Toggle pixel grid"), TRUE);
+        menuGrid->Append( GRID_CHAR,_("&Char Grid\tCTRL-G"),_("Toggle character grid"), TRUE);
 
-        menuZoom->Append( ZOOM_1, "x1", "Sets 1x1 zoom", TRUE);
-        menuZoom->Append( ZOOM_2, "x2", "Sets 2x2 zoom", TRUE);
-        menuZoom->Append( ZOOM_3, "x3", "Sets 3x3 zoom", TRUE);
-        menuZoom->Append( ZOOM_4, "x4", "Sets 4x4 zoom", TRUE);
-        menuZoom->Append( ZOOM_5, "x6", "Sets 6x6 zoom", TRUE);
-        menuZoom->Append( ZOOM_6, "x8", "Sets 8x8 zoom", TRUE);
-        menuZoom->Append( ZOOM_7, "x12", "Sets 12x12 zoom", TRUE);
-        menuZoom->Append( ZOOM_8, "x16", "Sets 16x16 zoom", TRUE);
-        menuZoom->Append( ZOOM_9, "x20", "Sets 20x20 zoom", TRUE);
-        menuZoom->Append( ZOOM_10, "x25", "Sets 25x25 zoom", TRUE);
-        menuZoom->Append( ZOOM_11, "x32", "Sets 32x32 zoom", TRUE);
-        menuZoom->Append( ZOOM_12, "x40", "Sets 40x40 zoom", TRUE);
-        menuZoom->Append( ZOOM_13, "x48", "Sets 48x48 zoom", TRUE);
+        menuZoom->Append( ZOOM_1,_("x1"),_("Sets 1x1 zoom"), TRUE);
+        menuZoom->Append( ZOOM_2,_("x2"),_("Sets 2x2 zoom"), TRUE);
+        menuZoom->Append( ZOOM_3,_("x3"),_("Sets 3x3 zoom"), TRUE);
+        menuZoom->Append( ZOOM_4,_("x4"),_("Sets 4x4 zoom"), TRUE);
+        menuZoom->Append( ZOOM_5,_("x6"),_("Sets 6x6 zoom"), TRUE);
+        menuZoom->Append( ZOOM_6,_("x8"),_("Sets 8x8 zoom"), TRUE);
+        menuZoom->Append( ZOOM_7,_("x12"),_("Sets 12x12 zoom"), TRUE);
+        menuZoom->Append( ZOOM_8,_("x16"),_("Sets 16x16 zoom"), TRUE);
+        menuZoom->Append( ZOOM_9,_("x20"),_("Sets 20x20 zoom"), TRUE);
+        menuZoom->Append( ZOOM_10,_("x25"),_("Sets 25x25 zoom"), TRUE);
+        menuZoom->Append( ZOOM_11,_("x32"),_("Sets 32x32 zoom"), TRUE);
+        menuZoom->Append( ZOOM_12,_("x40"),_("Sets 40x40 zoom"), TRUE);
+        menuZoom->Append( ZOOM_13,_("x48"),_("Sets 48x48 zoom"), TRUE);
         menuZoom->AppendSeparator();
-        menuZoom->Append( ZOOM_AUTO, "AutoZoom", "Toggle Autozoom", TRUE);
+        menuZoom->Append( ZOOM_AUTO,_("AutoZoom"),_("Toggle Autozoom"), TRUE);
 
-        menuInfo->Append( INFO_ABOUT, "&About\tCTRL-A", "Info about program" );
+        menuInfo->Append( INFO_ABOUT,_("&About\tCTRL-A"),_("Info about program"));
 
-        menuBar->Append( menuFile, "&File" );
-        menuBar->Append( menuEdit, "&Edit" );
-        menuBar->Append( menuFill, "Fi&ll" );
-        menuBar->Append( menuEffects, "Effe&cts" );
-        menuBar->Append( menuMask, "&Mask" );
-        menuBar->Append( menuSprite, "&Sprite" );
-        menuBar->Append( menuGrid, "&Grid" );
-        menuBar->Append( menuZoom, "&Zoom" );
-        menuBar->Append( menuInfo, "&Info" );
+        menuBar->Append( menuFile,_("&File"));
+        menuBar->Append( menuEdit,_("&Edit"));
+        menuBar->Append( menuFill,_("Fi&ll"));
+        menuBar->Append( menuEffects,_("Effe&cts"));
+        menuBar->Append( menuMask,_("&Mask"));
+        menuBar->Append( menuSprite,_("&Sprite"));
+        menuBar->Append( menuGrid,_("&Grid"));
+        menuBar->Append( menuZoom,_("&Zoom"));
+        menuBar->Append( menuInfo,_("&Info"));
 
         menuBar->Check(GRID_PIXEL,gridpix);
         menuBar->Check(GRID_CHAR,gridchr);
@@ -596,7 +599,7 @@ TheFrame::TheFrame(const wxChar *title, int xpos, int ypos, int width, int heigh
         canvas2 = new MyWindow(canvas,0,0,size_wx,size_wy,wxRETAINED);
 
         boxink = new wxBoxSizer( wxHORIZONTAL );
-        boxinktext = new wxStaticText( this, ID_TEXT, "INK:    ", wxDefaultPosition, wxDefaultSize, 0 );
+        boxinktext = new wxStaticText( this, ID_TEXT, _("INK:    "), wxDefaultPosition, wxDefaultSize, 0 );
         Butt_ink[0] = new wxBitmapButton( this, ID_BITMAPBUTTONI0, coBitmaps[0], wxDefaultPosition, wxDefaultSize );
         Butt_ink[1] = new wxBitmapButton( this, ID_BITMAPBUTTONI1, coBitmaps[1], wxDefaultPosition, wxDefaultSize );
         Butt_ink[2] = new wxBitmapButton( this, ID_BITMAPBUTTONI2, coBitmaps[2], wxDefaultPosition, wxDefaultSize );
@@ -616,7 +619,7 @@ TheFrame::TheFrame(const wxChar *title, int xpos, int ypos, int width, int heigh
         Butt_ink[7]->SetBitmapDisabled(coBitmapsd[7]);
         Butt_ink[8]->SetBitmapDisabled(coBitmapsd[10]);
         boxpaper = new wxBoxSizer( wxHORIZONTAL );
-        boxpapertext = new wxStaticText( this, ID_TEXT, "PAPER:", wxDefaultPosition, wxDefaultSize, 0 );
+        boxpapertext = new wxStaticText( this, ID_TEXT, _("PAPER:"), wxDefaultPosition, wxDefaultSize, 0 );
         Butt_paper[0] = new wxBitmapButton( this, ID_BITMAPBUTTONP0, coBitmaps[0], wxDefaultPosition, wxDefaultSize );
         Butt_paper[1] = new wxBitmapButton( this, ID_BITMAPBUTTONP1, coBitmaps[1], wxDefaultPosition, wxDefaultSize );
         Butt_paper[2] = new wxBitmapButton( this, ID_BITMAPBUTTONP2, coBitmaps[2], wxDefaultPosition, wxDefaultSize );
@@ -635,14 +638,14 @@ TheFrame::TheFrame(const wxChar *title, int xpos, int ypos, int width, int heigh
         Butt_paper[6]->SetBitmapDisabled(coBitmapsd[6]);
         Butt_paper[7]->SetBitmapDisabled(coBitmapsd[7]);
         Butt_paper[8]->SetBitmapDisabled(coBitmapsd[10]);
-        boxbriflatext1 = new wxStaticText( this, ID_TEXT, " BRIGHT: ", wxDefaultPosition, wxDefaultSize, 0 );
+        boxbriflatext1 = new wxStaticText( this, ID_TEXT,_(" BRIGHT: "), wxDefaultPosition, wxDefaultSize, 0 );
         Butt_bright[0] = new wxBitmapButton( this, ID_BITMAPBUTTONB0, coBitmaps[8], wxDefaultPosition, wxDefaultSize );
         Butt_bright[1] = new wxBitmapButton( this, ID_BITMAPBUTTONB1, coBitmaps[9], wxDefaultPosition, wxDefaultSize );
         Butt_bright[2] = new wxBitmapButton( this, ID_BITMAPBUTTONBT, coBitmaps[10], wxDefaultPosition, wxDefaultSize );
         Butt_bright[0]->SetBitmapDisabled(coBitmapsd[8]);
         Butt_bright[1]->SetBitmapDisabled(coBitmapsd[9]);
         Butt_bright[2]->SetBitmapDisabled(coBitmapsd[10]);
-        boxbriflatext2 = new wxStaticText( this, ID_TEXT, "  FLASH:", wxDefaultPosition, wxDefaultSize, 0 );
+        boxbriflatext2 = new wxStaticText( this, ID_TEXT,_("  FLASH:"), wxDefaultPosition, wxDefaultSize, 0 );
         Butt_flash[0] = new wxBitmapButton( this, ID_BITMAPBUTTONF0, coBitmaps[8], wxDefaultPosition, wxDefaultSize );
         Butt_flash[1] = new wxBitmapButton( this, ID_BITMAPBUTTONF1, coBitmaps[9], wxDefaultPosition, wxDefaultSize );
         Butt_flash[2] = new wxBitmapButton( this, ID_BITMAPBUTTONFT, coBitmaps[10], wxDefaultPosition, wxDefaultSize );
@@ -706,10 +709,10 @@ TheFrame::TheFrame(const wxChar *title, int xpos, int ypos, int width, int heigh
                         {
                         if (Files_open==12)
                                 {
-                                (void)wxMessageBox("Can't open more than 12 graphics","SevenuP");
+                                (void)wxMessageBox(_("Can't open more than 12 graphics"),_("SevenuP"));
                                 break;
                                 }
-                        Files[Files_open] = new class OpenFile(argv[n]);
+                        Files[Files_open] = new class OpenFile(wc2s(argv[n]));
                         if (Files[Files_open]->OpenGraph->Propied1!=0)
                                 {
                                 Files_current=Files_open++;
@@ -721,7 +724,7 @@ TheFrame::TheFrame(const wxChar *title, int xpos, int ypos, int width, int heigh
                                 Current = Files[Files_current];
                                 Graphic2 = Files[Files_current]->OpenGraph;
                                 Frame_total=Current->OpenFrames;
-                                char num0=48+(Files_open%10);
+                                wxChar num0=48+(Files_open%10);
                                 wxString menunumber,menuname;
                                 menunumber=num0;
 
@@ -729,21 +732,21 @@ TheFrame::TheFrame(const wxChar *title, int xpos, int ypos, int width, int heigh
 #if defined(__WXGTK__) || defined (__WXMOTIF__) || defined (__WXMAC__)
                                 if (Files_open>10)
                                         {
-                                        menuname="1"+menunumber+" - "+Current->OpenName;
+                                        menuname=_("1")+menunumber+_(" - ")+Current->OpenName;
                                         }
                                 else
                                         {
-                                        if (Files_open==10)     menuname="1"+menunumber+" - "+Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
-                                        else                    menuname=menunumber+" - "+Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
+                                        if (Files_open==10)     menuname=_("1")+menunumber+_(" - ")+Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
+                                        else                    menuname=menunumber+_(" - ")+Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
                                         }
 #else
                                 if (Files_open>9)
                                         {
-                                        menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-F1"+menunumber+"\0";
+                                        menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-F1")+menunumber+_("\0");
                                         }
                                 else
                                         {
-                                        menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-F"+menunumber+"\0";
+                                        menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-F")+menunumber+_("\0");
                                         }
 #endif
                                 menuFile->Append(FILE_1+Files_open-1, menuname);
@@ -812,20 +815,20 @@ void TheFrame::FileNew(wxCommandEvent &event)
 {
         if (Files_open==12)
                 {
-                (void)wxMessageBox("Can't open more than 12 graphics","SevenuP");
+                (void)wxMessageBox(_("Can't open more than 12 graphics"),_("SevenuP"));
                 return;
                 }
-        wxDialog dialog(this,-1,wxString("New Graph Properties"));
+        wxDialog dialog(this,-1,wxString(_("New Graph Properties")));
 
                 newitem0 = new wxBoxSizer (wxVERTICAL);
                 newitem1 = new wxBoxSizer (wxHORIZONTAL);
                 wxFlexGridSizer *newitem3 = new wxFlexGridSizer( 2, 0, 0 );
-                wxStaticText *newitem4 = new wxStaticText( &dialog, ID_TEXT, "Size X:", wxDefaultPosition, wxDefaultSize, 0 );
-                newitem5 = new wxSpinCtrl( &dialog, ID_NEW_SPINCTRL1, wxString::Format("%d",newdefaultx), wxDefaultPosition, wxSize(50,-1), 0, 1, 256, newdefaultx );
-                wxStaticText *newitem6 = new wxStaticText( &dialog, ID_TEXT, "Size Y:", wxDefaultPosition, wxDefaultSize, 0 );
-                newitem7 = new wxSpinCtrl( &dialog, ID_NEW_SPINCTRL2, wxString::Format("%d",newdefaulty), wxDefaultPosition, wxSize(50,-1), 0, 1, 192, newdefaulty );
-                wxButton *newitem8 = new wxButton( &dialog, wxID_OK, "OK", wxDefaultPosition, wxDefaultSize, 0 );
-                wxButton *newitem9 = new wxButton( &dialog, wxID_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0 );
+                wxStaticText *newitem4 = new wxStaticText( &dialog, ID_TEXT, _("Size X:"), wxDefaultPosition, wxDefaultSize, 0 );
+                newitem5 = new wxSpinCtrl( &dialog, ID_NEW_SPINCTRL1, wxString::Format(_("%d"),newdefaultx), wxDefaultPosition, wxSize(50,-1), 0, 1, 256, newdefaultx );
+                wxStaticText *newitem6 = new wxStaticText( &dialog, ID_TEXT,_("Size Y:"), wxDefaultPosition, wxDefaultSize, 0 );
+                newitem7 = new wxSpinCtrl( &dialog, ID_NEW_SPINCTRL2, wxString::Format(_("%d"),newdefaulty), wxDefaultPosition, wxSize(50,-1), 0, 1, 192, newdefaulty );
+                wxButton *newitem8 = new wxButton( &dialog, wxID_OK,_("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+                wxButton *newitem9 = new wxButton( &dialog, wxID_CANCEL,_("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
 
                 newitem3->Add( newitem4, 0, wxALIGN_CENTRE|wxALL, 0 );
                 newitem3->Add( newitem5, 0, wxALIGN_CENTRE|wxALL, 5 );
@@ -879,7 +882,7 @@ void TheFrame::FileNew(wxCommandEvent &event)
                 canvas2->SetSize(size_x,size_y);
                 disablezoom=0;
 
-                char num0=48+(Files_open%10);
+                wxChar num0=48+(Files_open%10);
                 wxString menunumber,menuname;
                 menunumber=num0;
 
@@ -887,21 +890,21 @@ void TheFrame::FileNew(wxCommandEvent &event)
 #if defined(__WXGTK__) || defined (__WXMOTIF__) || defined (__WXMAC__)
                 if (Files_open>10)
                         {
-                        menuname="1"+menunumber+" - "+Current->OpenName;
+                        menuname=_("1")+menunumber+_(" - ")+Current->OpenName;
                         }
                 else
                         {
-			if (Files_open==10)	menuname="1"+menunumber+" - "+Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
-			else			menuname=menunumber+" - "+Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
+			if (Files_open==10)	menuname=_("1")+menunumber+_(" - ")+Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
+			else			menuname=menunumber+_(" - ")+Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
                         }
 #else
                 if (Files_open>9)
                         {
-                        menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-F1"+menunumber+"\0";
+                        menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-F1")+menunumber+_("\0");
                         }
                 else
                         {
-                        menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-F"+menunumber+"\0";
+                        menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-F")+menunumber+_("\0");
                         }
 #endif
 
@@ -923,11 +926,11 @@ void TheFrame::FileLoad(wxCommandEvent &event)
 {
         if (Files_open==12)
                 {
-                (void)wxMessageBox("Can't open more than 12 graphics","SevenuP");
+                (void)wxMessageBox(_("Can't open more than 12 graphics"),_("SevenuP"));
                 return;
                 }
 
-	wxFileDialog dialog(this, "Select a graphic file", OpenFilePath, "", "Any SevenuP file (*.sev; *.scr)|*.sev;*.scr|SEVenuP graphic format (*.sev)|*.sev|SCReen memory snapshot (*.scr)|*.scr", 0);
+	wxFileDialog dialog(this,_("Select a graphic file"), OpenFilePath, _(""),_("Any SevenuP file (*.sev; *.scr)|*.sev;*.scr|SEVenuP graphic format (*.sev)|*.sev|SCReen memory snapshot (*.scr)|*.scr"), 0);
 
 	dialog.CentreOnParent();
         if (dialog.ShowModal() == wxID_OK)
@@ -936,12 +939,12 @@ void TheFrame::FileLoad(wxCommandEvent &event)
                 wxString s = dialog.GetPath();
                 if (RememberOpenFilePath==1)
                         {
-                        int searchindxwin=s.rfind("\\");
-                        int searchindxunix=s.rfind("/");
+                        int searchindxwin=s.rfind(_("\\"));
+                        int searchindxunix=s.rfind(_("/"));
                         int pathend=(searchindxwin>searchindxunix)?searchindxwin:searchindxunix;
                         OpenFilePath=s.Left(pathend+1);
                         }
-                Files[Files_open] = new class OpenFile(s);
+                Files[Files_open] = new class OpenFile(ws2s(s));
 
                 if (Files[Files_open]->OpenGraph->Propied1!=0)
                         {
@@ -1000,7 +1003,7 @@ void TheFrame::FileLoad(wxCommandEvent &event)
                         canvas2->SetSize(size_x,size_y);
                         disablezoom=0;
 
-                        char num0=48+(Files_open%10);
+                        wxChar num0=48+(Files_open%10);
                         wxString menunumber,menuname;
                         menunumber=num0;
 
@@ -1008,21 +1011,21 @@ void TheFrame::FileLoad(wxCommandEvent &event)
 #if defined(__WXGTK__) || defined (__WXMOTIF__) || defined (__WXMAC__)
                         if (Files_open>10)
                                 {
-                                menuname="1"+menunumber+" - "+Current->OpenName;
+                                menuname=_("1")+menunumber+_(" - ")+Current->OpenName;
                                 }
                         else
                                 {
-				if (Files_open==10) menuname="1"+menunumber+" - "+Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
-				else menuname=menunumber+" - "+Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
+				if (Files_open==10) menuname=_("1")+menunumber+_(" - ")+Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
+				else menuname=menunumber+_(" - ")+Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
                                 }
 #else
                         if (Files_open>9)
                                 {
-                                menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-F1"+menunumber+"\0";
+                                menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-F1")+menunumber+_("\0");
                                 }
                         else
                         {
-                                menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-F"+menunumber+"\0";
+                                menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-F")+menunumber+_("\0");
                                 }
 #endif
 
@@ -1044,10 +1047,10 @@ void TheFrame::FileImport(wxCommandEvent &event)
 {
         if (Files_open==12)
                 {
-                (void)wxMessageBox("Can't open more than 12 graphics","SevenuP");
+                (void)wxMessageBox(_("Can't open more than 12 graphics"),_("SevenuP"));
                 return;
                 }
-        wxFileDialog dialog(this, "Select an image file", ImportImagePath, "", "Any image|*.bmp;*.gif;*.jpg;*.png;*.pcx;*.tif;*.iff;*.xmp|BMP - Windows Bitmap|*.bmp|GIF - Compuserve Graphic Interchange Format|*.gif|JPG - Joint Picture Experts Group|*.jpg|PNG - Portable Network Graphic|*.png|PCX - Zsoft Paintbrush|*.pcx|TIF - Tagged Image File Format|*.tif|IFF - Amiga Interchange File Format|*.iff|XPM - X-Bitmap|*.xpm", 0);
+        wxFileDialog dialog(this, _("Select an image file"), ImportImagePath, _(""),_("Any image|*.bmp;*.gif;*.jpg;*.png;*.pcx;*.tif;*.iff;*.xmp|BMP - Windows Bitmap|*.bmp|GIF - Compuserve Graphic Interchange Format|*.gif|JPG - Joint Picture Experts Group|*.jpg|PNG - Portable Network Graphic|*.png|PCX - Zsoft Paintbrush|*.pcx|TIF - Tagged Image File Format|*.tif|IFF - Amiga Interchange File Format|*.iff|XPM - X-Bitmap|*.xpm"), 0);
 
 	dialog.CentreOnParent();
         if (dialog.ShowModal() == wxID_OK)
@@ -1056,12 +1059,12 @@ void TheFrame::FileImport(wxCommandEvent &event)
                 wxString s = dialog.GetPath();
                 if (RememberImportImagePath==1)
                         {
-                        int searchindxwin=s.rfind("\\");
-                        int searchindxunix=s.rfind("/");
+                        int searchindxwin=s.rfind(_("\\"));
+                        int searchindxunix=s.rfind(_("/"));
                         int pathend=(searchindxwin>searchindxunix)?searchindxwin:searchindxunix;
                         ImportImagePath=s.Left(pathend+1);
                         }
-                Files[Files_open] = new class OpenFile(s);
+                Files[Files_open] = new class OpenFile(ws2s(s));
 
                 if (Files[Files_open]->OpenGraph->Propied1!=0)
                         {
@@ -1120,7 +1123,7 @@ void TheFrame::FileImport(wxCommandEvent &event)
                         canvas2->SetSize(size_x,size_y);
                         disablezoom=0;
 
-                        char num0=48+(Files_open%10);
+                        wxChar num0=48+(Files_open%10);
                         wxString menunumber,menuname;
                         menunumber=num0;
 
@@ -1128,21 +1131,21 @@ void TheFrame::FileImport(wxCommandEvent &event)
 #if defined(__WXGTK__) || defined (__WXMOTIF__) || defined (__WXMAC__)
                         if (Files_open>10)
                                 {
-                                menuname="1"+menunumber+" - "+Current->OpenName;
+                                menuname=_("1")+menunumber+_(" - ")+Current->OpenName;
                                 }
                         else
                                 {
-				if (Files_open==10) menuname="1"+menunumber+" - "+Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
-				else menuname=menunumber+" - "+Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
+				if (Files_open==10) menuname=_("1")+menunumber+_(" - ")+Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
+				else menuname=menunumber+_(" - ")+Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
                                 }
 #else
                         if (Files_open>9)
                                 {
-                                menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-F1"+menunumber+"\0";
+                                menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-F1")+menunumber+_("\0");
                                 }
                         else
                         {
-                                menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-F"+menunumber+"\0";
+                                menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-F")+menunumber+_("\0");
                                 }
 #endif
 
@@ -1159,37 +1162,58 @@ void TheFrame::FileImport(wxCommandEvent &event)
                 }
 }
 
+void TheFrame::FileBinImport(wxCommandEvent &event)
+{
+        if (Files_open==0) return;
+        wxFileDialog dialog(this, _("Select a binary file"), ImportImagePath, _(""), _("Any file|*.*|BIN - Binary File|*.bin"), 0);
+	dialog.CentreOnParent();
+        if (dialog.ShowModal() == wxID_OK)
+                {
+                lastx=-1;
+                wxString s = dialog.GetPath();
+                if (RememberImportImagePath==1)
+                        {
+                        int searchindxwin=s.rfind(_("\\"));
+                        int searchindxunix=s.rfind(_("/"));
+                        int pathend=(searchindxwin>searchindxunix)?searchindxwin:searchindxunix;
+			ImportImagePath=s.Left(pathend+1);
+                        }
+                Files[Files_current]->ImportBIN(ws2s(s),optradioboxdef,priorities[0],priorities[1],priorities[2],priorities[3],priorities[4],maskfirst,zigzag,AttrMask,AttrMaskFlash*128+AttrMaskBright*64+AttrMaskPaper*56+AttrMaskInk*7,interleave,z88dksize);
+	        wxClientDC dc(canvas2);
+	        Rfrsh(dc,TRUE);
+                }
+}
+
+
 // Export graphic to an image file
 void TheFrame::FileExportImage(wxCommandEvent &event)
 {
         if (Files_open==0) return;
         lastx=-1;
 
-        wxFileDialog dialog(this, "Choose name and image format to save", ExportImagePath, Current->OpenName, "PNG - Portable Network Graphic|*.png|BMP - Windows Bitmap|*.bmp|JPG - Joint Picture Experts Group|*.jpg|PCX - Zsoft Paintbrush|*.pcx|TIF - Tagged Image File Format|*.tif|XPM - X-Bitmap|*.xpm",wxSAVE|wxOVERWRITE_PROMPT);
+        wxFileDialog dialog(this,_("Choose name and image format to save"), ExportImagePath, Current->OpenName,_("PNG - Portable Network Graphic|*.png|BMP - Windows Bitmap|*.bmp|JPG - Joint Picture Experts Group|*.jpg|PCX - Zsoft Paintbrush|*.pcx|TIF - Tagged Image File Format|*.tif|XPM - X-Bitmap|*.xpm"),wxSAVE|wxOVERWRITE_PROMPT);
         
         dialog.CentreOnParent();
         if (dialog.ShowModal() == wxID_OK)
                 {
                 wxString s=dialog.GetPath();
-		#ifdef __WXMAC__
 	        wxString ext;
 	        ext = s.Right(4);
 	        ext = ext.Lower();
 	        int fi=dialog.GetFilterIndex();
-		wxString extensions[] = {".png",".bmp",".jpg",".pcx",".tif",".xpm"};
+		wxString extensions[] = {_(".png"),_(".bmp"),_(".jpg"),_(".pcx"),_(".tif"),_(".xpm")};
        		if (ext!=extensions[fi])
         	       	{
                		s+=extensions[fi];
                		}
-		#endif
                 if (RememberExportImagePath==1)
                         {
-                        int searchindxwin=s.rfind("\\");
-                        int searchindxunix=s.rfind("/");
+                        int searchindxwin=s.rfind(_("\\"));
+                        int searchindxunix=s.rfind(_("/"));
                         int pathend=(searchindxwin>searchindxunix)?searchindxwin:searchindxunix;
                         ExportImagePath=s.Left(pathend+1);
                         }
-                Files[Files_current]->Export(s,Frame_current);
+                Files[Files_current]->Export(ws2s(s),Frame_current);
                 }
 }
 
@@ -1197,7 +1221,7 @@ void TheFrame::FileExportImage(wxCommandEvent &event)
 void TheFrame::FileClose(wxCommandEvent &event)
 {
         if (Files_open==0) return;
-        wxMessageDialog dialog( this, "Unsaved work will be lost\nAre you sure?","Warning",wxOK|wxCANCEL);
+        wxMessageDialog dialog( this, _("Unsaved work will be lost\nAre you sure?"),_("Warning"),wxOK|wxCANCEL);
         dialog.CentreOnParent();
         if ((Current->flagsure==1)&&(Warn_closefile==1))
                 {
@@ -1220,7 +1244,7 @@ void TheFrame::FileClose(wxCommandEvent &event)
                 size_i=1;
                 size_j=1;
                 disablezoom=0;
-                this->SetTitle("SevenuP v1.20");
+                this->SetTitle(_("SevenuP v1.21"));
                 ClearUndo();
                 Mask_view=0;
                 menuMask->Check(MASK_VIEW,FALSE);
@@ -1233,28 +1257,28 @@ void TheFrame::FileClose(wxCommandEvent &event)
         for (int i=Files_current;i<Files_open;i++)
                 {
                 Files[i]=Files[i+1];
-                char num0=48+((i+1)%10);
+                wxChar num0=48+((i+1)%10);
                 wxString menunumber,menuname;
                 menunumber=num0;
                 // Conditional compilation code
 #if defined(__WXGTK__) || defined (__WXMOTIF__) || defined (__WXMAC__)
                 if (i>9)
                         {
-                        menuname="1"+menunumber+" - "+Files[i]->OpenName;
+                        menuname=_("1")+menunumber+_(" - ")+Files[i]->OpenName;
                         }
                 else
                         {
-			if (i==9) menuname="1"+menunumber+" - "+Files[i]->OpenName.Left(Files[i]->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
-			else   menuname=menunumber+" - "+Files[i]->OpenName.Left(Files[i]->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
+			if (i==9) menuname=_("1")+menunumber+_(" - ")+Files[i]->OpenName.Left(Files[i]->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
+			else   menuname=menunumber+_(" - ")+Files[i]->OpenName.Left(Files[i]->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
                         }
 #else
                 if (i>8)
                         {
-                        menuname=Files[i]->OpenName.Left(Files[i]->OpenName.Length()-1)+"\tCtrl-F1"+menunumber+"\0";
+                        menuname=Files[i]->OpenName.Left(Files[i]->OpenName.Length()-1)+_("\tCtrl-F1")+menunumber+_("\0");
                         }
                 else
                         {
-                        menuname=Files[i]->OpenName.Left(Files[i]->OpenName.Length()-1)+"\tCtrl-F"+menunumber+"\0";
+                        menuname=Files[i]->OpenName.Left(Files[i]->OpenName.Length()-1)+_("\tCtrl-F")+menunumber+_("\0");
                         }
 #endif
                 menuFile->SetLabel(FILE_1+i, menuname);
@@ -1292,12 +1316,12 @@ void TheFrame::FileClose(wxCommandEvent &event)
 void TheFrame::FileRename(wxCommandEvent &event)
 {
         if (Files_open==0) return;
-        wxTextEntryDialog rename(this,"Enter new name","Rename File","",wxOK | wxCANCEL);
+        wxTextEntryDialog rename(this,_("Enter new name"),_("Rename File"),_(""),wxOK | wxCANCEL);
         rename.CentreOnParent();
         if (rename.ShowModal() == wxID_OK)
                 {
-                Current->OpenName=rename.GetValue()+'\0';
-                Current->OpenPath="";
+                Current->OpenName=rename.GetValue()+_('\0');
+                Current->OpenPath=_("");
                 SetTit();
                 }
 }
@@ -1307,39 +1331,37 @@ void TheFrame::FileFastSave(wxCommandEvent &event)
 {
         if (Files_open==0) return;
         lastx=-1;
-        if (Files[Files_current]->OpenPath!="")
+        if (Files[Files_current]->OpenPath!=_(""))
                 {
-                Files[Files_current]->Save(Files[Files_current]->OpenPath);
+                Files[Files_current]->Save(ws2s(Files[Files_current]->OpenPath));
 		if (Save_showdialog==1)
 			{
-                	(void)wxMessageBox(Files[Files_current]->OpenPath+" saved","SevenuP");
+                	(void)wxMessageBox(Files[Files_current]->OpenPath+_(" saved"),_("SevenuP"));
 			}
                 }
         else
                 {
-                wxFileDialog dialog(this, "Choose a file name to save", SavePath, Current->OpenName, "SEVenuP graphic format (*.sev)|*.sev", wxSAVE|wxOVERWRITE_PROMPT);
+                wxFileDialog dialog(this, _("Choose a file name to save"), SavePath, Current->OpenName,_("SEVenuP graphic format (*.sev)|*.sev"), wxSAVE|wxOVERWRITE_PROMPT);
                 dialog.CentreOnParent();
                 if (dialog.ShowModal() == wxID_OK)
                         {
                         wxString s=dialog.GetPath();
-			#ifdef __WXMAC__
 	        	wxString ext;
 	        	ext = s.Right(4);
 	        	ext = ext.Lower();
-       			if (ext!=".sev")
+       			if (ext!=_(".sev"))
         	       		{
-               			s+=".sev";
+               			s+=_(".sev");
 	               		}
-			#endif
                         if (RememberSavePath==1)
                                 {
-                                int searchindxwin=s.rfind("\\");
-                                int searchindxunix=s.rfind("/");
+                                int searchindxwin=s.rfind(_("\\"));
+                                int searchindxunix=s.rfind(_("/"));
                                 int pathend=(searchindxwin>searchindxunix)?searchindxwin:searchindxunix;
                                 SavePath=s.Left(pathend+1);
                                 }
 
-                        Files[Files_current]->Save(s);
+                        Files[Files_current]->Save(ws2s(s));
                         Files[Files_current]->OpenPath=s;
                         SetTit();
                         }
@@ -1352,18 +1374,14 @@ void TheFrame::FileSave(wxCommandEvent &event)
         if (Files_open==0) return;
         lastx=-1;
 	wxFileDialog *dialog;
-	#ifdef __WXMAC__
-	wxString extensions[] = {".scr",".sev"};
-	#endif
+	wxString extensions[] = {_(".scr"),_(".sev")};
 	if ((Current->OpenGraph->GetSizeX()==256)&&(Current->OpenGraph->GetSizeY()==192))
                 {
-	        dialog = new wxFileDialog(this, "Choose a file name to save", SavePath, Current->OpenName, "SCReen memory snapshot (*.scr)|*.scr|SEVenuP graphic format (*.sev)|*.sev", wxSAVE|wxOVERWRITE_PROMPT);
+	        dialog = new wxFileDialog(this, _("Choose a file name to save"), SavePath, Current->OpenName, _("SCReen memory snapshot (*.scr)|*.scr|SEVenuP graphic format (*.sev)|*.sev"), wxSAVE|wxOVERWRITE_PROMPT);
 		}
 	else	{
-	        dialog = new wxFileDialog(this, "Choose a file name to save", SavePath, Current->OpenName, "SEVenuP graphic format (*.sev)|*.sev", wxSAVE|wxOVERWRITE_PROMPT);
-		#ifdef __WXMAC__
-		extensions[0] = ".sev";
-		#endif		
+	        dialog = new wxFileDialog(this,_("Choose a file name to save"), SavePath, Current->OpenName,_("SEVenuP graphic format (*.sev)|*.sev"), wxSAVE|wxOVERWRITE_PROMPT);
+		extensions[0] =_(".sev");
 		}
 	dialog->CentreOnParent();
         if (dialog->ShowModal() == wxID_OK)
@@ -1371,12 +1389,11 @@ void TheFrame::FileSave(wxCommandEvent &event)
                 wxString s=dialog->GetPath();
                 if (RememberSavePath==1)
                         {
-                        int searchindxwin=s.rfind("\\");
-                        int searchindxunix=s.rfind("/");
+                        int searchindxwin=s.rfind(_("\\"));
+                        int searchindxunix=s.rfind(_("/"));
                         int pathend=(searchindxwin>searchindxunix)?searchindxwin:searchindxunix;
                         SavePath=s.Left(pathend+1);
                         }
-		#ifdef __WXMAC__
 	        wxString ext;
 	        ext = s.Right(4);
 	        ext = ext.Lower();
@@ -1385,12 +1402,11 @@ void TheFrame::FileSave(wxCommandEvent &event)
         	       	{
                		s+=extensions[fi];
                		}
-		#endif    
                 Files[Files_current]->OpenPath=s;
-                Files[Files_current]->Save(s);
+                Files[Files_current]->Save(ws2s(s));
                 SetTit();
 
-                char num0=48+((Files_current+1)%10);
+                wxChar num0=48+((Files_current+1)%10);
                 wxString menunumber,menuname;
                 menunumber=num0;
 
@@ -1398,21 +1414,21 @@ void TheFrame::FileSave(wxCommandEvent &event)
 #if defined(__WXGTK__) || defined (__WXMOTIF__) || defined (__WXMAC__)
                 if (Files_open>9)
                         {
-                        menuname="1"+menunumber+" - "+Current->OpenName;
+                        menuname=_("1")+menunumber+_(" - ")+Current->OpenName;
                         }
                 else
                         {
-			if (Files_open==10)	menuname="1"+menunumber+" - "+Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
-			else			menuname=menunumber+" - "+Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
+			if (Files_open==10)	menuname=_("1")+menunumber+_(" - ")+Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
+			else			menuname=menunumber+_(" - ")+Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
                         }
 #else
                 if (Files_current>8)
                         {
-                        menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-F1"+menunumber+"\0";
+                        menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-F1")+menunumber+_("\0");
                         }
                 else
                         {
-                        menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-F"+menunumber+"\0";
+                        menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-F")+menunumber+_("\0");
                         }
 #endif
                 menuFile->SetLabel(FILE_1+Files_current, menuname);
@@ -1425,41 +1441,34 @@ void TheFrame::FileExportData(wxCommandEvent &event)
         if (Files_open==0) return;
         wxString ExportDataExtensions;
         lastx=-1;
-	#ifdef __WXMAC__
-	wxString extensions[] = {".bin",".asm",".c"};
-	#endif
+	wxString extensions[] = {_(".bin"),_(".asm"),_(".c")};
         switch (defaultexport)
         	{
         	case 0:	{
-        		ExportDataExtensions="raw BINary (*.BIN)|*.BIN|ASM Source (*.ASM)|*.ASM|C Source (*.C)|*.C";
+        		ExportDataExtensions=_("raw BINary (*.BIN)|*.BIN|ASM Source (*.ASM)|*.ASM|C Source (*.C)|*.C");
         		break;
         		}
         	case 1: {
-        		ExportDataExtensions="ASM Source (*.ASM)|*.ASM|C Source (*.C)|*.C|raw BINary (*.BIN)|*.BIN";
-			#ifdef __WXMAC__
-			extensions[0] = ".asm";
-			extensions[1] = ".c";
-			extensions[2] = ".bin";
-			#endif
+        		ExportDataExtensions=_("ASM Source (*.ASM)|*.ASM|C Source (*.C)|*.C|raw BINary (*.BIN)|*.BIN");
+			extensions[0] = _(".asm");
+			extensions[1] = _(".c");
+			extensions[2] = _(".bin");
         		break;
         		}
         	case 2: {
-        		ExportDataExtensions="C Source (*.C)|*.C|raw BINary (*.BIN)|*.BIN|ASM Source (*.ASM)|*.ASM";
-			#ifdef __WXMAC__
-			extensions[0] = ".c";
-			extensions[1] = ".bin";
-			extensions[2] = ".asm";
-			#endif
+        		ExportDataExtensions=_("C Source (*.C)|*.C|raw BINary (*.BIN)|*.BIN|ASM Source (*.ASM)|*.ASM");
+			extensions[0] = _(".c");
+			extensions[1] = _(".bin");
+			extensions[2] = _(".asm");
         		break;
         		}
         	}
-        wxFileDialog dialog(this, "Choose a file name to save", ExportDataPath, Current->OpenName, ExportDataExtensions, wxSAVE|(wxOVERWRITE_PROMPT*(1-appendfile)));
+        wxFileDialog dialog(this, _("Choose a file name to save"), ExportDataPath, Current->OpenName, ExportDataExtensions, wxSAVE|(wxOVERWRITE_PROMPT*(1-appendfile)));
         dialog.CentreOnParent();
         if (dialog.ShowModal() == wxID_OK)
                 {
                 wxString s=dialog.GetPath();
 
-		#ifdef __WXMAC__
 	        int fi=dialog.GetFilterIndex();
 	        wxString ext;
 	        ext = s.Right(extensions[fi].Len());
@@ -1468,16 +1477,15 @@ void TheFrame::FileExportData(wxCommandEvent &event)
         	       	{
                		s+=extensions[fi];
                		}
-		#endif
                 if (RememberExportDataPath==1)
                         {
-                        int searchindxwin=s.rfind("\\");
-                        int searchindxunix=s.rfind("/");
+                        int searchindxwin=s.rfind(_("\\"));
+                        int searchindxunix=s.rfind(_("/"));
                         int pathend=(searchindxwin>searchindxunix)?searchindxwin:searchindxunix;
                         ExportDataPath=s.Left(pathend+1);
                         }
 
-                Files[Files_current]->ExportData(s,optradioboxdef,priorities[0],priorities[1],priorities[2],priorities[3],priorities[4],maskfirst,asmtype,appendfile,zigzag,AttrMask,AttrMaskFlash*128+AttrMaskBright*64+AttrMaskPaper*56+AttrMaskInk*7,interleave,z88dksize,nolabel);
+                Files[Files_current]->ExportData(ws2s(s),optradioboxdef,priorities[0],priorities[1],priorities[2],priorities[3],priorities[4],maskfirst,asmtype,appendfile,zigzag,AttrMask,AttrMaskFlash*128+AttrMaskBright*64+AttrMaskPaper*56+AttrMaskInk*7,interleave,z88dksize,nolabel);
                 }
 }
 
@@ -1499,7 +1507,7 @@ void TheFrame::FileSaveSelAsm0(wxCommandEvent &event)
         menuFile_SelAsm->Check(FILE_ASMSELECT_7,FALSE);
         asmtype=0;
         menuFile_SelAsm->Check(FILE_ASMSELECT_0,TRUE);
-        SetStatusText("Generic assembler, dec",0);
+        SetStatusText(_("Generic assembler, dec"),0);
 }
 
 // Select TASM assembler, decimal output
@@ -1514,7 +1522,7 @@ void TheFrame::FileSaveSelAsm1(wxCommandEvent &event)
         menuFile_SelAsm->Check(FILE_ASMSELECT_7,FALSE);
         asmtype=1;
         menuFile_SelAsm->Check(FILE_ASMSELECT_1,TRUE);
-        SetStatusText("TASM, dec",0);
+        SetStatusText(_("TASM, dec"),0);
 }
 
 // Select The E-Z80 Way assembler
@@ -1529,7 +1537,7 @@ void TheFrame::FileSaveSelAsm2(wxCommandEvent &event)
         menuFile_SelAsm->Check(FILE_ASMSELECT_7,FALSE);
         asmtype=2;
         menuFile_SelAsm->Check(FILE_ASMSELECT_2,TRUE);
-        SetStatusText("The E-Z80 Way",0);
+        SetStatusText(_("The E-Z80 Way"),0);
 }
 
 // Select tniASM assembler, decimal output
@@ -1544,7 +1552,7 @@ void TheFrame::FileSaveSelAsm3(wxCommandEvent &event)
         menuFile_SelAsm->Check(FILE_ASMSELECT_7,FALSE);
         asmtype=3;
         menuFile_SelAsm->Check(FILE_ASMSELECT_3,TRUE);
-        SetStatusText("tniASM, dec",0);
+        SetStatusText(_("tniASM, dec"),0);
 }
 
 // Select generic assembler, hexadecimal output with prefix "$"
@@ -1559,7 +1567,7 @@ void TheFrame::FileSaveSelAsm4(wxCommandEvent &event)
         menuFile_SelAsm->Check(FILE_ASMSELECT_7,FALSE);
         asmtype=4;
         menuFile_SelAsm->Check(FILE_ASMSELECT_4,TRUE);
-        SetStatusText("Generic assembler, hex using $",0);
+        SetStatusText(_("Generic assembler, hex using $"),0);
 }
 
 // Select generic assembler, hexadecimal output with prefix "0x"
@@ -1574,7 +1582,7 @@ void TheFrame::FileSaveSelAsm5(wxCommandEvent &event)
         menuFile_SelAsm->Check(FILE_ASMSELECT_7,FALSE);
         asmtype=5;
         menuFile_SelAsm->Check(FILE_ASMSELECT_5,TRUE);
-        SetStatusText("Generic assembler, hex using 0x",0);
+        SetStatusText(_("Generic assembler, hex using 0x"),0);
 }
 
 // Select TASM assembler, decimal output
@@ -1589,7 +1597,7 @@ void TheFrame::FileSaveSelAsm6(wxCommandEvent &event)
         menuFile_SelAsm->Check(FILE_ASMSELECT_7,FALSE);
         asmtype=6;
         menuFile_SelAsm->Check(FILE_ASMSELECT_6,TRUE);
-        SetStatusText("TASM, hex",0);
+        SetStatusText(_("TASM, hex"),0);
 }
 
 // Select tniASM assembler, decimal output
@@ -1604,7 +1612,7 @@ void TheFrame::FileSaveSelAsm7(wxCommandEvent &event)
         menuFile_SelAsm->Check(FILE_ASMSELECT_6,FALSE);
         asmtype=7;
         menuFile_SelAsm->Check(FILE_ASMSELECT_7,TRUE);
-        SetStatusText("tniASM, hex",0);
+        SetStatusText(_("tniASM, hex"),0);
 }
 
 // Close application
@@ -1844,7 +1852,7 @@ void TheFrame::EditPaste(wxCommandEvent &event)
                         right_func=10;
                         if (cursormode<3) oldcursormode=cursormode;
                         cursormode=3;
-                        SetStatusText("Paste/Cancel paste",0);
+                        SetStatusText(_("Paste/Cancel paste"),0);
                         }
                 else    {
                         switch (oldcursormode)
@@ -1856,15 +1864,15 @@ void TheFrame::EditPaste(wxCommandEvent &event)
                                         switch (sselect)
                                                 {
                                                 case 0: {
-                                                        SetStatusText("Toggle Pixel/Select zone",0);
+                                                        SetStatusText(_("Toggle Pixel/Select zone"),0);
                                                         break;
                                                         }
                                                 case 1: {
-                                                        SetStatusText("Toggle Pixel/Close selection",0);
+                                                        SetStatusText(_("Toggle Pixel/Close selection"),0);
                                                         break;
                                                         }
                                                 case 2: {
-                                                        SetStatusText("Toggle Pixel/Discard selection",0);
+                                                        SetStatusText(_("Toggle Pixel/Discard selection"),0);
                                                         break;
                                                         }
                                                 }
@@ -1876,11 +1884,11 @@ void TheFrame::EditPaste(wxCommandEvent &event)
                                         right_func=6;
                                         if ((Mask_use==1)&&(Mask_view==1))
                                                 {
-                                                SetStatusText("Toggle mask/Toggle graphic",0);
+                                                SetStatusText(_("Toggle mask/Toggle graphic"),0);
                                                 }
                                         else
                                                 {
-                                                SetStatusText("Set Attributes/Get Attributes",0);
+                                                SetStatusText(_("Set Attributes/Get Attributes"),0);
                                                 }
                                         break;
                                         }
@@ -1891,7 +1899,7 @@ void TheFrame::EditPaste(wxCommandEvent &event)
                                         cursormode=0;
                                         left_func=1;
                                         right_func=2;
-                                        SetStatusText("Set Pixel/Reset Pixel",0);
+                                        SetStatusText(_("Set Pixel/Reset Pixel"),0);
                                         break;
                                         }
                                 }
@@ -1909,7 +1917,7 @@ void TheFrame::FillSolid(wxCommandEvent &event)
                 right_func=10;
                 if (cursormode<3) oldcursormode=cursormode;
                 cursormode=4;   // Fill
-                SetStatusText("Fill/Cancel fill",0);
+                SetStatusText(_("Fill/Cancel fill"),0);
                 }
         else    {
                 switch (oldcursormode)
@@ -1921,15 +1929,15 @@ void TheFrame::FillSolid(wxCommandEvent &event)
                                 switch (sselect)
                                         {
                                         case 0: {
-                                                SetStatusText("Toggle Pixel/Select zone",0);
+                                                SetStatusText(_("Toggle Pixel/Select zone"),0);
                                                 break;
                                                 }
                                         case 1: {
-                                                SetStatusText("Toggle Pixel/Close selection",0);
+                                                SetStatusText(_("Toggle Pixel/Close selection"),0);
                                                 break;
                                                 }
                                         case 2: {
-                                                SetStatusText("Toggle Pixel/Discard selection",0);
+                                                SetStatusText(_("Toggle Pixel/Discard selection"),0);
                                                 break;
                                                 }
                                         }
@@ -1941,11 +1949,11 @@ void TheFrame::FillSolid(wxCommandEvent &event)
                                 right_func=6;
                                 if ((Mask_use==1)&&(Mask_view==1))
                                         {
-                                        SetStatusText("Toggle mask/Toggle graphic",0);
+                                        SetStatusText(_("Toggle mask/Toggle graphic"),0);
                                         }
                                 else
                                         {
-                                        SetStatusText("Set Attributes/Get Attributes",0);
+                                        SetStatusText(_("Set Attributes/Get Attributes"),0);
                                         }
                                 break;
                                 }
@@ -1956,7 +1964,7 @@ void TheFrame::FillSolid(wxCommandEvent &event)
                                 cursormode=0;
                                 left_func=1;
                                 right_func=2;
-                                SetStatusText("Set Pixel/Reset Pixel",0);
+                                SetStatusText(_("Set Pixel/Reset Pixel"),0);
                                 break;
                                 }
                         }
@@ -1975,7 +1983,7 @@ void TheFrame::FillPattern(wxCommandEvent &event)
                         right_func=10;
                         if (cursormode<3) oldcursormode=cursormode;
                         cursormode=5;   // Fill pattern
-                        SetStatusText("Pattern fill/Cancel fill",0);
+                        SetStatusText(_("Pattern fill/Cancel fill"),0);
                         }
                 else
                         {
@@ -1988,15 +1996,15 @@ void TheFrame::FillPattern(wxCommandEvent &event)
                                         switch (sselect)
                                                 {
                                                 case 0: {
-                                                        SetStatusText("Toggle Pixel/Select zone",0);
+                                                        SetStatusText(_("Toggle Pixel/Select zone"),0);
                                                         break;
                                                         }
                                                 case 1: {
-                                                        SetStatusText("Toggle Pixel/Close selection",0);
+                                                        SetStatusText(_("Toggle Pixel/Close selection"),0);
                                                         break;
                                                         }
                                                 case 2: {
-                                                        SetStatusText("Toggle Pixel/Discard selection",0);
+                                                        SetStatusText(_("Toggle Pixel/Discard selection"),0);
                                                         break;
                                                         }
                                                 }
@@ -2008,11 +2016,11 @@ void TheFrame::FillPattern(wxCommandEvent &event)
                                         right_func=6;
                                         if ((Mask_use==1)&&(Mask_view==1))
                                                 {
-                                                SetStatusText("Toggle mask/Toggle graphic",0);
+                                                SetStatusText(_("Toggle mask/Toggle graphic"),0);
                                                 }
                                         else
                                                 {
-                                                SetStatusText("Set Attributes/Get Attributes",0);
+                                                SetStatusText(_("Set Attributes/Get Attributes"),0);
                                                 }
                                         break;
                                         }
@@ -2023,7 +2031,7 @@ void TheFrame::FillPattern(wxCommandEvent &event)
                                         cursormode=0;
                                         left_func=1;
                                         right_func=2;
-                                        SetStatusText("Set Pixel/Reset Pixel",0);
+                                        SetStatusText(_("Set Pixel/Reset Pixel"),0);
                                         break;
                                         }
                                 }
@@ -3063,9 +3071,9 @@ void TheFrame::SpriteInsertNext(wxCommandEvent &event)
                 {
                 return;
                 }
-        if ((Frame_total==32)||(17*(Frame_total+1)*sizechar_i*sizechar_j>41984))
+        if ((Frame_total==999)||(17*(Frame_total+1)*sizechar_i*sizechar_j>41984))
                 {
-                (void)wxMessageBox("Max number of frames reached","SevenuP");
+                (void)wxMessageBox(_("Max number of frames reached"),_("SevenuP"));
                 return;
                 }
         SP_Graph *NewGra = new SP_Graph (Current->OpenGraph->GetSizeX(),Current->OpenGraph->GetSizeY(),TRUE);
@@ -3093,9 +3101,9 @@ void TheFrame::SpriteInsertPrev(wxCommandEvent &event)
                 {
                 return;
                 }
-        if ((Frame_total==32)||(17*(Frame_total+1)*sizechar_i*sizechar_j>41984))
+        if ((Frame_total==999)||(17*(Frame_total+1)*sizechar_i*sizechar_j>41984))
                 {
-                (void)wxMessageBox("Max number of frames reached","SevenuP");
+                (void)wxMessageBox(_("Max number of frames reached"),_("SevenuP"));
                 return;
                 }
         SP_Graph *NewGra = new SP_Graph (Current->OpenGraph->GetSizeX(),Current->OpenGraph->GetSizeY(),TRUE);
@@ -3140,7 +3148,7 @@ void TheFrame::SpriteMove(wxCommandEvent &event)
                 {
                 return;
                 }
-        long newpos=wxGetNumberFromUser("","New frame position:","Move frame",1,1,Frame_total,this);
+        long newpos=wxGetNumberFromUser(_(""),_("New frame position:"),_("Move frame"),1,1,Frame_total,this);
 
         if (newpos==-1)
                 {
@@ -3195,7 +3203,7 @@ void TheFrame::SpriteRemove(wxCommandEvent &event)
                 {
                 return;
                 }
-        wxMessageDialog dialog( this, "This action can't be reversed\nAre you sure?","Warning",wxOK|wxCANCEL);
+        wxMessageDialog dialog( this,_("This action can't be reversed\nAre you sure?"),_("Warning"),wxOK|wxCANCEL);
         dialog.CentreOnParent();
 	if (Warn_spriteremove==1)
 		{
@@ -3295,7 +3303,7 @@ void TheFrame::SpriteGoto(wxCommandEvent &event)
                 {
                 return;
                 }
-        long newpos=wxGetNumberFromUser("","Go to frame:","Select frame",1,1,Frame_total,this);
+        long newpos=wxGetNumberFromUser(_(""),_("Go to frame:"),_("Select frame"),1,1,Frame_total,this);
 
         if (newpos==-1)
                 {
@@ -3376,7 +3384,7 @@ void TheFrame::SetZoom(wxCommandEvent &event)
 // Inform about the current version
 void TheFrame::InfoAbout(wxCommandEvent &event)
 {
-        (void)wxMessageBox("SevenuP - version 1.20\n(C) 2002-2006 by Metalbrain", "About SevenuP");
+        (void)wxMessageBox(_("SevenuP - version 1.21\n(C) 2002-2007 by Metalbrain"),_("About SevenuP"));
 }
 
 // TOOLBAR FUNCTIONS
@@ -3451,15 +3459,15 @@ void TheFrame::ChangeCursor(wxCommandEvent &event)
                         switch (sselect)
                                 {
                                 case 0: {
-                                        SetStatusText("Toggle Pixel/Select zone",0);
+                                        SetStatusText(_("Toggle Pixel/Select zone"),0);
                                         break;
                                         }
                                 case 1: {
-                                        SetStatusText("Toggle Pixel/Close selection",0);
+                                        SetStatusText(_("Toggle Pixel/Close selection"),0);
                                         break;
                                         }
                                 case 2: {
-                                        SetStatusText("Toggle Pixel/Discard selection",0);
+                                        SetStatusText(_("Toggle Pixel/Discard selection"),0);
                                         break;
                                         }
                                 }
@@ -3471,11 +3479,11 @@ void TheFrame::ChangeCursor(wxCommandEvent &event)
                         right_func=6;
                         if ((Mask_use==1)&&(Mask_view==1))
                                 {
-                                SetStatusText("Toggle mask/Toggle graphic",0);
+                                SetStatusText(_("Toggle mask/Toggle graphic"),0);
                                 }
                         else
                                 {
-                                SetStatusText("Set Attributes/Get Attributes",0);
+                                SetStatusText(_("Set Attributes/Get Attributes"),0);
                                 }
                         break;
                         }
@@ -3486,7 +3494,7 @@ void TheFrame::ChangeCursor(wxCommandEvent &event)
                         cursormode=0;
                         left_func=1;
                         right_func=2;
-                        SetStatusText("Set Pixel/Reset Pixel",0);
+                        SetStatusText(_("Set Pixel/Reset Pixel"),0);
                         break;
                         }
                 }
@@ -3516,7 +3524,7 @@ void TheFrame::Erase(wxCommandEvent &event)
                 sel_end_x=size_i;
                 sel_end_y=size_j;
                 sselect=0;
-                if (cursormode==1) SetStatusText("Toggle Pixel/Select zone",0);
+                if (cursormode==1) SetStatusText(_("Toggle Pixel/Select zone"),0);
                 }
 
         ssxc=sel_start_x/8;
@@ -4085,33 +4093,33 @@ void TheFrame::GetOutputOptions()
         priorities_temp[4]=priorities[4];
 
         wxString strs7[] = {strs5[priorities_temp[0]],strs5[priorities_temp[1]],strs5[priorities_temp[2]],strs5[priorities_temp[3]],strs5[priorities_temp[4]]};
-        wxDialog dialogOutputOptions(this,-1,wxString("Set Output Options"));
+        wxDialog dialogOutputOptions(this,-1,wxString(_("Set Output Options")));
                 optitem0 = new wxBoxSizer( wxVERTICAL );
                 optitem1 = new wxBoxSizer( wxHORIZONTAL );
-                optitem2 = new wxRadioBox( &dialogOutputOptions, ID_SAVEOPT_RADIOBOX, "Data Outputted", wxDefaultPosition, wxDefaultSize, 4, strs4, 1, wxRA_SPECIFY_COLS );
-                optitem15 = new wxRadioBox( &dialogOutputOptions, ID_SAVEOPT_INTERLEAVE, "Interleave", wxDefaultPosition, wxDefaultSize, 5, strs6, 1, wxRA_SPECIFY_COLS );
+                optitem2 = new wxRadioBox( &dialogOutputOptions, ID_SAVEOPT_RADIOBOX, _("Data Outputted"), wxDefaultPosition, wxDefaultSize, 4, strs4, 1, wxRA_SPECIFY_COLS );
+                optitem15 = new wxRadioBox( &dialogOutputOptions, ID_SAVEOPT_INTERLEAVE, _("Interleave"), wxDefaultPosition, wxDefaultSize, 5, strs6, 1, wxRA_SPECIFY_COLS );
                 optitem3 = new wxBoxSizer( wxVERTICAL );
-                wxButton *optitem4 = new wxButton( &dialogOutputOptions, wxID_OK, "OK", wxDefaultPosition, wxDefaultSize, 0 );
-                wxButton *optitem5 = new wxButton( &dialogOutputOptions, wxID_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0 );
+                wxButton *optitem4 = new wxButton( &dialogOutputOptions, wxID_OK,_("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+                wxButton *optitem5 = new wxButton( &dialogOutputOptions, wxID_CANCEL,_("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
                 optitem6 = new wxBoxSizer( wxHORIZONTAL );
-                wxStaticBox *optitem8 = new wxStaticBox( &dialogOutputOptions, -1, "Byte sort priority" );
+                wxStaticBox *optitem8 = new wxStaticBox( &dialogOutputOptions, -1,_("Byte sort priority") );
                 wxStaticBoxSizer *optitem7 = new wxStaticBoxSizer( optitem8, wxVERTICAL );
                 optitem9 = new wxListBox( &dialogOutputOptions, ID_SAVEOPT_LISTBOX, wxDefaultPosition, wxSize(80,75), 5, strs7, wxLB_SINGLE );
                 optitem10 = new wxBoxSizer( wxVERTICAL );
-                wxButton *optitem11 = new wxButton( &dialogOutputOptions, ID_SAVEOPT_BUTTON_UP, "Move up", wxDefaultPosition, wxDefaultSize, 0 );
-                wxButton *optitem12 = new wxButton( &dialogOutputOptions, ID_SAVEOPT_BUTTON_DOWN, "Move Down", wxDefaultPosition, wxDefaultSize, 0 );
+                wxButton *optitem11 = new wxButton( &dialogOutputOptions, ID_SAVEOPT_BUTTON_UP,_("Move up"), wxDefaultPosition, wxDefaultSize, 0 );
+                wxButton *optitem12 = new wxButton( &dialogOutputOptions, ID_SAVEOPT_BUTTON_DOWN,_("Move Down"), wxDefaultPosition, wxDefaultSize, 0 );
 
-                optitem13 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_MASK, "Mask Before Graph", wxDefaultPosition, wxDefaultSize, 0 );
-                optitem14 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_APPEND, "Append Data", wxDefaultPosition, wxDefaultSize, 0 );
+                optitem13 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_MASK,_("Mask Before Graph"), wxDefaultPosition, wxDefaultSize, 0 );
+                optitem14 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_APPEND,_("Append Data"), wxDefaultPosition, wxDefaultSize, 0 );
                 
-                optitem16 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_ZIGZAG, "Horizontal Zig Zag", wxDefaultPosition, wxDefaultSize, 0 );
-                optitem17 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_ATMASK, "Attribute Mask", wxDefaultPosition, wxDefaultSize, 0 );
-                optitem18 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_ATMASKI, "   Ink", wxDefaultPosition, wxDefaultSize, 0 );
-                optitem19 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_ATMASKP, "   Paper", wxDefaultPosition, wxDefaultSize, 0 );
-                optitem20 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_ATMASKB, "   Bright", wxDefaultPosition, wxDefaultSize, 0 );
-                optitem21 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_ATMASKF, "   Flash", wxDefaultPosition, wxDefaultSize, 0 );
-                optitem22 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_Z88DK, "Add z88dk extra info", wxDefaultPosition, wxDefaultSize, 0 );
-                optitem24 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_NOLABEL, "No ASM Label", wxDefaultPosition, wxDefaultSize, 0 );
+                optitem16 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_ZIGZAG,_("Horizontal Zig Zag"), wxDefaultPosition, wxDefaultSize, 0 );
+                optitem17 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_ATMASK,_("Attribute Mask"), wxDefaultPosition, wxDefaultSize, 0 );
+                optitem18 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_ATMASKI,_("   Ink"), wxDefaultPosition, wxDefaultSize, 0 );
+                optitem19 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_ATMASKP,_("   Paper"), wxDefaultPosition, wxDefaultSize, 0 );
+                optitem20 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_ATMASKB,_("   Bright"), wxDefaultPosition, wxDefaultSize, 0 );
+                optitem21 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_ATMASKF,_("   Flash"), wxDefaultPosition, wxDefaultSize, 0 );
+                optitem22 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_Z88DK,_("Add z88dk extra info"), wxDefaultPosition, wxDefaultSize, 0 );
+                optitem24 = new wxCheckBox( &dialogOutputOptions, ID_SAVEOPT_NOLABEL,_("No ASM Label"), wxDefaultPosition, wxDefaultSize, 0 );
                 optitem23 = new wxBoxSizer( wxHORIZONTAL );
 
                 
@@ -4223,17 +4231,17 @@ void TheFrame::MoveOptUP(wxCommandEvent &event)
 // The effects options dialog
 void TheFrame::GetEffectsOptions()
         {
-        wxString strs4[] ={"Pixels and Attributes", "Pixels", "Attributes"};
-        wxDialog effectopt(this,-1,wxString("Set Effects Options"));
+        wxString strs4[] ={_("Pixels and Attributes"),_("Pixels"),_("Attributes")};
+        wxDialog effectopt(this,-1,wxString(_("Set Effects Options")));
 
                 effitem0 = new wxBoxSizer( wxVERTICAL );
 
-                effitem1 = new wxRadioBox( &effectopt, ID_RADIOBOX_EFF, "Effects affect to:", wxDefaultPosition, wxDefaultSize, 3, strs4, 1, wxRA_SPECIFY_COLS );
-                effitem2 = new wxCheckBox( &effectopt, ID_CHECKBOX_EFF1, "Shift (instead rotation) ", wxDefaultPosition, wxDefaultSize, 0 );
-                effitem3 = new wxCheckBox( &effectopt, ID_CHECKBOX_EFF2, "Character rotation/shift", wxDefaultPosition, wxDefaultSize, 0 );
+                effitem1 = new wxRadioBox( &effectopt, ID_RADIOBOX_EFF,_("Effects affect to:"), wxDefaultPosition, wxDefaultSize, 3, strs4, 1, wxRA_SPECIFY_COLS );
+                effitem2 = new wxCheckBox( &effectopt, ID_CHECKBOX_EFF1,_("Shift (instead rotation) "), wxDefaultPosition, wxDefaultSize, 0 );
+                effitem3 = new wxCheckBox( &effectopt, ID_CHECKBOX_EFF2,_("Character rotation/shift"), wxDefaultPosition, wxDefaultSize, 0 );
                 effitem4 = new wxBoxSizer( wxHORIZONTAL );
-                wxButton *effitem5 = new wxButton( &effectopt, wxID_OK, "OK", wxDefaultPosition, wxDefaultSize, 0 );
-                wxButton *effitem6 = new wxButton( &effectopt, wxID_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0 );
+                wxButton *effitem5 = new wxButton( &effectopt, wxID_OK,_("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+                wxButton *effitem6 = new wxButton( &effectopt, wxID_CANCEL,_("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
 
                 effitem0->Add( effitem1, 0, wxALIGN_CENTRE|wxALL, 5 );
                 effitem0->Add( effitem2, 0, wxALIGN_CENTRE|wxALL, 5 );
@@ -4543,7 +4551,7 @@ void TheFrame::PixelAction (int action, int x, int y)
                                         sel_start_x=x;
                                         sel_start_y=y;
                                         sselect++;
-                                        SetStatusText("Toggle Pixel/Close selection",0);
+                                        SetStatusText(_("Toggle Pixel/Close selection"),0);
                                         break;
                                         }
                                 case 1:
@@ -4569,7 +4577,7 @@ void TheFrame::PixelAction (int action, int x, int y)
                                         sexc=sel_end_x;
                                         seyc=sel_end_y;
                                         sselect++;
-                                        SetStatusText("Toggle Pixel/Discard selection",0);
+                                        SetStatusText(_("Toggle Pixel/Discard selection"),0);
                                         DrawArea(sel_start_x/8,sel_start_y/8,(sel_end_x+7)/8,(sel_end_y+7)/8);
                                         AreaRfrsh(dc,TRUE);
                                         break;
@@ -4577,7 +4585,7 @@ void TheFrame::PixelAction (int action, int x, int y)
                                 case 2:
                                         {
                                         sselect=0;
-                                        SetStatusText("Toggle Pixel/Select zone",0);
+                                        SetStatusText(_("Toggle Pixel/Select zone"),0);
                                         ssxc=sel_start_x;
                                         ssyc=sel_start_y;
                                         sexc=sel_end_x;
@@ -4720,15 +4728,15 @@ void TheFrame::PixelAction (int action, int x, int y)
                                         switch (sselect)
                                                 {
                                                 case 0: {
-                                                        SetStatusText("Toggle Pixel/Select zone",0);
+                                                        SetStatusText(_("Toggle Pixel/Select zone"),0);
                                                         break;
                                                         }
                                                 case 1: {
-                                                        SetStatusText("Toggle Pixel/Close selection",0);
+                                                        SetStatusText(_("Toggle Pixel/Close selection"),0);
                                                         break;
                                                         }
                                                 case 2: {
-                                                        SetStatusText("Toggle Pixel/Discard selection",0);
+                                                        SetStatusText(_("Toggle Pixel/Discard selection"),0);
                                                         break;
                                                         }
                                                 }
@@ -4740,11 +4748,11 @@ void TheFrame::PixelAction (int action, int x, int y)
                                         right_func=6;
                                         if ((Mask_use==1)&&(Mask_view==1))
                                                 {
-                                                SetStatusText("Toggle mask/Toggle graphic",0);
+                                                SetStatusText(_("Toggle mask/Toggle graphic"),0);
                                                 }
                                         else
                                                 {
-                                                SetStatusText("Set Attributes/Get Attributes",0);
+                                                SetStatusText(_("Set Attributes/Get Attributes"),0);
                                                 }
                                         break;
                                         }
@@ -4755,7 +4763,7 @@ void TheFrame::PixelAction (int action, int x, int y)
                                         cursormode=0;
                                         left_func=1;
                                         right_func=2;
-                                        SetStatusText("Set Pixel/Reset Pixel",0);
+                                        SetStatusText(_("Set Pixel/Reset Pixel"),0);
                                         break;
                                         }
                                 }
@@ -4793,7 +4801,7 @@ void TheFrame::OnActivate(wxActivateEvent &event)
 //  are modified & unsaved open files
 void TheFrame::OnClose(wxCloseEvent &event)
 {
-        wxMessageDialog dialog( this, "All unsaved graphics will be lost\nAre you sure?","Warning",wxOK|wxCANCEL);
+        wxMessageDialog dialog( this,_("All unsaved graphics will be lost\nAre you sure?"),_("Warning"),wxOK|wxCANCEL);
         dialog.CentreOnParent();
         if (Files_open==0) event.Skip();
         int j=0;
@@ -4823,19 +4831,22 @@ void TheFrame::SetTit()
         wxString Number1;
 
         char num0=48+(Frame_current%10);
-        char num1=48+(Frame_current/10);
-        Number0="[";
-        if (num1>48) Number0+=num1;
+        char num1=48+((Frame_current/10)%10);
+        char num2=48+(Frame_current/100);
+        Number0=_("[");
+        if (num2>48) Number0+=num2;
+        if ((num1>48)||(num2>48)) Number0+=num1;
         Number0+=num0;
 
-        char num2=48+(Frame_total%10);
-        char num3=48+(Frame_total/10);
-        Number1="/";
-        if (num3>48) Number1+=num3;
-        Number1+=num2;
+        char num3=48+(Frame_total%10);
+        char num4=48+((Frame_total/10)%10);
+        char num5=48+(Frame_total/100);
+        Number1=_("/");
+        if (num5>48) Number1+=num5;
+        if ((num4>48)||(num5>48)) Number1+=num4;
+        Number1+=num3;
 
-
-        TheTitle=Current->OpenName.Left(Current->OpenName.Length()-1)+" - "+Number0+Number1+"]\0";
+        TheTitle=Current->OpenName.Left(Current->OpenName.Length()-1)+_(" - ")+Number0+Number1+_("]\0");
 
         if (Frame_total>1)      this->SetTitle(TheTitle);
         else                    this->SetTitle(Current->OpenName);
@@ -4847,10 +4858,10 @@ void TheFrame::OpenArrayFiles(const wxArrayString &filenames)
                 {
                 if (Files_open==12)
                         {
-                        (void)wxMessageBox("Can't open more than 12 graphics","SevenuP");
+                        (void)wxMessageBox(_("Can't open more than 12 graphics"),_("SevenuP"));
                         break;
                         }
-                Files[Files_open] = new class OpenFile(filenames[n]);
+                Files[Files_open] = new class OpenFile(wc2s(filenames[n]));
                 if (Files[Files_open]->OpenGraph->Propied1!=0)
                         {
                         Files_current=Files_open++;
@@ -4862,7 +4873,7 @@ void TheFrame::OpenArrayFiles(const wxArrayString &filenames)
                         Current = Files[Files_current];
                         Graphic2 = Files[Files_current]->OpenGraph;
                         Frame_total=Current->OpenFrames;
-                        char num0=48+(Files_open%10);
+                        wxChar num0=48+(Files_open%10);
                         wxString menunumber,menuname;
                         menunumber=num0;
 
@@ -4870,21 +4881,21 @@ void TheFrame::OpenArrayFiles(const wxArrayString &filenames)
 #if defined(__WXGTK__) || defined (__WXMOTIF__) || defined (__WXMAC__)
                         if (Files_open>10)
                                 {
-                                menuname="1"+menunumber+" - "+Current->OpenName;
+                                menuname=_("1")+menunumber+_(" - ")+Current->OpenName;
                                 }
                         else
                                 {
-                                if (Files_open==10)	menuname="1"+menunumber+" - "+Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
-				else			menuname=menunumber+" - "+Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-"+menunumber+"\0";
+                                if (Files_open==10)	menuname=_("1")+menunumber+_(" - ")+Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
+				else			menuname=menunumber+_(" - ")+Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-")+menunumber+_("\0");
                                 }
 #else
                         if (Files_open>9)
                                 {
-                                menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-F1"+menunumber+"\0";
+                                menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-F1")+menunumber+_("\0");
                                 }
                         else
                                 {
-                                menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+"\tCtrl-F"+menunumber+"\0";
+                                menuname=Current->OpenName.Left(Current->OpenName.Length()-1)+_("\tCtrl-F")+menunumber+_("\0");
                                 }
 #endif
                         menuFile->Append(FILE_1+Files_open-1, menuname);
@@ -4991,6 +5002,7 @@ BEGIN_EVENT_TABLE(TheFrame, wxFrame)
         EVT_MENU                (FILE_NEW,TheFrame::FileNew)
         EVT_MENU                (FILE_LOAD,TheFrame::FileLoad)
         EVT_MENU                (FILE_IMPORT,TheFrame::FileImport)
+        EVT_MENU                (FILE_BINIMPORT,TheFrame::FileBinImport)
         EVT_MENU                (FILE_CLOSE,TheFrame::FileClose)
         EVT_MENU                (FILE_RENAME,TheFrame::FileRename)
         EVT_MENU                (FILE_FASTSAVE,TheFrame::FileFastSave)
@@ -5299,22 +5311,22 @@ void MyWindow::OnMouse(wxMouseEvent& event)
         switch (framee->cursormode)
                 {
                 case 0: {
-                        framee->SetStatusText("Set Pixel/Reset Pixel",0);
+                        framee->SetStatusText(_("Set Pixel/Reset Pixel"),0);
                         break;
                         }
                 case 1: {
                         switch (framee->sselect)
                                 {
                                 case 0: {
-                                        framee->SetStatusText("Toggle Pixel/Select zone",0);
+                                        framee->SetStatusText(_("Toggle Pixel/Select zone"),0);
                                         break;
                                         }
                                 case 1: {
-                                        framee->SetStatusText("Toggle Pixel/Close selection",0);
+                                        framee->SetStatusText(_("Toggle Pixel/Close selection"),0);
                                         break;
                                         }
                                 case 2: {
-                                        framee->SetStatusText("Toggle Pixel/Discard selection",0);
+                                        framee->SetStatusText(_("Toggle Pixel/Discard selection"),0);
                                         break;
                                         }
                                 }
@@ -5323,24 +5335,24 @@ void MyWindow::OnMouse(wxMouseEvent& event)
                 case 2: {
                         if ((framee->Mask_use==1)&&(framee->Mask_view==1))
                                 {
-                                framee->SetStatusText("Toggle mask/Toggle graphic",0);
+                                framee->SetStatusText(_("Toggle mask/Toggle graphic"),0);
                                 }
                         else
                                 {
-                                framee->SetStatusText("Set Attributes/Get Attributes",0);
+                                framee->SetStatusText(_("Set Attributes/Get Attributes"),0);
                                 }
                         break;
                         }
                 case 3: {
-                        framee->SetStatusText("Paste/Cancel paste",0);
+                        framee->SetStatusText(_("Paste/Cancel paste"),0);
                         break;
                         }
                 case 4: {
-                        framee->SetStatusText("Fill/Cancel fill",0);
+                        framee->SetStatusText(_("Fill/Cancel fill"),0);
                         break;
                         }
                 case 5: {
-                        framee->SetStatusText("Pattern Fill/Cancel fill",0);
+                        framee->SetStatusText(_("Pattern Fill/Cancel fill"),0);
                         break;
                         }
                 }
@@ -5426,7 +5438,7 @@ void MyWindow::OnKey(wxKeyEvent& event)
                         framee->cursormode=0;
                         framee->left_func=1;
                         framee->right_func=2;
-                        framee->SetStatusText("Set Pixel/Reset Pixel",0);
+                        framee->SetStatusText(_("Set Pixel/Reset Pixel"),0);
                         break;
                         }
                 case '2': {
@@ -5436,15 +5448,15 @@ void MyWindow::OnKey(wxKeyEvent& event)
                         switch (framee->sselect)
                                 {
                                 case 0: {
-                                        framee->SetStatusText("Toggle Pixel/Select zone",0);
+                                        framee->SetStatusText(_("Toggle Pixel/Select zone"),0);
                                         break;
                                         }
                                 case 1: {
-                                        framee->SetStatusText("Toggle Pixel/Close selection",0);
+                                        framee->SetStatusText(_("Toggle Pixel/Close selection"),0);
                                         break;
                                         }
                                 case 2: {
-                                        framee->SetStatusText("Toggle Pixel/Discard selection",0);
+                                        framee->SetStatusText(_("Toggle Pixel/Discard selection"),0);
                                         break;
                                         }
                                 };
@@ -5456,11 +5468,11 @@ void MyWindow::OnKey(wxKeyEvent& event)
                         framee->right_func=6;
                         if ((framee->Mask_use==1)&&(framee->Mask_view==1))
                                 {
-                                framee->SetStatusText("Toggle mask/Toggle graphic",0);
+                                framee->SetStatusText(_("Toggle mask/Toggle graphic"),0);
                                 }
                         else
                                 {
-                                framee->SetStatusText("Set Attributes/Get Attributes",0);
+                                framee->SetStatusText(_("Set Attributes/Get Attributes"),0);
                                 }
                         break;
                         }
