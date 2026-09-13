@@ -26,10 +26,22 @@
 #ifndef _SEVENUP_H
 #define _SEVENUP_H
 
+class TheFrame;
+
 class SevenuP : public wxApp
 {
 public:
+        SevenuP() { m_frame = NULL; }
         virtual bool OnInit();
+#ifdef __WXMAC__
+        // Finder double-click, "Open With", drop on the Dock icon
+        virtual void MacOpenFiles(const wxArrayString &fileNames);
+#endif
+                                // Called from ~TheFrame, so a late
+                                // Apple Event cannot use a dead pointer
+        void ForgetFrame(TheFrame *frame) { if (m_frame==frame) m_frame=NULL; }
+private:
+        TheFrame *m_frame;
 };
 
 DECLARE_APP(SevenuP)

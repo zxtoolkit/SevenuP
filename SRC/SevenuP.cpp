@@ -38,10 +38,29 @@ IMPLEMENT_APP(SevenuP)          // Here starts the wxWindows application
 
 bool SevenuP::OnInit()          // This is executed at startup
 {
-        TheFrame *frame=new TheFrame(-1, -1, -1, -1, argc, argv);
+        m_frame=new TheFrame(-1, -1, -1, -1, argc, argv);
                                 // Create the Frame with this title, at
                                 // default position with default size
-        frame->Show(TRUE);      // Show it
-        SetTopWindow(frame);    // Set it on top
+        m_frame->Show(TRUE);    // Show it
+        SetTopWindow(m_frame);  // Set it on top
         return true;            // Init was ok
 }
+
+#ifdef __WXMAC__
+
+// Files opened from the Finder arrive as an Apple Event, not in argv.
+// Hand the whole array to OpenArrayFiles at once, the same entry point
+// the drag and drop target uses, so the canvas is refreshed only after
+// the last file rather than once per file.
+void SevenuP::MacOpenFiles(const wxArrayString &fileNames)
+{
+        if (m_frame==NULL)      // event arrived before the frame exists
+                {
+                wxApp::MacOpenFiles(fileNames);
+                return;
+                }
+        m_frame->OpenArrayFiles(fileNames);
+        m_frame->Raise();
+}
+
+#endif

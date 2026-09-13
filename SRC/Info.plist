@@ -4,6 +4,78 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>SEVenuP graphic</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>sev</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.speccy.metalbrain.sevenup.sev</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>ZX Spectrum screen snapshot</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>scr</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.speccy.zx-spectrum.screen</string>
+			</array>
+		</dict>
+	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.speccy.metalbrain.sevenup.sev</string>
+			<key>UTTypeDescription</key>
+			<string>SEVenuP graphic</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>sev</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.speccy.zx-spectrum.screen</string>
+			<key>UTTypeDescription</key>
+			<string>ZX Spectrum screen snapshot</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>scr</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>SevenuP</string>
 	<key>CFBundleIdentifier</key>

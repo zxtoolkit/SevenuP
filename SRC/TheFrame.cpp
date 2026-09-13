@@ -23,6 +23,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "TheFrame.h"
+#include "SevenuP.h"
 
 #ifdef __WXMAC__
 #include <sys/types.h>
@@ -801,6 +802,7 @@ TheFrame::TheFrame(int xpos, int ypos, int width, int height, int argc, wxChar *
 
 TheFrame::~TheFrame()
 {
+        wxGetApp().ForgetFrame(this);
 }
 
 // FILE MENU FUNCTIONS
