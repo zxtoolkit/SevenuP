@@ -30,10 +30,10 @@
 #endif
 
 #define ADD_TOOL(id, bmp, tooltip, help) \
-        toolBar->AddTool(id,bmp,wxNullBitmap,FALSE,-1,-1,(wxObject *)0, tooltip,help)
+        toolBar->AddTool(id,wxEmptyString,bmp,wxNullBitmap,wxITEM_NORMAL,tooltip,help)
 
 #define ADD_TOOL2(id, bmp, tooltip) \
-        toolBar->AddTool(id,bmp,wxNullBitmap,FALSE,-1,-1,(wxObject *)0, tooltip)
+        toolBar->AddTool(id,wxEmptyString,bmp,wxNullBitmap,wxITEM_NORMAL,tooltip)
 
 // Colors 0-15 Speccy, 16 grid light brown, 17 grid orange, 18-19 mask grid
 BYTE RedPal[20]={0,0,200,200,0,0,200,200,0,0,248,248,0,0,248,248,154,238,154,238};
@@ -564,11 +564,6 @@ TheFrame::TheFrame(int xpos, int ypos, int width, int height, int argc, wxChar *
 
         wxBitmap coBitmaps[11];
         wxBitmap coBitmapsd[11];
-        int depth = ::wxDisplayDepth();
-        for(int i = 0; i < 10; ++i) {
-            coBitmaps[i].SetDepth(depth);
-            coBitmapsd[i].SetDepth(depth);
-        }
 
         coBitmaps[0] = wxBITMAP(color0);
         coBitmaps[1] = wxBITMAP(color1);
@@ -1191,7 +1186,7 @@ void TheFrame::FileExportImage(wxCommandEvent &event)
         if (Files_open==0) return;
         lastx=-1;
 
-        wxFileDialog dialog(this,_("Choose name and image format to save"), ExportImagePath, Current->OpenName,_("PNG - Portable Network Graphic|*.png|BMP - Windows Bitmap|*.bmp|JPG - Joint Picture Experts Group|*.jpg|PCX - Zsoft Paintbrush|*.pcx|TIF - Tagged Image File Format|*.tif|XPM - X-Bitmap|*.xpm"),wxSAVE|wxOVERWRITE_PROMPT);
+        wxFileDialog dialog(this,_("Choose name and image format to save"), ExportImagePath, Current->OpenName,_("PNG - Portable Network Graphic|*.png|BMP - Windows Bitmap|*.bmp|JPG - Joint Picture Experts Group|*.jpg|PCX - Zsoft Paintbrush|*.pcx|TIF - Tagged Image File Format|*.tif|XPM - X-Bitmap|*.xpm"),wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
         
         dialog.CentreOnParent();
         if (dialog.ShowModal() == wxID_OK)
@@ -1341,7 +1336,7 @@ void TheFrame::FileFastSave(wxCommandEvent &event)
                 }
         else
                 {
-                wxFileDialog dialog(this, _("Choose a file name to save"), SavePath, Current->OpenName,_("SEVenuP graphic format (*.sev)|*.sev"), wxSAVE|wxOVERWRITE_PROMPT);
+                wxFileDialog dialog(this, _("Choose a file name to save"), SavePath, Current->OpenName,_("SEVenuP graphic format (*.sev)|*.sev"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
                 dialog.CentreOnParent();
                 if (dialog.ShowModal() == wxID_OK)
                         {
@@ -1377,10 +1372,10 @@ void TheFrame::FileSave(wxCommandEvent &event)
 	wxString extensions[] = {_(".scr"),_(".sev")};
 	if ((Current->OpenGraph->GetSizeX()==256)&&(Current->OpenGraph->GetSizeY()==192))
                 {
-	        dialog = new wxFileDialog(this, _("Choose a file name to save"), SavePath, Current->OpenName, _("SCReen memory snapshot (*.scr)|*.scr|SEVenuP graphic format (*.sev)|*.sev"), wxSAVE|wxOVERWRITE_PROMPT);
+	        dialog = new wxFileDialog(this, _("Choose a file name to save"), SavePath, Current->OpenName, _("SCReen memory snapshot (*.scr)|*.scr|SEVenuP graphic format (*.sev)|*.sev"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 		}
 	else	{
-	        dialog = new wxFileDialog(this,_("Choose a file name to save"), SavePath, Current->OpenName,_("SEVenuP graphic format (*.sev)|*.sev"), wxSAVE|wxOVERWRITE_PROMPT);
+	        dialog = new wxFileDialog(this,_("Choose a file name to save"), SavePath, Current->OpenName,_("SEVenuP graphic format (*.sev)|*.sev"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 		extensions[0] =_(".sev");
 		}
 	dialog->CentreOnParent();
@@ -1463,7 +1458,7 @@ void TheFrame::FileExportData(wxCommandEvent &event)
         		break;
         		}
         	}
-        wxFileDialog dialog(this, _("Choose a file name to save"), ExportDataPath, Current->OpenName, ExportDataExtensions, wxSAVE|(wxOVERWRITE_PROMPT*(1-appendfile)));
+        wxFileDialog dialog(this, _("Choose a file name to save"), ExportDataPath, Current->OpenName, ExportDataExtensions, wxFD_SAVE|(wxFD_OVERWRITE_PROMPT*(1-appendfile)));
         dialog.CentreOnParent();
         if (dialog.ShowModal() == wxID_OK)
                 {

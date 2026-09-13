@@ -1,28 +1,30 @@
-CC = g++
+CXX = g++
+WX_CONFIG ?= wx-config
 
 PROGRAM = SevenuP
 
 OBJECTS = $(PROGRAM).o TheFrame.o OpenFile.o
 
 # implementation
-CXXFLAGS:= -Os `wx-config --cxxflags`
+CXXFLAGS:= -Os `$(WX_CONFIG) --cxxflags`
 LDFLAGS:=
-LDLIBS:=`wx-config --static --libs`
+LDLIBS:=`$(WX_CONFIG) --libs`
 
 .SUFFIXES:	.o .cpp
 
 all:    $(PROGRAM).app
 
-$(PROGRAM).app: $(PROGRAM)
+$(PROGRAM).app: $(PROGRAM) Info.plist SevenUp.icns
 	install -d $@/Contents
 	install -d $@/Contents/MacOS
 	install -d $@/Contents/Resources
-	install Info.plist $@/Contents 
-	install SevenUp.icns $@/Contents/Resources
-	install -s $< $@/Contents/MacOS
+	install -m 644 Info.plist $@/Contents
+	install -m 644 SevenUp.icns $@/Contents/Resources
+	install $< $@/Contents/MacOS
+	codesign --force --sign - $@
 
 $(PROGRAM):	$(OBJECTS)
-	$(LINK.o)  -o $@ $^ $(LDLIBS)
+	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 clean: 
 	rm -f *.o $(PROGRAM)
 	rm -Rf $(PROGRAM).app
