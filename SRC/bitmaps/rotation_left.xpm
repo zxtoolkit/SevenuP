@@ -1,0 +1,23 @@
+/* XPM */
+static char *rotation_left_xpm[] = {
+"16 16 3 1",
+"  c None",
+"a c #00FFFF",
+"b c #FFFFFF",
+"                ",
+"                ",
+"   bb  bb  bb   ",
+" b bb  bb  bb b ",
+"bb            bb",
+"b              b",
+"      a         ",
+"     aa         ",
+"b   aaa        b",
+"bb aaaaaaaaaa bb",
+" b aaaaaaaaaa b ",
+"    aaa         ",
+"     aa         ",
+"      a         ",
+"                ",
+"                ",
+};

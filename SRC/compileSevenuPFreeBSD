@@ -1,0 +1,17 @@
+#!/bin/sh
+# Emilio (04-04-06) Checks for disponibility of wxgtk2
+# and compiles SevenuP; otherwise, it tells how to
+# install wxgtk2
+
+version="`/usr/sbin/pkg_info -E 'wxgtk2>=2.4'`"
+
+if [ -z "$version" ] ; then
+  echo "You'll need at least wxgtk2-2.4 to compile SevenuP"
+  echo "(you may use:"
+  echo "portinstall -P wxgtk2"
+  echo "to install it)"
+  exit 1;
+fi
+
+gmake -f makefile.freebsd WX-CONFIG=`echo "$version" | cut -b -10`-config
+

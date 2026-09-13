@@ -1,0 +1,23 @@
+/* XPM */
+static char *color3d_xpm[] = {
+"16 16 3 1",
+"a c #E000B0",
+"b c #FF00DF",
+"c c #FFFFFF",
+"aaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaacaaa",
+"aaaaaaaaaaacccaa",
+"aaaaaaaaaacccaaa",
+"aaaaaaaaaacccaaa",
+"aaaaaaaaaacccaaa",
+"aaaaaaaaacccaaaa",
+"acaaaaaaacccaaaa",
+"bccbbbbbcccbbbbb",
+"bbccbbbbcccbbbbb",
+"bbcccbbccccbbbbb",
+"bbbcccccccbbbbbb",
+"bbbbcccccbbbbbbb",
+"bbbbbcccbbbbbbbb",
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb"
+};

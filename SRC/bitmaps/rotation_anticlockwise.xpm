@@ -1,0 +1,22 @@
+/* XPM */
+static char *rotation_anticlockwise_xpm[] = {
+"16 16 2 1",
+"  c None",
+"a c #00FFFF",
+"                ",
+"      aaaa      ",
+"    aa    aa    ",
+"   a        a   ",
+"  a          a  ",
+"  a          a  ",
+" a            a ",
+" a            a ",
+" a            a ",
+" a            a ",
+"  a          a  ",
+"  a  a       a  ",
+"   a a      a   ",
+"    aa     a    ",
+"  aaaa          ",
+"                ",
+};

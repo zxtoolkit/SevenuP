@@ -1,0 +1,23 @@
+/* XPM */
+static char *inv_bits_xpm[] = {
+"16 16 3 1",
+"  c None",
+"a c #000000",
+"b c #FFFFFF",
+"aaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaa",
+"bbbabaaaababaaab",
+"abaabaaaababaaab",
+"abaabbaaababaaab",
+"abaabbaaababaaab",
+"abaababaabaababa",
+"abaababaabaababa",
+"abaabaababaababa",
+"abaabaababaababa",
+"abaabaaabbaaabaa",
+"abaabaaabbaaabaa",
+"abaabaaaabaaabaa",
+"bbbabaaaabaaabaa",
+"aaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaa",
+};

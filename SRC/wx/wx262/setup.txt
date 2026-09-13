@@ -1,0 +1,2 @@
+Optimized wxWidgets 2.6.2 setup.h for SevenuP compilation.
+Place it at lib\gcc_lib\msw\wx from your wxWidgets directory.

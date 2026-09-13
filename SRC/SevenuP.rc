@@ -1,0 +1,52 @@
+#include "wx\msw\wx.rc"
+
+sevenup ICON "bitmaps/sevenup.ico"
+
+erase   BITMAP "bitmaps/reset.bmp"
+save    BITMAP "bitmaps/save.bmp"
+zoomin  BITMAP "bitmaps/zoomin.bmp"
+zoomout BITMAP "bitmaps/zoomout.bmp"
+
+cursor  BITMAP "bitmaps/cursor.bmp"
+
+color0  BITMAP "bitmaps/color0.bmp"
+color1  BITMAP "bitmaps/color1.bmp"
+color2  BITMAP "bitmaps/color2.bmp"
+color3  BITMAP "bitmaps/color3.bmp"
+color4  BITMAP "bitmaps/color4.bmp"
+color5  BITMAP "bitmaps/color5.bmp"
+color6  BITMAP "bitmaps/color6.bmp"
+color7  BITMAP "bitmaps/color7.bmp"
+
+bright0 BITMAP "bitmaps/bright0.bmp"
+bright1 BITMAP "bitmaps/bright1.bmp"
+
+transp  BITMAP "bitmaps/transp.bmp"
+
+color0d BITMAP "bitmaps/color0d.bmp"
+color1d BITMAP "bitmaps/color1d.bmp"
+color2d BITMAP "bitmaps/color2d.bmp"
+color3d BITMAP "bitmaps/color3d.bmp"
+color4d BITMAP "bitmaps/color4d.bmp"
+color5d BITMAP "bitmaps/color5d.bmp"
+color6d BITMAP "bitmaps/color6d.bmp"
+color7d BITMAP "bitmaps/color7d.bmp"
+
+bright0d BITMAP "bitmaps/bright0d.bmp"
+bright1d BITMAP "bitmaps/bright1d.bmp"
+
+transpd BITMAP "bitmaps/transpd.bmp"
+
+flip_x BITMAP "bitmaps/flip_x.bmp"
+flip_y BITMAP "bitmaps/flip_y.bmp"
+inv_bits BITMAP "bitmaps/inv_bits.bmp"
+
+rotation_left BITMAP "bitmaps/rotation_left.bmp"
+rotation_right BITMAP "bitmaps/rotation_right.bmp"
+rotation_up BITMAP "bitmaps/rotation_up.bmp"
+rotation_down BITMAP "bitmaps/rotation_down.bmp"
+rotation_clockwise BITMAP "bitmaps/rotation_clockwise.bmp"
+rotation_anticlockwise BITMAP "bitmaps/rotation_anticlockwise.bmp"
+
+fra_prev BITMAP "bitmaps/fra_prev.bmp"
+fra_next BITMAP "bitmaps/fra_next.bmp"

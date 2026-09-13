@@ -1,0 +1,22 @@
+/* XPM */
+static char *color0d_xpm[] = {
+"16 16 2 1",
+"a c #000000",
+"b c #FFFFFF",
+"aaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaabaaa",
+"aaaaaaaaaaabbbaa",
+"aaaaaaaaaabbbaaa",
+"aaaaaaaaaabbbaaa",
+"aaaaaaaaaabbbaaa",
+"aaaaaaaaabbbaaaa",
+"abaaaaaaabbbaaaa",
+"abbaaaaabbbaaaaa",
+"aabbaaaabbbaaaaa",
+"aabbbaabbbbaaaaa",
+"aaabbbbbbbaaaaaa",
+"aaaabbbbbaaaaaaa",
+"aaaaabbbaaaaaaaa",
+"aaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaa"
+};

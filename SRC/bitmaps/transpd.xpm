@@ -1,0 +1,23 @@
+/* XPM */
+static char *transpd_xpm[] = {
+"16 16 3 1",
+"a c Black",
+"b c #FFFFFF",
+"c c #00FF00",
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbcbbb",
+"bbaaaaaaaaacccbb",
+"bbaaaaaaaacccabb",
+"bbaaaaaaaacccabb",
+"bbaaaaaaaacccabb",
+"bbbbbbaaacccbbbb",
+"bcbbbbaaacccbbbb",
+"bccbbbaacccbbbbb",
+"bbccbbaacccbbbbb",
+"bbcccbaccccbbbbb",
+"bbbcccccccbbbbbb",
+"bbbbcccccabbbbbb",
+"bbbbbcccaabbbbbb",
+"bbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbb"
+};

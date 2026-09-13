@@ -1,0 +1,896 @@
+				*******************
+				* SevenuP - v1.20 *
+				*******************
+
+
+
+Introducción
+************
+
+ ¡Bienvenido a SevenuP! Esta es otra de mis pequeñas contribuciones a la
+escena mundial del Speccy. Es un editor gráfico para el Spectrum, para crear
+gráficos y sprites que puedan ser usados en nuevos juegos de spectrum.
+También puede usar para crear o modificar pantallas aunque esta no sea su
+utilidad principal.
+
+ SevenuP ha sido programado en C++ usando la librería wxWidgets (antes
+conocida como wxWindows) para facilitar la portabilidad.
+
+
+
+¿Que significa el nombre?
+*************************
+
+ ¿Es que el nombre tiene que tener algún significado a la fuerza? No
+necesariamente, y por lo tanto podría decir que simplemente fue lo
+primero que se me vino a la cabeza y así se quedó, pero estaría faltando
+a la verdad.
+
+ Lo primero que se me vino a la cabeza fue algo en la linea de SpecDraw,
+algo así como Spectrum Sprite Editor o GraphSpec... en esa linea... pero
+no me gustan los nombres excesivamente evidentes. Así que empecé a darle
+vueltas a la cabeza...
+
+ La idea para el programa desde el principio fue que no solo hiciera
+gráficos, sino también de Sprites. Sprite... ¿que es Sprite? aparte de
+ser un gráfico animado en la jerga spectrumiana, es una conocida bebida
+refrescante sabor lima-limón. ¡Y la bebida de la competencia se llama
+7up! Así que llamando a mi programa 7up, o seven up, estoy haciendo una
+referencia mas indirecta a los sprites. Hmm. Empieza por S y acaba por
+P. Voy a juntar las palabras y a destacar esas letras primera y última
+(que queda muy al estilo de logotipos de algunas bandas metaleras), y SP
+son las iniciales de SPectrum y de SPrite.
+
+ Así pues no me puedo quejar, 2 referencias a SPrite y una a SPectrum, me
+gusta, el nombre está decidido.
+
+ Y para rematar, pocos días después me doy cuenta de que aparte del negro
+en el Spectrum los colores van hasta el 7, lo cual no deja de ser otra
+casualidad que encaja perfectamente.
+
+
+
+Requerimientos
+**************
+
+ La versión Windows requiere cualquier versión de win32 y algo de memoria para
+cada gráfico que se abra. Hasta ahora ha sido probado con éxito en Windows 95,
+Windows 98, Windows 98SE, Windows ME, Windows 2000 y Windows XP. Informes sobre
+otras versiones (Windows 2003 y Windows NT) serían de agradecer.
+
+ La versión Linux requiere X con GTK (2.x) y también requiere que instales
+las liberías de wxWidgets versión 2.6.2 (o posterior), que se pueden encontrar
+en http://www.wxwidgets.org (sección Downloads->Unix/GTK+). SevenuP 1.20 ha
+sido compilada en Gentoo 2006.0 con wxWidgets 2.6.2 en un sistema x64, así que
+si no te funciona debes bajar el código fuente y compilar tu propia versión.
+
+ La versión de MacOS X ha sido compilada en OS X 10.2.8, y también se ha probado
+en la versión 10.3.9 . Seguramente funcionará en otras versiones, así que informes
+sobre esto serían de agradecer.
+
+ SevenuP sigue siendo un poco lento (aunque no tanto como antes), así que
+mientras mas megaherzios, mejor.
+
+
+
+Legal
+*****
+
+ SevenuP es (C) Copyright 2002-2006 Jaime Tejedor Gómez, tcc Metalbrain
+
+ SevenuP usa la licencia GNU GPL. Lee el archivo "GNU-GPL License.txt" para
+obtener mas detalles. El archivo está en inglés, si quieres ver una versión
+en español, la puedes encontrar en http://www.garaitia.com/gpl-spanish.php
+El código fuente y los ejecutables vienen en distintos paquetes, los cuales
+están disponibles en la página web de SevenuP (http://www.speccy.org/metalbrain).
+
+
+
+Instrucciones de uso
+********************
+
+ Creo que el uso del programa es bastante intuitivo (excepto quizás algunas partes
+como el modo de selección), pero lo que es obvio para mi podría no serlo para
+alguien, así que me he tomado algo de tiempo para escribir este texto. Y la
+traducción esta en español le puede valer a quien no domine el inglés.
+
+ Vamos a ver todas las partes del programa para ver lo que se puede hacer con el.
+
+·Barra de menús:
+	·File
+		·New
+			Se usa para crear un nuevo gráfico, indicando el tamaño.
+			Atajo de teclado: A
+		·Load	
+			Se usa para cargar un gráfico .SEV o una pantalla .SCR.
+			También se pueden cargar archivos arrastrandolos a la
+			ventana. Atajo de teclado: L
+		·Import
+			Se usa para crear un gráfico de Spectrum a partir de una
+			imagen. Si la imagen es demasiado grande, se reescalará
+			manteniendo la relación de aspecto. Los formatos
+			soportados son: .BMP, .GIF, .JPG, .PNG, .PCX, .TIF, .IFF
+			y .XPM . Atajo de teclado: I
+		·Save
+			Salva el gráfico actual en el formato nativo de SevenuP
+			.SEV o bien como pantalla de Spectrum .SCR . Atajo de
+			teclado: S
+		·Fast Save
+			Salva el gráfico o la pantalla usando el nombre actual.
+			Atajo de teclado: CTRL+S
+		·Export Data
+			Salva el gráfico como un archivo binario .BIN, código
+			fuente en ensamblador .ASM o código fuente en C .C . Atajo
+			de teclado: D
+		·Export Image
+			Salva el gráfico como una imagen. Los formatos soportados
+			son: .BMP, .JPG, .PNG, .PCX, .TIF y .XPM . Atajo de
+			teclado: E
+		·Close
+			Cierra el archivo actual. El siguiente será seleccionado
+			si está disponible. Atajo de teclado: CTRL+W
+		·Rename
+			Renombra el archivo actual (lo renombra en la memoria, y
+			al grabar por defecto se usará el nuevo nombre, no
+			renombra directamente el archivo que se abrió). Atajo de
+			teclado: F2
+		·Output options
+			Aquí se seleccionan las opciones de salida. El atajo de
+			teclado es CTRL+O. Hay 4 cosas que se pueden modificar:
+			·Data outputted: Especifica si quieres sacar los gráficos,
+				los atributos o ambos, y si son ambos, en que
+				orden hacerlo.
+			·Mask Before Graph: Cuando está seleccionado y hay una
+				máscara, los bytes de la máscara aparecerán antes
+				que los del gráfico.
+			·Atrribute Mask/Ink/Paper/Bright/Flash: Marcar la casilla
+				"Attribute Mask" creará un byte de máscara de
+				atributo para cada atributo, para su uso con la
+				librería de z88dk splib (a partir de la versión 3).
+				Todos los caracteres del sprite compartirán la misma
+				máscara de atributos, y se decidirá que partes del
+				atributo serán enmascaradas señalando las casillas
+				individuales para Ink, Paper, Bright y Flash.
+			·Byte sort priority: Sirve para indicar la prioridad de
+				ordenación de los bytes en el gráfico. La primera
+				característica de la lista se recorre en su
+				totalidad antes de variar una vez la segunda, que
+				a su vez se recorre en su totalidad antes de
+				variar la tercera, etc... Así por ejemplo, en el
+				modo por defecto (X Char, Char line, Y Char, Mask,
+				Frame number) el gráfico se almacena por lineas,
+				con la máscara (si está presente) justo despúes del
+				gráfico y si hay mas de un frame, cada frame después
+				del anterior. Si movemos la característica "Char Line"
+				arriba del todo, se almacena por carácteres. Mover
+				Mask a la posición mas alta entrelazaría los bytes
+				del gráfico y la máscara.
+			·Interleave: Cuando se sacan tanto los gráficos como los
+				atributos, estos se pueden entrelazar de distintas
+				maneras. Usando "Sprite" ambos se mantendán separados,
+				siendo el equivalente a la opción "At the End" de la
+				antigua opción de atributos. "Character" es
+				equivalente a la antigua opción de "As 9th byte".
+				"Line" entrelazará los atributos entre cada línea, a
+				menos que Char line tenga una prioridad más baja que
+				X char en la columna de Byte sort priority, en cuyo
+				caso se comportará exactamente igual que en el caso
+				"Caracter". De forma similar, "Column" entremezclará
+				los atributos al completar cada columna, a menos que
+				Char line tenga la prioridad más baja que Y char.
+				"Frames" entrelazará los datos cuando todos los frames
+				hayan sido procesados, a menos que Char line tenga
+				menor prioridad que Frame number. Si Frame number
+				está en la posición más baja, actuará de la misma
+				forma que en "Sprite". Si quieres sacar los atributos
+				después de cada frame, basta con escojer "Line" si
+				X char está por debajo de Y char en Byte sort priority,
+				o "Column" en caso contrario.
+			·Append Data: Cuando está seleccionado, los datos que
+				se exporten a un archivo ya existente no
+				sobreescribirán los antiguos, sino que se añadirán
+				al final.
+			·Horizontal Zig Zag: Si X char tiene una prioridad más alta
+				que Char line, los bytes serán sacados haciendo zig
+				zag: de izquierda a derecha en las líneas pares
+				(0,2,4 y 6), y de derecha a izquierda en las líneas
+				impares (1,3,5,7).
+			·Add z88dk extra info: Un par extra de bytes serán colocados
+				al comienzo del archivo indicando el tamaño del sprite.
+				Esteo es necesario para la librería estándar de sprites
+				de z88dk (pero no para Sprite Pack/splib).
+			·No ASM Label: Por defecto SevenuP usará el nombre del gráfico
+				actual como etiqueta, pero es posible que prefieras no
+				usar ninguna etiqueta, como en versiones anteriores. En
+				ese caso, señala esta casilla.
+
+		·Assembler output
+			El formato del código fuente en ensamblador (.ASM) varía
+			de unos ensambladores cruzados de Z80 a otros, así que
+			aquí puedes escoger tu ensamblador favorito si está
+			soportado, y también si quieres los datos de salida
+			en decimal o hexadecimal (excepto para The E-Z80 Way,
+			que no parece soportar valores hexadecimales dentro
+			de los DEFBs).
+			·Generic: Funciona con la mayoría de los ensambladores.
+				Lo he probado con AS80, SjASMPlus, Z80-ASM,
+				Z80ASM, Z80v4 y ZMAC.
+			·TASM: usa .BYTE en lugar de DEFB (también se puede usar
+				el formato genérico si incluimos esta línea:
+				"#DEFINE DEFB .BYTE" ).
+			·The E-Z80 way (anteriormente conocido como ZCAV2): solo
+				permite un byte por DEFB, y tiene un formato
+				especial basado en columnas. 			
+			·tniASM: usa DB en lugar de DEFB.
+			·Generic hex (with $): Usa "$" como prefijo para expresar
+				valores hexadecimales. Esto es válido para AS80,
+				ZMAC y Z80ASM, pero no para Z80v4 o Z80-ASM.
+			·Generic hex (with 0x): Usa "0x" como prefijo para expresar
+				valores hexadecimales. Esto es válido para AS80,
+				Z80v4, Z80-ASM y las nuevas versiones de Z80ASM,
+				pero no para ZMAC o las versiones antiguas de Z80ASM.
+			·TASM hex: lo mismo que TASM, pero con datos hexadecimales.
+			·tniASM hex: lo mismo que tniASM, pero con datos hexadecimales.
+		·Quit
+			Sale del programa. Atajo de teclado: CTRL+Q
+		(nombres de gráficos)
+			Selecciona el gráfico abierto como el actual. Atajos de teclado:
+			CTRL+(tecla de función) en Windows, CTRL+(número) en Linux
+			y MacOS X.
+	·Edit
+		·Undo
+			Deshace la acción anterior. Pueden deshacerse hasta 4 pasos.
+			Atajo de teclado: CTRL+Z.
+		·Redo
+			Vuelve a realizar la última acción deshecha. Todas las
+			acciones deshechas pueden volver a hacerse, siempre que
+			no se realice ninguna nueva acción. Atajo de teclado: 
+			CTRL+X.
+		·Copy
+			Copia la zona seleccionada (o el gráfico completo si no
+			hay zona seleccionada) a la memoria intermedia para ser
+			pegada (en el mismo gráfico o en otro) o para ser usada
+			como textura de relleno. Atajo de teclado: CTRL+C.
+		·Paste
+			Activa/desactiva el modo de pegado, que pega el gráfico
+			de la memoria intermedia a la posición actual del ratón
+			al pulsar el botón izquierdo. Los atributos solo se pegan
+			si el pixel de destino tiene la misma posición dentro
+			del carácter que la fuente de la copia. Con el botón 
+			derecho se cancela el modo de pegado. Atajo de teclado:
+			CTRL+V.
+	·Fill
+		·Fill
+			Activa/desactiva el modo de relleno. Pulsar el botón
+			izquierdo produce un relleno sólido desde el pixel sobre
+			el que se pulsa. Ese pixel debe estar inactivo (a 0, no a
+			1), o no se producirá el relleno. Pulsar el botón derecho
+			cancela	el modo de relleno. Atajo de teclado: F
+		·Textured Fill
+			Si se ha copiado una zona (o gráfico completo) usando la
+			opción Copy del menú Edit, se cambia el modo de relleno
+			con textura. Pulsar el botón izquierdo produce un relleno
+			con textura desde el pixel en el que se pulsa, estando la
+			textura con la esquina superior izquierda en el pixel que
+			se ha pulsado, el cual, tal y como pasaba con el relleno
+			sólido, debe estar a 0. Con el botón derecho se anula el
+			modo de relleno con textura. Atajo de teclado: T
+	·Effects
+		·Effects Options
+			Aquí se escoge si los los efectos afectarán solo a los
+			pixels, solo a los atributos o a ambos. Esto afecta a
+			todos los efectos, excepto la rotación/desplazamiento a
+			nivel de bit, que siempre afecta solo a los pixels. En
+			el modo de máscara, los efectos afectan solo a los
+			pixels (ya que la máscara no tiene atributos). Este
+			también es el sitio donde se elige si desplazamos en
+			lugar de rotar o si preferimos las rotaciones a nivel
+			de carácter en lugar de a nivel de bit. Atajo de
+			teclado: ALT+E
+		·Invert
+			Cambia los pixels entre 0 y 1, y también intercambia
+			los valores de ink y paper. Atajo de teclado: R
+		·X Flip
+			Da la vuelta al gráfico horizontalmente. Atajo de
+			teclado: X
+		·Y Flip
+			Da la vuelta al gráfico verticalmente. Atajo de
+			teclado: Y
+		·Clock rotation
+			Rota el gráfico o zona seleccionada 90 grados en sentido
+			horario . La zona de rotación tiene siempre forma de
+			cuadrado, de forma que si la parte seleccionada no es un
+			cuadrado tan solo se rotará el cuadrado mas arriba a la
+			izquierda de dicha zona. Los atributos son rotados
+			solamente si encajan perfectamente al hacer la rotación.
+			Atajo de teclado: B
+		·Anticlock rotation
+			Lo mismo que Clock rotation, pero en sentido antihorario.
+			 Atajo de teclado: V
+		·Left, Right, Up y Down
+			Rota o desplaza el gráfico en la dirección deseada.
+			La rotation/desplazamiento puede ser a nivel de bit o de
+			carácter.
+	·Mask
+		·Use mask
+			Activa/desactiva el uso de máscara para el gráfico. Las
+			máscaras se usan para preservar el fondo alrededor del
+			gráfico que vamos a poner en la pantalla. Primero se
+			aplica la máscara sobre el fondo usando AND, para borrar
+			el espacio que ocupará el gráfico manteniendo los bordes,
+			y entonces se pinta el gráfico usando OR (XOR también
+			vale). Atajo de teclado: CTRL+M
+		·View mask
+			Entra/sale del modo de edición de máscara. Aquí no se
+			edita el gráfico sino su máscara. La máscara no tiene
+			atributos, pero se muestran 4 colores, indicando la
+			posición de los pixels del gráfico para que sirvan como 
+			guía. El color negro significa mask=1 y pixel=0, así que
+			es un pixel del fondo (transparente). El color blanco
+			significa mask=0 y pixel=0, y el amarillo mask=0 y
+			pixel=1, así que estos colores definen el gráfico que
+			se pondrá tras aplicar la máscara. Finalmente, el color
+			verde indica mask=1 y pixel=1, por lo que es un pixel
+			del gráfico que no será borrado en la fase AND de la
+			máscara. Esto puede causar problemas de mezcla si se
+			usa XOR, pero es inofensivo usando OR. Atajo de
+			teclado: M
+		·Auto mask
+			Crea una máscara automáticamente dejando como transparente
+			todo el área alrededor del gráfico. Se asume que el gráfico
+			está cerrado y situado en el centro.
+	·Sprite
+		·Insert next frame
+			Añade un nuevo frame al sprite actual, justo después del
+			que tenemos seleccionado. Atajo de teclado: N
+		·Insert previous frame
+			Añade un nuevo frame al sprite actual, justo antes del
+			que tenemos seleccionado. Atajo de teclado: P
+		·Move frame
+			Mueve el frame actual a la posición que especifiquemos
+			dentro del sprite.
+		·Remove frame
+			Borra el frame actual.
+		·Select previous frame
+			Selecciona el frame anterior al actual. Si estamos en el
+			primero, pasaremos al último. Atajo de teclado: Cursor
+			izquierda
+		·Select next frame
+			Selecciona el siguiente frame. Si estamos en el último,
+			saltaremos al primero. Atajo de teclado: Cursor derecha
+		·Select frame number...
+			Selecciona el frame especificado.
+	·Grid
+		·Pixel Grid
+			Cambia entre tener o no rejilla de pixels. Atajo de
+			teclado: G
+		·Character Grid
+			Cambia entre tener o no rejilla de caracteres. Atajo de
+			teclado: CTRL+G
+	·Zoom
+		·x1, x2, ..., x48
+			Aquí se puede ver el zoom actual y seleccionar directamente
+			cualquier nivel. Los niveles disponibles son: 1, 2, 3, 4, 6,
+			8, 12, 16, 20, 25, 32, 40 y 48.
+		·AutoZoom:
+			Activa/desactiva el AutoZoom. Cuando está activo, el nivel
+			de zoom se seleccionará automáticamente al cargar un nuevo
+			gráfico, de forma que se vea completo en pantalla.
+	·Info
+		·About
+			Indica que versión de SevenuP estás usando. Atajo de
+			teclado: CTRL+A
+
+
+·Barra de herramientas:
+	·Save
+		Lo mismo que en el menú File->Save as
+	·Zoom in
+		Incrementa el nivel de zoom actual. Atajo de teclado: +
+	·Zoom out
+		Decrementa el nivel de zoom actual. Atajo de teclado: -
+	·Cursor
+		Cambia el modo de cursor. Hay 4 modos, pero solo se va
+		rotando a través de 3 de ellos. Si se está editando una
+		máscara, el tercer modo será Toggle mask/Toggle graphic, en
+		cualquier otro caso será Set Attributes/Get Attributes. Los
+		modos disponibles son:
+
+			·Set Pixel/Reset Pixel
+				El botón izquierdo pone los pixels a 1
+
+				El botón derecho pone los pixels a 0
+				
+				Atajo de teclado: 1
+
+			·Toggle Pixel/Select Zone
+				El botón izquierdo cambia el valor de los pixels
+				entre 0 y 1.
+
+				El botón derecho controla la selección. Para
+				seleccionar una zona, se hace click-derecho en
+				una esquina, click-derecho en la opuesta y ya
+				tenemos una porción seleccionada. La zona
+				seleccionada será algo mas brillante que la no
+				seleccionada y las rejillas (si están presentes)
+				se verán azules. Ahora los efectos solo afectarán
+				a la zona seleccionada, y se puede copiar esta
+				zona para pegarla donde sea o para usarla como
+				patrón en el relleno con textura. Un tercer
+				click-derecho quita la selección.
+
+				Atajo de teclado: 2
+
+			·Set Attributes/Get Attributes
+				El botón izquierdo fijará los atributos del
+				carácter actual, sin modificar el pixel. Si
+				alguno de los atributos está puesto en
+				transparente, este no cambiará.
+
+				El botón derecho tomará todos los atributos
+				del carácter actual (ningún atributo quedará
+				por lo tanto como transparente).
+
+				Atajo de teclado: 3
+				
+			·Toggle mask/Toggle graphic
+				El botón izquierdo cambia el valor de los pixels
+				de la máscara entre 0 y 1.
+
+				El botón derecho cambia el valor de los pixels del
+				gráfico entre 0 y 1.
+				
+				Atajo de teclado: 3
+	·Invert
+		Lo mismo que en el menú Effects->Invert
+	·X Flip
+		Lo mismo que en el menú Effects->X Flip
+	·Y Flip
+		Lo mismo que en el menú Effects->Y Flip
+	·Clock
+		Lo mismo que en el menú Effects->Clock rotation
+	·Anticlock
+		Lo mismo que en el menú Effects->Anticlock rotation
+	·Rotaciones/desplazamientos
+		Lo mismo que en los menús Effects->left, right, up y down
+	·Prev. Frame
+		Lo mismo que en el menú Sprite->Select previous frame
+	·Next Frame
+		Lo mismo que en el menú Sprite->Select next frame
+	·Erase
+		Fija todos los pixels a 0, y los atributos a 56 (paper 7, ink 0)
+
+
+·Canvas
+	Aquí está el gráfico.
+
+
+·Colores
+	Aquí se pueden seleccionar los valores usados para ink, paper, bright y
+	flash (el efecto flash no ha sido implementado). Un valor "T" significa
+	transparente, y no modificará el atributo cuando operes sobre un caracter.
+
+
+·Barra de estado
+	Se divide en dos zonas.
+
+	La zona de la izquierda indica la acción de un menú o un icono de la
+	barra de herramientas (cuando el puntero está sobre esa opción), y
+	normalmente dice en que modo de cursor estás. El modo de cursor está
+	de la forma Acción 1/Acción 2, significando que un click-izquierdo
+	ejecutará la Acción 1 y un click-derecho realizará la acción 2.
+
+	La zona de la derecha indica el pixel actual, a que caracter corresponde
+	dicho pixel y los atributos de ese caracter.
+
+
+
+Historia
+********
+
+2002-05-09: 	Liberada y anunciada (en es.comp.sistemas.sinclair) la versión
+			0.0 alpha
+
+2002-05-13:	Liberada la versión 0.1 alpha (y anunciada en comp.sys.sinclair)
+	(Linux) Desactivados botones de flash. 
+	(Linux) Se muestra la versión en Info. 
+	(Win) El directorio de carga y grabación por defecto es el actual,
+		no "Mis Documentos". 
+	Todos los colores por defecto en transparente. 
+	Carga de .SCR . 
+	Al cambiar el modo de cursor se muestra el modo actual inmediatamente.
+	Nuevos modos de zoom. En total los niveles actuales son: 1, 2, 3, 4,
+		6, 8, 12, 16, 20, 25, 32, 40 y 48, y comienzan a tener rejilla
+		desde el 6. 
+	Añadida rejilla de caracteres. 
+	Las rejillas son opcionales. 
+	Reescritura total del código de generación de pantalla. Ahora tarda 
+		un poquitín en crear o cargar los gráficos, pero la
+		aceleración en el refresco de la pantalla y en los modos de
+		zoom mas pequeños (sin rejilla) es BRUTAL. 
+	(BUGFIX) Corregido un bug en la rutina de grabación. No estaba creando
+		los archivos binarios correctamente así que se salvaba basura
+		extra por cada código de ENTER que transformaba. 
+	Trazado continuo (algo lento, tal vez lo ponga como opcional en futuras
+		versiones). 
+
+2002-05-23:	Liberada la versión 0.2 alpha 
+	Grabación en formatos binario (.BIN), fuente en C (.C) y fuente en
+		ensamblador (.ASM), y con cualquiera de ellos puedes escoger
+		la prioridad de ordenación de los bytes, y si quieres los
+		atributos al final, como noveno byte del carácter o sin atributos. 
+	(Win) Recompilada la librería para lograr un ejecutable mas pequeño. 
+	Mejorado el comportamiento del trazado continuo cuando el puntero sale
+		del marco y entra con el botón pulsado, aunque todavía no es
+		perfecto.
+	Cambiada la paleta, para una mejor distinción del brillo. 
+	(BUGFIX) El trazado continuo estaba dibujando el primer pixel dos veces,
+		causando problemas en el modo de cambio (Toggle). 
+	Grabación de .SCR . 
+
+2002-06-24:	Liberada la versión 0.3 alpha 
+	Añadido soporte nativo para los ensambladores TASM, tniASM y ZCAV2.
+	El soporte de ensamblador genérico se ha cambiado para mejorar la
+		compatibilidad, añadiendo un ":" al final de las etiquetas.
+		Este modo ha sido probado con éxito con los ensambladores AS80,
+		Z80v4, Z80-ASM y Z80ASM. 
+	Efecto de inversión 
+	Efectos flip horizontal y vertical. 
+	Los efectos pueden afectar solo a los pixels, solo a los atributos o
+		a ambos. 
+	Las opciones de salida se especifican en una opción del menú File, no
+		cada vez que se salva. 
+
+2002-07-08:	Liberada la versión 0.4 alpha 
+	El icono de cambio de cursor se ha cambiado por otro con mas significado.
+	El atributo del carácter actual aparece en la barra de estado. 
+	Reactivados botones del Flash (aunque el Flash en si sigue sin mostrarse).
+	Añadido modo de cursor para obtener atributos.
+	Añadido modo de cursor de selección, de forma que se pueden aplicar los
+		efectos solo a un cierto área del gráfico.
+	Añadidos efectos de rotación/desplazamiento tanto a nivel de carácter como
+		a nivel de bit.
+	Las opciones de los efectos se especifican en un diálogo.
+	Cambiado el Layout de la edición, ahora una pantalla de Spectrum completa
+		cabe en la pantalla a zoom x3 si tienes una resolución de 1024 x
+		768 (bajo Windows), y hay mas espacio para la barra de herramientas.
+
+2002-07-21:	Liberada la versión 0.5 alpha 
+	Añadida documentación preliminar (de momento sólo en inglés). 
+	La barra de estado es un poco mas informativa en el modo de selección.
+	Añadidos diálogos del tipo "¿Estás seguro?" al cierre de ventanas y el
+		uso de Erase. 
+	Añadido menú de Zoom para ir de cualquier nivel de zoom a otro
+		directamente sin tener que pasar por los intermedios. 
+	Eliminado parpadeo al cambiar de zoom. 
+	Añadido menú de edición con Copy y Paste (copiar y pegar). Ahora se
+		pueden copiar y pegar gráficos o fragmentos de una ventana de
+		edición a otra sin ningún problema. 
+
+2002-07-24:	Liberada la versión 0.51 alpha 
+	(BUGFIX) El pegado añadía basura por debajo de la zona pegada en
+		determinados casos. Corregido. 
+
+2002-08-05:	Liberada la versión 0.52 alpha
+	Pequeñas correcciones a la documentación, ahora también disponible
+		en español. 
+	Optimizaciones de velocidad. La carga o creación de nuevos gráficos
+		y los efectos deberían ser bastante mas rápidos ahora. El
+		modo 4x4 ya no usa bitmap, por lo tanto ahora además SevenuP
+		usa menos memoria, pero será mas lento en este modo. 
+	El ensamblador ZCAV2 ha sido renombrado a "The E-Z80 Way", realizados
+		los cambios pertinentes. 
+
+2002-09-04:	Liberada la versión 0.6 beta (y subida al WoS)
+	SevenuP pasa de ser alpha a beta. 
+	Mejorada la documentación. 
+	Integrado todo en la misma ventana. 
+	El nombre del gráfico aparece en la ventana (y se usa por defecto
+		para salvar). 
+	Se pueden cambiar los diferentes gráficos abiertos desde el menú
+		File o usando el teclado (CTRL+tecla de función (CTRL+número
+		en Linux, las teclas de función ya están pilladas), limitando
+		el número máximo de archivos abiertos a 12 (incluso en Linux,
+		donde solo se puede acceder por teclado a los 10 primeros)). 
+	Añadido soporte de máscaras. Usar máscaras cuesta memoria y velocidad,
+		así que se recomienda dejar el diseño de máscaras para el final.
+		La máscara entra en las prioridades de ordenación de la salida,
+		y puede colocarse antes o después del gráfico. 
+	Cambiado ligeramente el formato interno .SEV, para permitir el uso de
+		máscaras. Los nuevos .SEVs no funcionarán con las versiones
+		alpha de SevenuP (la v0.52 no avisa debido a un bug WIP (work
+		in progress), las demás si).
+	(BUGFIX) En la 0.52, el formato de salida de los ensambladores tniASM
+		y The E-Z80 Way se mezcló, por lo que la salida de tniASM quedaba
+		algo fea y la de The E-Z80 Way incorrecta. Corregido. 
+
+2002-09-22:     Liberada la version 0.61 beta
+        Limpieza del código y añadidos algunos comentarios.
+	(BUGFIX) Copiar desde la máscara ya no copia los atributos del gráfico.
+	Limitado el tamaño máximo del frame a 1280x1024, para evitar que la
+		gente con monitores enormes casquen el programa haciendo que el
+		cuadro del gráfico sea mayor que el tamaño interno del bitmap.
+        Pequeña corrección de seguridad: ciertos archivos .SEV corruptos cascaban
+		el programa. Ahora ya no.
+        Licencia cambiada de Freeware a GPL, y liberado por lo tanto el
+                código fuente.
+
+2002-10-18:	Liberada la versión 0.7 beta
+	Por petición, quitadas las etiquetas del código en ASM.
+	Añadido menú de relleno con rellenos sólido y con textura.
+	Añadida máscara automática.
+	Añadido nuevo modo de cursor, que reemplaza el Get/Set attributes
+		al editar la máscara, permitiendo cambiar al mismo tiempo
+		tanto la máscara como el gráfico.
+
+2002-12-10:	Liberada la versión 0.71 beta
+	Añadidos formatos de salida .ASM en hexadecimal.
+	Salvar un archivo .SCR también borra la bandera del "Are you sure?".
+	(BUGFIX) Cambiar el gráfico actual ya no deja marcada el área
+		seleccionada del gráfico anterior en los zooms con bitmaps.
+
+2002-12-22:	Liberada la versión 0.8 beta
+	SOPORTE DE SPRITES (¡Por fin!):
+		Menú de Sprites donde se pueden añadir o quitar frames y
+			seleccionar sobre cual vamos a trabajar.
+		El frame seleccionado se muestra en la barra del título si hay
+			mas de un frame.
+		La selección de frame también puede realizarse con los 2 nuevos
+			iconos de la barra de herramientas.
+		Evidentemente, existe un nuevo campo (Frame number) en la lista
+			de prioridad de ordenación de los bytes de las opciones
+			de salida.
+		El formato .SEV se ha extendido para habilitar el uso de Sprites.
+			Los nuevos .SEVs no cargarán en versiones mas antiguas de
+			SevenuP.
+		El número de frames está limitado a 32, o menos si el sprite es
+			demasiado grande (hasta 41K si se usan máscara y atributos).
+	Modificado el diálogo de File->New, ya que los sprites se crean	simplemente
+		añadiendo frames a un gráfico, y he decidido no añadir finalmente
+		soporte para animaciones porque creo que es mejor probar los
+		gráficos directamente en el Spectrum (emulado o real).
+	Las opciones de los efectos están ahora en la parte de arriba de su menú, ya
+		que los efectos son facilmente accesibles en la barra de herramientas.
+	El menú de zoom muestra ahora el modo actual.
+	Los gráficos pueden ser ahora renombrados desde el menú File.
+	Solo los campos relevantes son tomados en consideración para los archivos .C
+		y .ASM, para los retornos de carro y la información sobre prioridad
+		de ordenación.
+	(BUGFIX) Meter valores de tamaño ilegales ya no cascará el programa en ciertos
+		casos.
+	(Source) Añadido por fin un makefile para Unix.
+
+2002-12-28:	Liberada la versión 0.9 beta
+        SevenuP tiene ahora su propio icono.
+	Deshacer y rehacer (hasta 4 pasos) para el frame actual (cambiar a otro
+		frame o gráfico hace que se pierda el historial), y suprimida por
+		lo tanto la advertencia al borrar.
+	Añadidos otros 2 elementos al menu sprite: Move frame, para cambiar la
+		posición del frame actual, y Select frame number, para saltar
+		directamente a un determinado frame.
+	SevenuP intenta abrir el primer argumento de la linea de comando,
+		permitiendo la asociación de archivos .SEV . También se pueden
+		cargar .SCRs desde la linea de comandos, pero la asociación será
+		más dificil debido a la existencia de los estúpidos salvapantallas
+		de Windows.
+	Reducido algo de uso de memoria que no era necesaria.
+
+2003-01-04:	Liberada la versión 0.91 beta
+	Drag & Drop de múltiples archivos .SEV y .SCR.
+	También se pueden cargar múltiples archivos desde la linea de comandos.
+	Tanto los archivos .SEV como los .SCR se cargan desde la misma opción
+		de menú Load, en lugar de utilizar opciones distintas para cada
+		uno. (En Linux, al buscar ambos tipos de archivos se presentan
+		todos los *.s*, debido a una limitación de la librería).
+	Al seleccionar los frames siguientes o anteriores del sprite, se pasa
+		del primero al último y viceversa.
+	Optimizados los modos sin bitmap. El modo 4x4 ahora tarda cosa así del 52%
+		de lo que tardaba antes, y en el resto de modos tarda entre
+		100%-59% dependiendo de las rejillas activadas.
+	(Linux) (BUGFIX) Desde la v0.6, cargar dos o mas gráficos con el mismo
+		nombre (o el mismo varias veces) se cargaba las asociaciones de
+		teclado de tipo "Ctrl+(número)". No es mi culpa, sino un bug de la
+		librería, así que estoy añadiendo un número de prefijo para evitar
+		el problema.
+	(Win) Recompilada la librería eliminando los mecanismos de debug para
+		lograr un ejecutable mas pequeño.
+
+2003-01-16:	Liberada la versión 0.92 beta
+	Muchas optimizaciones de velocidad a los modos sin bitmap: cuando solo
+		está activa la rejilla de carácteres, ahora tarda el 83% aprox.
+		del tiempo anterior para generar la pantalla, la pantalla no se
+		regenera cuando solo necesitamos limpiarla, cuando cambiamos de
+		tamaño o la desplazamos solo se recalculan las partes nuevas, y
+		por último la (des)selección solo refresca ahora las partes
+		(des)seleccionadas. La aceleración es mayor en Linux, dado que
+		el evento de actualización de pantalla ocurre mas a menudo.
+	Añadidos algunos chequeos a la cabecera de los archivos cargados, para
+		evitar cuelgues con archivos corruptos.
+	El warning en los archivos inválidos muestra el nombre del archivo que
+		falla. También aparece el nombre al grabar con la opción "Save"
+		del menú.
+	Añadida una prueba para saber si existe el archivo que queremos cargar.
+	Añadidos algunos atajos de teclado al menú Edit.
+	(BUGFIX) Al usar la opción "Save" del menú para grabar un archivo .SCR
+		se grababa un .SEV manteniendo la extensión .SCR .
+	(BUGFIX) Renombrar un sprite (o renombrar un gráfico y transformarlo
+		después en sprite añadiendo frames) no mostraba el último
+		carácter del nuevo nombre en la barra del título.
+	(BUGFIX) Las rejillas tenían un problemita en la v0.91 .
+
+2003-01-26:	Liberada la versión 0.93 beta
+	(Win) (BUGFIX) Al ejecutarse, la v0.92 se quedaba en un estado extraño
+		hasta que se cargara o creara un gráfico.
+	(Win) (BUGFIX) Al hacer doble click para seleccionar un archivo (por
+		ejemplo, para cargarlo), ya no realizará una acción sobre el
+		pixel donde el nombre del archivo fue clickeado.
+	(BUGFIX) Cerrar el último archivo no dejará su tamaño en el recuadro
+		(esto se podía observar al cambiar el zoom antes de cargar o
+		crear otro gráfico).
+
+2003-03-18:	Liberada la versión 0.94 beta
+	Añadidas rotaciones de 90 grados al menú de efectos y a la barra de
+		herramientas.
+	Añadido un parche de Dominic Morris para cargar archivos .SCR
+		parciales.
+	(BUGFIX) Para los sprites, el número de frames no se mostraba en el
+		código fuente en C o ASM, sino que aparecía de nuevo el tamaño
+		en pixels.
+
+2003-05-29:	Liberada la versión 0.95 beta (sin el ejecutable de Windows)
+	(Mac) ¡Nuevo ejecutable para MacOS X! Los botones de Bitmap son un WIP
+		(Work in Progress) de wxWindows para OS X, así que se verán algo
+		peor que en las versiones para x86.
+	Incrementada la anchura mínima de la ventana para mostrar todos los iconos
+		de la barra de herramientas en Linux.
+	(Source) Ahora también compila usando wxWindows 2.4.0 . Esto corrige el
+		problema de búsqueda de archivos .s?? en lugar de .sev y .src en
+		Linux (problema mencionado en la versión 0.91).
+	(Linux) El ejecutable ahora ha sido compilado con Mandrake 9.1, gcc 2.3.2
+		y wxWindows 2.4.0 . Necesitareis instalar las nuevas librerías de
+		de http://www.wxwindows.org para hacerlo funcionar.
+
+2003-06-23:	Liberada la versión 1.00
+	Opciones de configuración almacenadas en SevenuP.ini (¡por fin!).
+	Importación de gráficos desde imágenes. Los formatos soportados son: BMP,
+		GIF, JPG, PNG, PCX, TIF, IFF y XPM.
+	Exportación de gráficos a imágenes. Los formatos soportados son: BMP, JPG,
+		PNG, PCX, TIF y XPM.
+	AutoZoom para ajustarse al tamaño de los archivos cargados.
+	Los atributos individuales (ink, paper, bright y flash) se muestran en la
+		barra de estado.
+	Actualizado wxWindows a la versión 2.4.1 . Se recomienda actualizar la
+		librería para Linux. Esto ha hecho que el tamaño del programa
+		para Windows crezca bastante.
+
+2003-08-02:	Liberada la versión 1.10
+	Cambiada la disposición del menú File. Ahora "Save" se llama "Fast Save",
+		"Save As" y "Save .SCR" están ambos en la opción "Save", y grabar
+		a .BIN, .C y .ASM están todos en "Export Data".
+	Los directorios por defecto para abrir, importar, grabar y exportar se
+		leen de SevenuP.ini
+	Los últimos directorios utilizados se pueden recordar (configurable en
+		SevenuP.ini)
+	Añadido "Append" a las opciones de salida, para poder acumular todos los
+		datos exportados en el mismo archivo.
+	Añadidos un montón de atajos de teclado.
+	El pegado, relleno y relleno con textura ahora intercambian sus modos, en
+		lugar de limitarse a activarlos (esto mejora el control desde el
+		teclado).
+	Cambiado el criterio para escoger el ink y el paper para mejorar la
+		importación de gráficos de Spectrum.
+	Optimizada un poquito la rutina de importación de imágenes (cosa así del
+		20%).
+	(Mac) Movido el archivo de configuración SevenuP.ini
+	(Source) Quitada la compatibilidad con wxWindows 2.2.9 (de todas formas, no
+		funcionaba bien en la versión anterior).
+	(BUGFIX) Los botones de Move up y Move Down del diálogo de las opciones
+		de salida no funcionaban desde la versión 0.95b .
+	(BUGFIX) Hacer un Fast Save justo después de importar un gráfico
+		sobreescribe la imagen recién importada sustituyendola con el
+		archivo .sev (con la extensión incorrecta).
+	(BUGFIX) La opción Eff_pixattr de SevenuP.ini no funcionaba correctamente.
+
+2003-08-21:	Liberada la versión 1.11
+        Añadidos algunos atajos de teclado mas.
+	(BUGFIX) Cambiar el modo de cursor desde los modos de relleno o pegado
+		mantenían dichos modos, aunque mostrando el set/reset.
+	(Linux) (BUGFIX) Se pueden grabar de nuevo archivos .SCR .
+	(Win) (BUGFIX) Corregido un importante bug gráfico de la librería
+		wxWindows, que hacía que el gráfico se hundiera en el marco
+		cuando la ventana se cambiaba de tamaño desde un tamaño que
+		requería una barra vertical a otro que no, mientras dicha
+		barra vertical estaba bajada.
+		
+2004-07-27:	Liberada la versión 1.12
+	(BUGFIX) La exportación de imagen exportaba siempre el primer frame de
+		un sprite en lugar de exportar el seleccionado actualmente.		
+
+2006-04-24:	Liberada la version 1.20
+	(FreeBSD) ¡Nuevo ejecutable para FreeBSD!
+  	(Linux) (BUGFIX) eliminadas casi todas las optimizaciones de la versión
+  		0.92, ya que pueden provocar errores en los desplazamientos bajo
+  		determinadas (y desconocidas para mi) circunstancias.
+	Enormes cambios en las opciones de salida para permitir aún más flexibilidad:
+	· Ahora se pueden entrelazar los atributos en frames, columnas o líneas, y
+		se pueden sacar solo los atributos o poner los atributos delante.
+	· Añadida una opción para sacar el tamaño en los dos primeros bytes, tal y
+		como lo necesita la librería de sprites estandar de z88dk.
+	· Añadida una opción para sacar los datos gráficos haciendo un zigzag
+		horizontal.
+	· Añadida una opción para sacar máscaras de atributos, tal y como se usan
+		en splib3.
+	· El nombre del sprite se usa ahora como etiqueta en ensamblador y como nombre
+		del sprite en C (pero la etiqueta en ASM se puede desactivar).
+	· Añadida una opción en el archivo .ini para escojer la extensión por defecto
+		a la hora de exportar datos.
+	(BUGFIX) Importantes correcciones en la importación de imágenes:
+	· Un caracter con tan solo un color dominante no podía obtener el atributo de
+		brillo.
+	· A veces se escogía el mismo color para el papel y la tinta en el mismo
+		caracter, dejando un feo caracter vacío.
+	· La distribución de pixels no estaba teniendo en cuenta el tamaño de las
+		subceldas, así que es asombroso que funcionara.
+	Optimizada la importación un poquito.
+	(Win) Recompilada la librería para obtener un ejecutable algo más pequeño.
+  	(Win) Cambio de UPX a Upack para obtener un ejecutable todavía más pequeño.
+	(Linux) El binario se compila ahora en Gentoo 2006.0-amd64, gcc 3.4.3 con
+		wxWidgets 2.6.2 para GTK2.x, no unicode. Necesitarás actualizar las
+		librerías de http://www.wxwidgets.org para hacerlo funcionar.
+	(Linux) Compilado también un ejecutable de 64 bits.
+	(Linux) Cambio de UPX 1.25 a 1.94 para lograr un ejecutable mucho más
+		pequeño (y para que pueda comprimirse la versión de 64 bits).
+
+
+
+Futuras mejoras
+***************
+
+	La verdad es que no se me ocurre nada...
+
+
+
+Agradecimientos/saludos
+***********************
+
+· Santiago Romero: Su SpecDraw (y su falta de tiempo para desarrollarlo :-) )
+	me dieron la inspiración para hacer este programilla. ¡Y gracias
+	también por supuesto por el espacio web (y todo lo demás) de
+	www.speccy.org !
+· James Weatherly: Adaptación y compilación del ejecutable para MacOS X.
+· Peter Hull: Compilación de la última versión para MacOS X, descubriendo y
+	corrigiendo importantes bugs.
+· Emilio Florido: Makefiles y compilación del ejecutable para FreeBSD.
+· Dominic Morris: Ha contribuido con un parche para cargar archivos .SCR parciales.
+· Mario Sevillano y gotham: Betatesters de la versión Linux.
+· gasman y Paul van der Laan: Betatesters de la versión MacOS X.
+· Martijn van der Heide: Promoción y alojamiento en http://www.worldofspectrum.org
+· Horace: Promoción y alojamiento en http://www.speccy.org/espectrum
+· Digiexp: Promoción y alojamiento en http://www.jaivan.net
+· Survivor: Promoción y alojamiento en http://www.pos.fmshop.ru
+· Colin Woodcock: Promoción en la revista ZXF en http://www.zxf.cjb.net
+· Icabod: Promoción en http://www.raww.org
+· Aprisobal: Promotion y hosting en http://zx.pk.ru
+· H.H. Chou: Intentó ayudarme a actualizarme a la versión 2.4.0 de wxWindows.
+· Todos los usuarios de SevenuP que crean gráficos para juegos nuevos.
+· tbrazil, Radastan, Ivan Ruiz Etxabe, Jobim, Badaman, Web8bits, S.T.A.R., Spaceboy,
+	TrueVideo, na_th_an, Beyker, compiuter y RANDOMIZE en es.comp.sistemas.sinclair
+	y CEZ, Woody, Tommy Pereira, Angel Constenla, Bohoon Fikee, Adam D. Moss,
+	Darren Salt, Staffan Vilcans, Alvin Albrecht, LCD, Andrew Owen,	Peter de
+	Vroomen, Bob Smith y Rob Pearmain en comp.sys.sinclair y WoS: Feedback,
+	críticas y ánimos.
+· todo el resto de la gente de ecss,css,CEZ y WoS: ¡manteniendo vivo el Spectrum!
+
+
+
+Contacto
+********
+
+email:	metalbrain_coder@gmx.net
+MSN:	metalbrain_coder@hotmail.com   (también válido para emails, si falla
+Yahoo:  metalbrain_coder		la de arriba)
+
+(aunque la verdad es que me conecto muy poco a esos servicios de mensajería
+	instantanea)
+
+http://www.speccy.org/metalbrain

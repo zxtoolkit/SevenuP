@@ -1,0 +1,815 @@
+				*******************
+				* SevenuP - v1.20 *
+				*******************
+
+
+
+Introduction
+************
+
+ Welcome to SevenuP! This is another of my small contributions to the Speccy
+scene worldwide. It's intended to be a graphic editor for the Spectrum, to
+create graphics and sprites that can be used in new spectrum games. You can
+also use it to create or modify complete spectrum screens, but that's not
+its main use.
+
+ SevenuP has been coded using C++ and the wxWidgets (previously known as
+wxWindows) library to make it easily portable.
+
+
+
+What does the name means?
+*************************
+
+ Must a name always have a hidden meaning? No, and I could therefore say
+SevenuP was just the first name that came to my head, but I wouldn't be
+telling the truth.
+
+ The first idea I had was something in the line of SpecDraw, something like
+Spectrum Sprite Editor or GraphSpec, but I didn't want the name to be too
+evident, so I started thinking a bit more...
+
+ Since the first day, I wanted not only a graphics editor, but also a sprites
+one... sprite... what's sprite? Other than a moving graphic in our speccy
+slang, it's a famous lima-lemon flavoured soft drink... and the competing
+product is called 7up!. So calling my program 7up or seven up, I'm making
+a somehow more indirect reference to sprites... Hmm... Starts with an S and
+ends with P. I'm joining both words, and capitalizing the first and last (in
+a typical metal moniker style). SP, the initials of both SPectrum and SPrite.
+
+ So I can't complain, 2 references to SPrite and one to SPectrum/eccy, I
+like it, the name is settled... And a few days after, I realize that
+(leaving black aside) Speccy colors go up to 7, and that's another
+coincidence that fits nicely. Cool.
+
+
+
+Requirements
+************
+
+ Windows version requires any win32 version and some memory for each graphic
+you open. So far it has been successfully tested on Windows 95, Windows 98,
+Windows 98SE, Windows ME, Windows 2000 and Windows XP. Reports on other
+platforms (Windows 2003 or Windows NT) would be welcome.
+
+ Linux version requires X with GTK (2.x) and also requires you to
+install the wxWidgets 2.6.2 libraries (or later), non-unicode version
+that can be found at http://www.wxwidgets.org (section Downloads->
+Unix/GTK+). SevenuP v1.20 has been compiled on Gentoo 2006.0 with
+wxWidgets 2.6.2 on an x64 system, so if it doesn't work for you, you
+must get the source code and compile your own version.
+
+ MacOS X version has been compiled on OS X 10.2.8, and also tested on
+version 10.3.9 . It will surely work on other versions too, so feel free
+to report about it.
+
+ SevenuP is still a bit slow (although much less than before), so the more
+MHZs you have, the best.
+
+
+
+Legal
+*****
+
+ SevenuP is (C) Copyright 2002-2006 Jaime Tejedor Gómez, aka Metalbrain
+
+ SevenuP uses the GNU GPL license. Read the file "GNU-GPL License.txt" for
+details. Source code and binaries comes in different packages, and they
+are all available at SevenuP's webpage (http://www.speccy.org/metalbrain).
+
+
+
+Usage instructions
+******************
+
+ I think the program usage is quite intuitive, (except perhaps a few parts
+like selection mode), but what's obvious for me might not be for someone, so
+I'm taking some time to write this piece of documentation.
+
+ Let's go through all parts of the program to see what can you do with it.
+
+·Menu Bar
+	·File
+		·New
+			Use it to create a new graphic with a certain size.
+			Keyboard shortcut: A
+		·Load
+			Use it to load a .SEV graphic or a .SCR screen. You can
+			also load files dropping them on the frame. Keyboard
+			shortcut: L
+		·Import
+			Use it to create an spectrum graphics from an image. If
+			it's too big, it will be resized keeping the aspect
+			ratio. Supported formats are: .BMP, .GIF, .JPG, .PNG,
+			.PCX, .TIF, .IFF and .XPM . Keyboard shortcut: I
+		·Save
+			Saves current graphic in SevenuP's native format .SEV
+			or .SCR screenshot format. Keyboard shortcut: S
+		·Fast Save
+			Saves graphic or screen using current filename.
+			Keyboard shortcut: CTRL+S
+		·Export Data
+			Saves graphic as a .BIN binary file, .ASM assembly
+			source file or .C C source file. Keyboard shortcut: D
+		·Export Image
+			Saves graphic as an image file. Supported formats are:
+			.BMP, .JPG, .PNG, .PCX, .TIF and .XPM . Keyboard
+			shortcut: E
+		·Close
+			Closes the current file. Next one will be selected if
+			available. Keyboard shortcut: CTRL+W
+		·Rename
+			Renames current file (in memory, and the new name will
+			be defaulted for saving, it doesn't directly rename a
+			file that was loaded). Keyboard shortcut: F2
+		·Output Options
+			You can set here the output options.  Keyboard shortcut
+			is ALT+O.
+			·Data outputted: Specifies if you want to output graphics,
+				attributes or both (in that case you can choose
+				which one will go first). 
+			·Mask Before Graph: When it's selected and there's a
+				mask, mask bytes will be placed before graphic
+				bytes.
+			·Atrribute Mask/Ink/Paper/Bright/Flash: Setting "Attribute
+				Mask" will create a mask byte for each attribute,
+				for z88dk's library splib version 3. All characters
+				will have the same attribute, and you decide which
+				parts of the attribute will be masked by setting
+				the individual checkboxes for Ink, Paper, Bright
+				and Flash.
+			·Byte sort priority: It controls the bytes arrangement
+				on output graphic. The first characteristic of
+				the list is totally crossed before each time 
+				the second one varies, and the second is crossed
+				too before varying the third, and so on.
+				Thus, e.g.: in default mode (X Char, Char line,
+				Y Char, Mask, Frame number), the graphic is stored
+				line by line, with the mask (if present) right after
+				the graphic and if there's more than one frame, each
+				one after the other. If	we move "Char Line" to the
+				upper position, then it's stored char by char. Moving
+				Mask to the upper position would interlace mask and
+				graphic bytes.
+			·Interleave: When you output both the graphics and attributes,
+				you can interleave them in several ways. Using "Sprite"
+				will keep them both separated, and it's equivalent
+				to older Attributes option "At the End". "Character"
+				is equivalent to older Attributes option "As 9th byte".
+				"Line" will interleave the attributes between each
+				line. If Char line has a lower priority than X char
+				on Byte sort priority, it will act exactly as in
+				Character. Likewise, "Column" will interleave
+				attributes after a column is completed, unless Char
+				Line has a lower priority than Y char. "Frames" will
+				interleave data after all frames have been processed,
+				unless Char line has a lower priority than
+				Frame number. If Frame number has the lowest priority,
+				this will act the same as "Sprite".
+				If you want to output attributes between each frame,
+				choose choose "Line" if the X char is lower than
+				Y char in Byte sort priority, and "Column" otherwise.
+			·Append Data: When it's selected, data saved to an
+				existing file won't overwrite old data, it will
+				be appended at the end of current file.
+			·Horizontal Zig Zag: If "X char" has a higher priority than
+				"Char Line", bytes will be outputted in zig zag:
+				from left to right on even (0,2,4,6) lines, and from
+				right to left on odd lines (1,3,5,7).
+			·Add z88dk extra info: A pair of bytes will be outputted
+				at the beginning of the file stating sprite's size.
+				This is necessary for z88dk's standard sprite library
+				(not for Sprite Pack (splib)).
+			·No ASM Label: By default SevenuP will use the name of the
+				graphic as a label, but you may prefer not to use any
+				label, as in previous versions. In that case, check 
+				this box.		
+
+		·Assembler output
+			ASM source format varies from some Z80 cross assemblers
+			to others, so here you can choose your favourite
+			assembler if it's supported, and also if you prefer
+			hexadecimal or decimal output (except for The E-Z80 Way,
+			that doesn't seem to support hex for DEFB values).
+			·Generic: Works with most assemblers, I've tested it
+				with AS80, SjASMPlus, Z80-ASM, Z80ASM, Z80v4 and
+				ZMAC
+			·TASM: uses .BYTE instead DEFB (TASM may also use
+				generic format if you put this line:
+				"#DEFINE DEFB .BYTE" in your code).
+			·The E-Z80 way (formerly known as ZCAV2): only one byte
+				per DEFB allowed, special column based format.
+			·tniASM: uses DB instead DEFB.
+			·Generic hex (with $): Uses "$" as a prefix to express
+				hexadecimal values. This is accepted by AS80,
+				ZMAC & Z80ASM, but not by Z80v4 or Z80-ASM.
+			·Generic hex (with 0x): Uses "0x" as a prefix to express
+				hexadecimal values. This is accepted by AS80,
+				Z80v4, Z80-ASM and newer versions of Z80ASM, but
+				not by ZMAC or old Z80ASM versions.
+			·TASM hex: same as TASM, but using hexadecimal data.
+			·tniASM hex: same as tniASM, but using hexadecimal data.
+		·Quit
+			Exits the program. Keyboard shortcut: CTRL+Q
+		(graphic names)
+			Selects the open graphic as current. Keyboard shortcuts:
+			CTRL+(function key) on Windows, CTRL+(number key) on Linux
+			and MacOS X.
+
+	·Edit
+		·Undo
+			Undoes the last action. Up to 4 actions can be undoed.
+			Keyboard shortcut: CTRL+Z.
+		·Redo
+			Redoes the last undoed action. You can redo any undoed
+			action, if you don't make any new action in between.
+			Keyboard shortcut: CTRL+X.
+		·Copy
+			Copies selected zone (or the complete graphic if
+			there's no zone selected) to intermediate memory to
+			be pasted (in the same graphic or another) or to be
+			used as a fill texture. Keyboard shortcut:  CTRL+C.
+		·Paste
+			Toggles paste mode, that pastes the graphic from
+			intermediate memory to 	current mouse location when
+			you make a left-click. Attributes will only be pasted
+			if destination pixel has the same position inside the
+			character as the copied source. Right-clicking cancels
+			paste mode. Keyboard shortcut: CTRL+V.
+	·Fill
+		·Fill
+			Toggles fill mode. Left clicking produces a solid fill
+			from the pixel you clicked. That pixel shouldn't be
+			set (must be 0, not 1), or else the fill won't be
+			performed. Right-clicking cancels fill mode. Keyboard
+			shortcut: F.
+		·Textured Fill
+			If you've copied a selected zone (or a complete graphic)
+			using the Edit menu Copy option, toggles the textured fill
+			mode. Left clicking produces a textured fill from the pixel
+			you clicked, and the texture will be placed with the
+			left-up corner right in the pixel you clicked. As happened
+			with the solid fill, the pixel value should be 0 to fill.
+			Right-clicking cancels textured fill mode. Keyboard
+			shortcut: T
+	·Effects
+		·Effects Options
+			You can choose here if effects will affect only pixels,
+			only attributes or both. This affects all effects, except
+			bitwise rotation/shift, that will always affect pixels
+			only. In mask view mode, effects affect always pixels
+			only (because there are	no attributes for the mask). This
+			is also the place to chose shift instead rotation or
+			charwise rotations instead bitwise. Keyboard shortcut:
+			ALT+E
+		·Invert
+			Toggles pixels from 0 to 1, and also exchanges ink and
+			paper values. Keyboard shortcut: R
+		·X Flip
+			Mirrors graphic horizontally. Keyboard shortcut: X
+		·Y Flip
+			Mirrors graphic vertically. Keyboard shortcut: Y
+		·Clock rotation
+			Rotates the graphic/selected 90 degrees clockwise. The
+			rotation zone is always square shaped, so if the selected
+			part isn't a square, only the upleftmost square zone will
+			be rotated. Attributes are rotated only	if they fit
+			perfectly after the rotation. Keyboard shortcut: B
+		·Anticlock rotation
+			Same as Clock rotation, but turns the graphic
+			anticlockwise. Keyboard shortcut: V
+		·Left, Right, Up and Down
+			Rotates or shift graphic in the selected direction.
+			Rotation/shift can be bitwise or characterwise.
+	·Mask
+		·Use mask
+			Enable/disable the use of a mask for the graphic. Mask
+			are used to preserve the background around the graphic
+			we put on screen. You make apply the mask over the
+			background using AND, cleaning the space where your
+			graphic will be placed, while keeping the borders, then
+			you put your graphic using OR (XOR can also be used).
+			Keyboard shortcut: CTRL+M
+		·View mask
+			Enter/leaves mask edition mode. Here you don't edit the
+			graphic but its mask. Mask have no attributes, but 4
+			colors are shown, giving an indication of the pixels
+			in the graphic (as a guidance). Black colour means
+			mask=1 and pixel=0, so it's a background pixel
+			(transparent). White colour means mask=0 and pixel=0,
+			and yellow means mask=0 and pixel=1, so it's the graphic
+			that will be applied after the mask. Finally, green
+			indicates mask=1 and pixel=1, so its a pixel set in the
+			graphic that won't be erased in the mask AND stage.
+			This may cause mixing problems if you use XOR, but it's
+			harmless using OR. Keyboard shortcut: M
+		·Auto mask
+			Creates a mask automatically leaving as transparent all
+			the area around the graphic. This assumes that the
+			graphic is closed and placed in the centre.
+	·Sprite
+		·Insert next frame
+			Add a new frame to current sprite, right after the 
+			selected one. Keyboard shortcut: N
+		·Insert previous frame
+			Add a new frame to current sprite, right before the 
+			selected one. Keyboard shortcut: P
+		·Move frame
+			Moves current frame to a new specified position inside
+			the sprite.
+		·Remove frame
+			Erases current frame.
+		·Select previous frame
+			Selects previous frame. If we're already in the first,
+			the last one will be selected. Keyboard shortcut: Left
+			cursor.
+		·Select next frame
+			Selects next frame. From the last one we jump to the
+			first. Keyboard shortcut: Right cursor.
+		·Select frame number...
+			Selects the specified frame.
+	·Grid
+		·Pixel Grid
+			Toggle between having or not a pixel grid. Keyboard
+			shortcut: G
+		·Character Grid
+			Toggle between having or not a character grid. Keyboard
+			shortcut: CTRL+G
+	·Zoom
+		·x1, x2, ..., x48
+			You can see current zoom and set any mode directly.
+			Available zoom values are: 1, 2, 3, 4, 6, 8, 12, 16,
+			20, 25, 32, 40 and 48.
+		·AutoZoom
+			Toggles AutoZoom feature. If enabled, zoom level will
+			be automatically selected on every new graphic load,
+			to make it fit on screen.
+	·Info
+		·About
+			Tells you which version of SevenuP are you using.
+			Keyboard shortcut: CTRL+A
+
+
+·Tool Bar
+	·Save
+		Same as menu File->Save
+	·Zoom in
+		Increases current zoom level. Keyboard shortcut: +
+	·Zoom out
+		Decreases current zoom level. Keyboard shortcut: -
+	·Cursor
+		Changes cursor mode. There are 4 cursor modes, but you only
+		cycle through 3 of them. If you're editing a mask, the 3rd
+		mode will be Toggle mask/Toggle graphic, otherwise it will
+		be Set Attributes/Get Attributes. The cursor modes are:
+
+			·Set Pixel/Reset Pixel
+				Left button sets pixels to value 1.
+
+				Right button resets pixels to value 0.
+
+			·Toggle Pixel/Select Zone
+				Left button toggles pixel value between 0 and 1.
+
+				Right button controls selection. To select a zone,
+				right-click on a corner, right-click in the
+				opposite corner and you have the portion selected.
+			 	Selected zone will be a little brighter than
+				non-selected, and grids (if present) will become
+				blue. Now all effects will affect only to the
+				selected zone, and you can Copy the selected zone
+				to be pasted anywhere or to be used as a fill
+				pattern. A third right-click will unselect the zone.
+
+			·Set Attributes/Get Attributes
+				Left button will set the attributes of the char,
+				without modifying the pixel. If any of the
+				attributes is set to transparent, it won't change.
+
+				Right button will get all the attributes from
+				current char (no attribute will be left as
+				transparent after you right click in this mode).
+
+			·Toggle mask/Toggle graphic
+				Left button toggles pixel value of the mask between
+				0 and 1.
+				
+				Right button toggles pixel value of the graphic
+				between 0 and 1.
+	·Invert
+		Same as menu Effects->Invert
+	·X Flip
+		Same as menu Effects->X Flip
+	·Y Flip
+		Same as menu Effects->Y Flip
+	·Clock
+		Same as menu Effects->Clock rotation
+	·Anticlock
+		Same as menu Effects->Anticlock rotation
+	·Rotate/shifts
+		Same as menu Effects->left, right, up and down
+	·Prev. Frame
+		Same as menu Sprite->Select previous frame
+	·Next Frame
+		Same as menu Sprite->Select next frame
+	·Erase
+		Clears all pixels to 0, and sets attributes to 56 (paper 7, ink 0)
+
+
+·Canvas
+	Here lies current graphic.
+
+
+·Colours
+	You can set here the values used for ink, paper, bright and flash
+	(flash display isn't implemented). A value "T" means transparent,
+	and you won't modify an attribute when you operate on a char if
+	it's marked as transparent.
+
+
+·Status Bar
+	It's divided in two zones.
+
+	The left zone tells you what a menu or toolbar option does (when you're
+	over that option), and normally tells you the cursor mode you're in.
+	The cursor mode is in the form Action 1/Action 2, meaning it will
+	perform Action 1 when you click the left button of the mouse and Action
+	2 when you click the right one.
+
+	The right zone tells you the current Pixel and char position, and the
+	current attribute values of that char.
+
+
+
+Version History
+***************
+
+2002-05-09:	Version 0.0 alpha released (and announced in es.comp.sistemas.sinclair)
+
+2002-05-13:	Version 0.1 alpha released (and announced in comp.sys.sinclair)
+	(Linux) Flash Buttons Disabled. 
+	(Linux) Version number shown on info. 
+	(Win) Default Load & Save directory is current directory not "My Documents". 
+	All default colors set to transparent. 
+	Load .SCR format. 
+	Change Cursor now indicates current state inmediately. 
+	New zoom modes. Current zoom levels are 1, 2, 3, 4, 6, 8, 12, 16, 20,
+		25, 32, 40 and 48, and they have grid starting from 6. 
+	Added character grid. 
+	Grids are now optional. 
+	Total rewrite of screen generation code. Now it takes a little bit to
+		create or load graphics, but the speedup in screen refresh and
+		smaller zoom modes (gridless) is BRUTAL.
+	(BUGFIX) Fixed a bug in Save routine: wasn't saving to a binary file,
+		so extra garbare chars were added for newline code.
+	Continuous drawing (a bit slow, maybe I'll put it optional in future
+		versions).
+
+2002-05-23:	Version 0.2 alpha released
+	Save binary (.BIN), C source (.C) and ASM source (.ASM) formats, in all
+		of them you can choose the sort priority for the data, and if
+		you want attributes at the end, encoded as the 9th byte of the
+		character or no attributes at all.
+	(Win) Recompiled library for a bit smaller executable size.
+	Improved behaviour of continuous drawing when mouse pointer goes out
+		of the canvas and enters with the button pressed, but it isn't
+		perfect yet.
+	Changed palette, for a better differenciation of bright and non-bright
+		colors.
+	(BUGFIX) Continuous drawing was drawing the first pixel twice, causing
+		problems in toogle mode.
+	Save .SCR format.
+
+2002-06-24:	Version 0.3 alpha released
+	Added native support for TASM, tniASM and ZCAV2 assemblers.
+	Changed generic assembly format to improve compatibility, adding a ":"
+		at the end of each label. This mode has been successfully tested
+		with AS80, Z80v4, Z80-ASM and Z80ASM.
+	Added invert effect.
+	Added horizontal and vertical flip effects.
+	Effects can affect only pixels, only attributes or both.
+	Output options are set from File menu, not everytime a file is saved.
+
+2002-07-08:	Version 0.4 alpha released
+	Change cursor icon changed to something meaningful.
+	Attribute information is now displayed in Status Bar.
+	Reenabled flash buttons (but Flash effect still isn't shown).
+	Added a Get Attribute cursor mode.
+	Added a Select cursor mode, so you can apply effects only to a certain
+		area of the graphic.
+	Added rotations/shifts at bit/character level.
+	Effect options are now set on a dialog.
+	Changed Layout: Now a complete Spectrum screen fits in x3 zoom if you're
+		using a 1024x768 screen size (under Windows), and there is more
+		room for the toolbar.
+
+2002-07-21:	Version 0.5 alpha released
+	Added some preliminary documentation.
+	Status bar is a bit more informative in selection mode.
+	Added "Are you sure?" warning dialogs to window closing and erase.
+	Added a zoom menu, now you can change from any zoom mode to another
+		without changing through all intermediate levels.
+	Eliminated annoying flicker on zoom mode change.
+	Added an edit menu with Copy and Paste capabilities. Now you can copy
+		and paste graphics or fragments of graphics from one edition
+		window to another.
+
+2002-07-24:	Version 0.51 alpha released
+	(BUGFIX) Paste added garbare below the pasted zone in certain cases.
+		Fixed.
+
+2002-08-05:	Version 0.52 alpha released
+	Minor fixes to docs, spanish docs available too.
+	Speed optimizations. Load/new graphics and effects should be quite
+		faster now. 4x4 isn't a bitmapped mode anymore, so SevenuP
+		also uses less memory, but it will be slower in that mode.
+	The ZCAV2 cross assembler has been renamed to "The E-Z80 Way",
+		appropiate changes made.
+
+2002-09-04:	Version 0.6 beta released (and uploaded to WoS)
+	SevenuP is now considered beta instead of alpha.
+	Improved documentation.
+	Integrated everything in one window.
+	Graphic name appears in the window title (and is used as default save
+		name).
+	You can change different open graphics from File menu or using the
+		keyboard (CTRL+function key (CTRL+number key in Linux, function
+		keys are already used), limiting the maximum number of
+		simultaneous open files to 12 (even in Linux version, where only
+		the first ten files can be selected by keyboard)).
+	Added mask support. Using masks takes more memory and speed, so you'd
+		better leave mask design for the end. Mask now enter in the byte
+		sort priority options, and can be placed before or after the
+		graphic.
+	Changed a bit the internal .SEV format, to allow the use of masks. New
+		version .SEVs won't load on SevenuP alpha versions (v0.52 won't
+		warn about it because of a stupid WIP bug, the rest will give a
+		warning).
+	(BUGFIX) In v0.52, tniASM and The E-Z80 Way asm output got mixed, so
+		tniASM output was a bit messy and The E-Z80 Way one was wrong.
+		Fixed.
+
+2002-09-22:	Version 0.61 beta released
+	Code cleaning and a few comments added.
+	(BUGFIX) Copying from mask zone won't copy graphic attributes now.
+        Limited the maximum frame size to 1280x1024, to prevent people with
+                very big monitors crashing the program by making the canvas
+                bigger than internal bitmap size.
+	Minor security fix: certain corrupt .SEV files could crash the program.
+		Not anymore.
+	License changed from Freeware to GPL, and therefore source code released.
+
+2002-10-18:	Version 0.7 beta released
+	By petition, labels removed from ASM code.
+	Added a fill menu with both textured and solid fills available.
+	Added auto mask.
+	Added a new cursor mode, that replaces the Get/Set Attributes
+		one when we're editing a mask, allowing the change of both
+		mask and graphic at the same time.
+
+2002-12-10:	Version 0.71 beta released
+	Added .ASM hexadecimal data output modes.
+	Saving a .SCR file clears the "Are you sure?" flag too.
+	(BUGFIX) Changing current graphic doesn't leave the selected area of old
+                graphic still marked in bitmapped modes.
+
+2002-12-22:	Version 0.8 beta released
+	SPRITE SUPPORT (Finally!):
+		There's a Sprite menu where you can add or remove frames and select
+			the one to work on.
+		Current selected frame is now shown on Title bar if there's more than
+			one.
+		Selection can also be done with the 2 new items at the Toolbar.
+		Evidently, a new field (Frame number) has been added to the byte
+			sort priority list of output options.
+		Extended the internal .SEV format, to enable the use of sprites. The
+			new .SEVs won't load on previous SevenuP versions.
+		The number of frames is limited to 32, or less if the sprite is too
+			big (up to 41K when using mask and attributes).
+	Modified the File->New dialog, since sprites are created just by adding frames
+		to a graphic, and I won't finally add animations support, since I
+		believe it's better to test graphics directly on Spectrum (either
+		emulated or real).
+	Effect options are now placed on top of the Effects menu, since all effects
+		are already at reach in the Toolbar.
+	Zoom menu now shows current mode.
+	Graphic can be now renamed from the file menu.
+	Only relevant fields are taken in consideration in C and ASM files to make
+		newlines and in the Sort Priority information.
+	(BUGFIX) Entering illegal size values won't crash the program at certain
+		points.
+	(Source) Finally added an Unix makefile.
+
+2002-12-28:	Version 0.9 beta released
+        SevenuP now has its own icon.
+        Undo & redo (up to 4 steps) for current frame (changing to another frame or
+		graphic loses history), and therefore suppressed the Erase warning.
+        Added two more items to the sprite menu: Move frame, to change position of
+		current frame, and Select frame number, to jump directly to a given
+		frame.
+        SevenuP tries to open the first command line argument, allowing association
+		of .SEV files. SCRs can also be loaded from command line, but Windows
+		association will be more difficult due to the existence of those
+		stupid Windows .SCReen savers.
+        Reduced some unnecessary memory usage.
+
+2003-01-04:	Version 0.91 beta released
+	Drag & Drop of multiple .SEV and .SCR files.
+        Multiple files can now also be loaded from command line.
+        Both .SEV and .SCR files can be loaded from the Load menu option, instead
+		of using separate Load options (under Linux, when searching both
+		file types, all *.s* files are presented due to a library
+		limitation).
+        Select next and previous frame now cycle through the sprite.
+        Optimized non bitmapped zoom modes. 4x4 now it takes about 52% of previous
+		time, the rest takes between 100%-59%, depending on enabled grids.
+	(Linux) (BUGFIX) Since v0.6, loading two or more graphics with the same
+       	       	name (or the same graphic more than once) would screw the
+	       	"Ctrl+(number)" keyboard associations for those files under
+		Linux. This isn't my fault, but a library bug, so I'm adding a
+		prefix number to avoid the problem.
+	(Win) Recompiled library removing all debug mechanisms to get a smaller
+		executable size.
+
+2003-01-16:	Version 0.92 beta released
+        Many speed optimizations to non-bitmapped modes: when only the char grid
+		is on, it now takes around 83% of previous time for the screen to
+		be generated, screen isn't regenerated when the window is just
+		cleaned, when it's resized or scrolled it only calculates the new
+		parts and finally (un)selection now only refresh the (un)selected
+		part. The speedup is bigger in Linux, where the screen update
+		event happens more often.
+        Added some checks to the header of loaded files, to avoid crashing on
+		corrupt files.
+        Warning on a invalid file now provides the name of failing file. The name
+		also appears saving a file from the "Save" menu option.
+        Added a check to see if the file to be loaded exists.
+        Added some keyboard shortcuts for the Edit menu.
+	(BUGFIX) Using the "Save" menu option to save a .SCR file would save a
+		.SEV file but keeping the .SCR extension.
+	(BUGFIX) Renaming a sprite (or renaming a graphic, then turning it to a
+                sprite by adding frames) wouldn't show the last character of the
+		new name on title bar.
+	(BUGFIX) Grids were a bit wrong on v0.91 .
+
+2003-01-26:	Version 0.93 beta released
+	(Win) (BUGFIX) Right after executed, v0.92 was left in a strange state
+		until a graphic was created or loaded.
+	(Win) (BUGFIX) Double-clicking to select a file (eg: to load it), won't
+		now perform an action on the pixel where the filename was clicked.
+	(BUGFIX) Closing the last file won't leave it's size on the canvas (this
+		could be noticed by changing zoom before loading/creating another
+		graphic).
+
+2003-03-18:	Version 0.94 beta released
+	Added 90 degrees rotations to effects menu and toolbar.
+	Added a patch by Dominic Morris to load partial .SCR files.
+	(BUGFIX) For sprites, the number of frames wasn't showing in the C and ASM
+                source code comments, but pixel size again instead.
+
+2003-05-30:	Version 0.95 beta released (without Windows binary)
+	(Mac) Brand new MacOS X binary! Bitmap buttons are a work in progress
+                for OS X, so they'll look a bit worse than their x86 counterparts.
+	Increased minimum window width to show all tools in Linux toolbar
+	(Source) Now also compiles using wxWindows 2.4.0 . This fixes the .s??
+		search on Linux instead of .sev and .src (problem mentioned on
+		version 0.91).
+	(Linux) Binary is now compiled with Mandrake 9.1, gcc 2.3.2 and wxWindows
+                2.4.0 . You'll need to install the new libraries from
+                http://www.wxwindows.org to make it work.
+
+2003-06-23:	Version 1.00 released
+        Configuration options stored in SevenuP.ini (finally!).
+        Import graphics from image files. Supported formats are: BMP, GIF, JPG,
+		PNG, PCX, TIF, IFF and XPM.
+        Export graphics to image files. Supported formats are: BMP, JPG, PNG, PCX,
+		TIF and XPM.
+        AutoZoom to fit size of loaded files.
+        Individual attributes (ink, paper, bright and flash) shown on status bar.
+        Updated wxWindows to 2.4.1 . Updating the library for Linux is recommended.
+		This has caused Windows binary size to grown quite a bit.
+
+2003-08-02:	Version 1.10 released
+        Changed File menu layout. Now "Save" is called "Fast Save", "Save As"
+		and "Save .SCR" are both in "Save" option, and saving to .BIN,
+		.C and .ASM are all placed in "Export Data".
+        Default paths for open, import, save and export are now taken from
+                SevenuP.ini
+        Lastest paths used can be remembered (switchable on SevenuP.ini)
+        Added append to output options, so you can use the same file to
+                accumulate all data exported.
+        Added lots of keyboard shortcuts.
+        Paste, Fill & fill pattern now toggle their modes, instead of just setting
+		it (nicer for keyboard control).
+        Changed the way paper & ink are chosen to improve importation of speccy
+		graphics.
+        Optimized the import image routine a bit (around 20%).
+	(Mac) Changed location of SevenuP.ini .
+        (Source) Removed compatibility with wxWindows 2.2.9 (it was broken on last
+                version anyway).
+	(BUGFIX) Move Up and Move Down buttons on Save Option dialog didn't work
+		since version 0.95b .
+	(BUGFIX) Fast save after import would overwrite the just imported image
+                replacing it with the .sev file (with the wrong extension).
+	(BUGFIX) Eff_pixattr option from SevenuP.ini wasn't working correctly.
+
+2003-08-21:	Version 1.11 released
+        Added a few more keyboard shortcuts.
+	(BUGFIX) Changing cursor mode from fill or paste mode would make keep
+		that mode, while showing the normal set/reset one.
+	(Linux) (BUGFIX) .SCR files can be saved again.
+	(Win) (BUGFIX) Fixed an important graphic bug in wxWindows library, that
+	        caused the canvas to get sunk if the screen was resized from a
+	        size that needed a vertical scrollbar to a size that didn't
+	        need it, while that vertical scrollbar was scrolled down.
+
+2004-07-27:	Version 1.12 released
+	(BUGFIX) Export image was exporting always the first frame of a sprite,
+		instead of the currently selected one.
+
+2006-04-24:	Version 1.20 released
+  	(FreeBSD) Brand new FreeBSD binary!.
+  	(Linux) (BUGFIX) removed most of optimizations from version 0.92, as
+  		they may provoke scroll bugs under certain (unknown to me)
+  		circunstances.
+	Huge changes on output options to allow even more flexibility:
+	· Now you can also interleave attributes on frames, columns or
+		lines, and you can output only the attributes or put the
+		attributes first.
+	· Added an option to output the size in the first two bytes of the
+		data, as needed by z88dk's standard sprite library.
+	· Added an option to output the graphic data making an horizontal zigzag.
+	· Added an option to add attribute masks, as needed by splib3.
+	· The name of the sprite is now used as label for asm, and name for C
+		output (but ASM label can be disabled).
+	· Added an option in .ini file to choose the default extension to export
+		data.
+	(BUGFIX) Important bugfixes on image importation:
+	· A character with only one dominant colour could never get the bright
+		attribute.
+	· Sometimes the same colour would get chosen for both ink and paper in the
+		same char, leaving an ugly blank character.
+	· Pixel distribution wasn't taking into consideration the subcell sizes,
+		so it's amazing that it worked at all.
+	Optimized importation a bit.
+	(Win) Recompiled library for a bit smaller executable size.
+  	(Win) Used Upack instead of UPX for an even smaller executable size.	
+	(Linux) Binary is now compiled on Gentoo 2006.0-amd64, gcc 3.4.3 and
+		wxWidgets 2.6.2 for GTK2.x, non unicode. You'll need to install
+		the new libraries from http://www.wxwidgets.org to make it work.
+	(Linux) Also compiled a 64 bit binary.
+  	(Linux) Switched from UPX 1.25 to 1.94 to get much smaller executable
+  		size (and to be able to compress the 64 bit binary).
+
+
+
+Future improvements
+*******************
+
+	Don't really know what...
+
+
+
+Greetings/Thanks
+****************
+
+· Santiago Romero: His SpecDraw (and his lack of time to develop it :-) ) gave
+	me the inspiration to make this proggy. And of course thanks for
+	the webspace (and everything else) at www.speccy.org!
+· James Weatherley: Adapted and compiled the MacOS X port.
+· Peter Hull: Compiled the latest MacOS X port, discovering and fixing
+	important bugs.
+· Emilio Florido: Makefiles and compilation of the FreeBSD port.
+· Dominic Morris: Contributed a patch to load partial .SCR files.
+· Mario Sevillano & gotham: Linux betatesters.
+· gasman & Paul van der Laan: MacOS X betatesters.
+· Martijn van der Heide: Promotion & hosting at http://www.worldofspectrum.org
+· Horace: Promotion & hosting at http://www.speccy.org/espectrum
+· Digiexp: Promotion & hosting at http://www.jaivan.net
+· Survivor: Promotion & hosting at http://www.pos.fmshop.ru
+· Colin Woodcock: Promotion on ZXF magazine at http://www.cwoodcock.co.uk
+· Icabod: Promotion at http://www.raww.org
+· Aprisobal: Promotion on & hosting at http://zx.pk.ru
+· H.H. Chou: Tried to help me to upgrade to wxWindows 2.4.0
+· All SevenuP's users making graphics for new games.
+· Woody, Tommy Pereira, Angel Constenla, Bohoon Fikee, Adam D. Moss, LCD,
+	Peter de Vroomen, Darren Salt, Staffan Vilcans, Alvin Albrecht,
+	Andrew Owen, Bob Smith, Rob Pearmain @ comp.sys.sinclair & WoS,
+	and tbrazil, Radastan, Ivan Ruiz Etxabe, Jobim, Badaman,
+	Web8bits, Spaceboy, S.T.A.R., TrueVideo, na_th_an, Beyker, compiuter
+	& RANDOMIZE @ es.comp.sistemas.sinclair & CEZ: Feedback,
+	criticism and encouragement.
+· everybody else at e.c.s.s.,c.s.s.,WoS & CEZ: keeping the speccy scene alive!
+
+
+
+Contact
+*******
+
+email:	metalbrain_coder@gmx.net
+MSN:	metalbrain_coder@hotmail.com   (also valid for email, if the upper one fails)
+Yahoo:  metalbrain_coder
+
+(Although I rarely connect to those Instant Message services)
+
+http://www.speccy.org/metalbrain

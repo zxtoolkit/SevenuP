@@ -1,0 +1,22 @@
+/* XPM */
+static char *cursor_xpm[] = {
+"16 16 2 1",
+"  c None",
+"a c #FFFFFF",
+"                ",
+"   a            ",
+"   aa           ",
+"   aaa          ",
+"   aaaa         ",
+"   aaaaa        ",
+"   aaaaaa       ",
+"   aaaaaaa      ",
+"   aaaaaaaa     ",
+"   aaaaaa       ",
+"   aaa aa       ",
+"   aa  aaa      ",
+"        aa      ",
+"        aaa     ",
+"         aa     ",
+"                ",
+};

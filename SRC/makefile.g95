@@ -1,0 +1,6 @@
+WXDIR = $(WXWIN)
+
+TARGET=SevenuP
+OBJECTS = OpenFile.o TheFrame.o $(TARGET).o
+
+include $(WXDIR)/src/makeprog.g95
