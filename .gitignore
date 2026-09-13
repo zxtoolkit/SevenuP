@@ -1,0 +1,4 @@
+# build output
+*.o
+/SRC/SevenuP
+/SRC/SevenuP.app/
