@@ -1,7 +1,7 @@
 /* XPM */
 static const char *fra_next_xpm[] = {
 "16 16 4 1",
-"  c None",
+"  c #000000",
 "a c #FFFF20",
 "b c #FFFFFF",
 "d c #000000",

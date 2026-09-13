@@ -28,6 +28,7 @@
 #ifdef __WXMAC__
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <wx/sysopt.h>
 #endif
 
 #define ADD_TOOL(id, bmp, tooltip, help) \
@@ -541,7 +542,19 @@ TheFrame::TheFrame(int xpos, int ypos, int width, int height, int argc, wxChar *
         tbBitmaps[14] = wxBITMAP(fra_prev);
         tbBitmaps[15] = wxBITMAP(fra_next);
 
+// macOS turns a frame's toolbar into a native NSToolbar, drawn inside the title
+// bar, where these sixteen small tools end up behind an overflow chevron. On
+// macOS the toolbar is an ordinary child window in the main sizer instead, and
+// it has to be the sizer rather than the frame: wxFrame subtracts the toolbar
+// height from the client area only when wx was built without native toolbars,
+// so a frame toolbar would share its space with the canvas and be drawn over.
+#ifdef __WXMAC__
+        wxSystemOptions::SetOption(wxT("mac.toolbar.no-native"), 1);
+        toolBar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                                wxTB_HORIZONTAL);
+#else
         toolBar = CreateToolBar();
+#endif
         toolBar->SetMargins(5,5);
         toolBar->SetToolBitmapSize(wxSize(16,16));
 
@@ -602,6 +615,9 @@ TheFrame::TheFrame(int xpos, int ypos, int width, int height, int argc, wxChar *
         coBitmapsd[10] = wxBITMAP(transpd);
 
         mainbox = new wxBoxSizer( wxVERTICAL );
+#ifdef __WXMAC__
+        mainbox->Add( toolBar, 0, wxGROW );     // see the toolbar comment above
+#endif
         canvas = new wxScrolledWindow( this, ID_PANEL, wxDefaultPosition, wxSize(size_wx,size_wy), wxSUNKEN_BORDER );
         canvas2 = new MyWindow(canvas,0,0,size_wx,size_wy,wxRETAINED);
 
