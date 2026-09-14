@@ -167,10 +167,36 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
+      # librsvg2-common: without it GTK cannot draw the SVG icons that
+      # modern themes ship.
       - name: Install the GTK headers wxWidgets builds against
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev imagemagick file desktop-file-utils
+          sudo apt-get install -y libgtk-3-dev imagemagick file \
+            desktop-file-utils librsvg2-common zlib1g-dev liblzma-dev xvfb
+
+      # libxml2 is bundled only so librsvg can parse SVG icons, and the distro
+      # build of it links ICU, whose data blob is 11 MB. /usr/local resolves
+      # ahead of the system copy, so the dependency walk never reaches ICU.
+      - name: Build libxml2 without ICU
+        run: |
+          set -eux
+          curl -fsSL -o libxml2.tar.xz \
+            https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.14.tar.xz
+          echo "60d74a257d1ccec0475e749cba2f21559e48139efba6ff28224357c7c798dfee  libxml2.tar.xz" \
+            | sha256sum -c -
+          tar xf libxml2.tar.xz
+          cd libxml2-2.9.14
+          ./configure --prefix=/usr/local --without-icu --without-python \
+            --disable-static --enable-shared
+          make -j"$(nproc)"
+          sudo make install
+          sudo ldconfig
+          ldd /usr/lib/x86_64-linux-gnu/librsvg-2.so.2 | grep libxml2
+          if ldd /usr/lib/x86_64-linux-gnu/librsvg-2.so.2 | grep -q libicu; then
+            echo "::error::librsvg still resolves an ICU-linked libxml2"
+            exit 1
+          fi
 
       # Split from save so a later failure does not discard a built wxWidgets.
       - name: Restore the static wxWidgets build
@@ -209,7 +235,8 @@ jobs:
         run: |
           set -eux
           cd SRC
-          make -f makefile.unx WX_CONFIG="$GITHUB_WORKSPACE/wx-install/bin/wx-config"
+          make -f makefile.unx LDFLAGS=-s \
+            WX_CONFIG="$GITHUB_WORKSPACE/wx-install/bin/wx-config"
           file SevenuP
 
       - name: Stage an AppDir
@@ -242,7 +269,9 @@ jobs:
           export GIO_MODULE_DIR="$APPDIR/usr/lib/gio/modules"
           HOOK
 
-      - name: Build the AppImage
+      # Staging only: packaging runs after the prune, so linuxdeploy cannot
+      # put back what the next step takes out.
+      - name: Fill the AppDir with GTK and its dependencies
         run: |
           set -eux
           base=https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous
@@ -252,20 +281,118 @@ jobs:
           chmod +x linuxdeploy linuxdeploy-plugin-gtk
           export APPIMAGE_EXTRACT_AND_RUN=1
           export DEPLOY_GTK_VERSION=3
-          ./linuxdeploy --appdir AppDir --plugin gtk --output appimage \
+          ./linuxdeploy --appdir AppDir --plugin gtk \
             -d AppDir/usr/share/applications/sevenup.desktop \
             -i AppDir/usr/share/icons/hicolor/32x32/apps/sevenup.png
-          mv SevenuP*.AppImage SevenuP-linux-x86_64.AppImage
-          chmod +x SevenuP-linux-x86_64.AppImage
 
-      - name: Check the AppImage carries its dependencies
+      - name: Drop what SevenuP cannot use
+        run: |
+          set -eux
+          # Nothing in the bundle links libgirepository; the GTK plugin stages
+          # the typelibs whether or not anything introspects.
+          rm -rf AppDir/usr/lib/girepository-1.0
+          python3 - AppDir <<'PRUNE'
+          import os, subprocess, sys
+
+          appdir = sys.argv[1]
+          libdir = os.path.join(appdir, 'usr/lib')
+
+          # SevenuP has no wxPrint* anywhere in it, so the CUPS backend and
+          # the TLS, Kerberos and Avahi stack behind it are dead weight. The
+          # GTK plugin stages the backend under two names.
+          DROP = ('libprintbackend-cups.so',)
+
+          # Modules are dlopened, so nothing ever lists them as NEEDED. They are
+          # roots of the dependency graph in their own right, like the binary.
+          MODULES = ('libpixbufloader-', 'libprintbackend-', 'im-')
+
+          def dynamic(path):
+              """(soname, [needed]) for an ELF, None for anything else."""
+              out = subprocess.run(['objdump', '-p', path], capture_output=True,
+                                   text=True, errors='replace').stdout
+              if 'Dynamic Section' not in out:
+                  return None
+              soname, needed = None, []
+              for line in out.splitlines():
+                  f = line.split()
+                  if f[:1] == ['SONAME']:
+                      soname = f[1]
+                  elif f[:1] == ['NEEDED']:
+                      needed.append(f[1])
+              return soname, needed
+
+          libs, roots, doomed = {}, [], []
+          for base, _, names in os.walk(appdir):
+              for n in names:
+                  p = os.path.join(base, n)
+                  if os.path.islink(p) or not os.path.isfile(p):
+                      continue
+                  d = dynamic(p)
+                  if d is None:
+                      continue
+                  soname, needed = d
+                  if n in DROP:
+                      doomed.append((p, needed))
+                  elif os.path.dirname(p) == libdir and soname \
+                          and not n.startswith(MODULES):
+                      libs.setdefault(soname, []).append((p, needed))
+                  else:
+                      roots.append((p, needed))
+
+          def reachable(entries):
+              seen, queue = set(), [n for _, needed in entries for n in needed]
+              while queue:
+                  s = queue.pop()
+                  if s in seen or s not in libs:
+                      continue
+                  seen.add(s)
+                  for _, needed in libs[s]:
+                      queue.extend(needed)
+              return seen
+
+          # Only what the doomed modules alone keep alive. A library that
+          # already looks unreferenced stays: its users are host libraries
+          # linuxdeploy omits on purpose, so this graph has holes in it.
+          orphaned = reachable(roots + doomed) - reachable(roots)
+
+          for p, _ in doomed + [e for s in sorted(orphaned) for e in libs[s]]:
+              print('dropping', os.path.relpath(p, appdir))
+              os.remove(p)
+
+          # Whatever pointed at them is a dangling symlink now.
+          for base, _, names in os.walk(appdir):
+              for n in names:
+                  p = os.path.join(base, n)
+                  if os.path.islink(p) and not os.path.exists(p):
+                      os.remove(p)
+          PRUNE
+
+      - name: Build the AppImage
+        run: |
+          set -eux
+          curl -fsSL -o appimagetool \
+            https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage
+          curl -fsSL -o runtime-x86_64 \
+            https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-x86_64
+          chmod +x appimagetool
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          export ARCH=x86_64
+          # Level 22 rather than the zstd default of 15. The block size is
+          # left alone: appimagetool's 128K is what keeps startup quick.
+          ./appimagetool --no-appstream --runtime-file runtime-x86_64 \
+            --mksquashfs-opt=-Xcompression-level --mksquashfs-opt=22 \
+            AppDir SevenuP-linux-x86_64.AppImage
+          chmod +x SevenuP-linux-x86_64.AppImage
+          ls -l SevenuP-linux-x86_64.AppImage
+
+      - name: Check the AppImage carries its dependencies, and nothing more
         run: |
           set -eu
           export APPIMAGE_EXTRACT_AND_RUN=1
           ./SevenuP-linux-x86_64.AppImage --appimage-extract >/dev/null
           echo "--- bundled libraries ---"
-          ls squashfs-root/usr/lib/ | head -40
-          for lib in libgtk-3 libgdk-3 libglib-2.0; do
+          ls squashfs-root/usr/lib/
+          for lib in libgtk-3 libgdk-3 libglib-2.0 libxml2 librsvg-2; do
             ls squashfs-root/usr/lib/ | grep -q "$lib" || {
               echo "::error::$lib is not bundled; the AppImage needs it installed"; exit 1; }
           done
@@ -273,12 +400,25 @@ jobs:
             echo "::error::wxWidgets is bundled as a shared library, so it was not linked statically"
             exit 1
           fi
-          echo "self-contained: GTK bundled, wxWidgets linked in"
+          if ls squashfs-root/usr/lib/ | grep -iE '^libicu|^libcups|^libgnutls|^libkrb5'; then
+            echo "::error::ICU or the print stack is back in the bundle"
+            exit 1
+          fi
+          echo "self-contained: GTK bundled, wxWidgets linked in, no ICU, no print stack"
+
+          echo "--- oldest glibc it will run against ---"
+          floor=GLIBC_2.35
+          want=$(objdump -T squashfs-root/usr/bin/SevenuP squashfs-root/usr/lib/*.so* 2>/dev/null \
+                 | grep -oE 'GLIBC_2\.[0-9]+' | sort -uV | tail -1)
+          echo "  needs at most $want, floor is $floor"
+          if [ "$(printf '%s\n%s\n' "$want" "$floor" | sort -V | tail -1)" != "$floor" ]; then
+            echo "::error::something needs $want, above the $floor floor"
+            exit 1
+          fi
 
       - name: Run it
         run: |
           set -eu
-          sudo apt-get install -y xvfb
           export APPIMAGE_EXTRACT_AND_RUN=1
           python3 - <<'PY'
           b = bytearray(6912)

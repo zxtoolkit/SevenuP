@@ -5,6 +5,9 @@ PROGRAM = SevenuP
 
 OBJECTS = $(PROGRAM).o TheFrame.o OpenFile.o
 
+# Release builds pass LDFLAGS=-s; the symbol table is 15% of the binary.
+LDFLAGS ?=
+
 .SUFFIXES:	.o .cpp
 
 .cpp.o :
@@ -13,7 +16,7 @@ OBJECTS = $(PROGRAM).o TheFrame.o OpenFile.o
 all:    $(PROGRAM)
 
 $(PROGRAM):	$(OBJECTS)
-	$(CXX) -o $(PROGRAM) $(OBJECTS) `$(WX_CONFIG) --libs core,base`
+	$(CXX) -o $(PROGRAM) $(OBJECTS) $(LDFLAGS) `$(WX_CONFIG) --libs core,base`
 
 clean: 
 	rm -f *.o $(PROGRAM)

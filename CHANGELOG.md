@@ -12,6 +12,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Windows version resource, so `SevenuP.exe` carries a product name, version
   and copyright in its file properties instead of showing none.
 
+### Changed
+
+- Linux AppImage halved, 33 MB to 17 MB. It no longer carries ICU, which
+  nothing in it used, nor the CUPS print backend and the TLS, Kerberos and
+  Avahi stack behind it, which SevenuP has no way to reach.
+
+## [v1.21.0-rc3] - 2026-09-14
+
 ### Fixed
 
 - macOS build required macOS 14 and would not start on anything older. The
@@ -55,6 +63,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   as accelerators. The canvas now handles them directly.
 - New Graph dialog's spin controls were allocated negative width on GTK.
 
-[Unreleased]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc2...HEAD
+[Unreleased]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc3...HEAD
+[v1.21.0-rc3]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc2...v1.21.0-rc3
 [v1.21.0-rc2]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc1...v1.21.0-rc2
 [v1.21.0-rc1]: https://github.com/zxtoolkit/SevenuP/releases/tag/v1.21.0-rc1
