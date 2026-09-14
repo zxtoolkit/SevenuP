@@ -5,29 +5,14 @@ PROGRAM = SevenuP
 
 OBJECTS = $(PROGRAM).o TheFrame.o OpenFile.o
 
-# implementation
-
 .SUFFIXES:	.o .cpp
 
 .cpp.o :
-# -std=c++17 IS NOT OPTIONAL, and is pinned rather than left to the compiler.
-# wxWidgets 3 headers need C++11 at minimum -- they use override, = default and
-# = delete -- and `g++` with no -std picks whatever that compiler's default
-# happens to be. That default varies by toolchain and by year: a machine
-# defaulting to C++14 builds this fine while a CI runner defaulting to C++98
-# fails with hundreds of errors inside wx/string.h, which look like wxWidgets
-# is broken and are nothing of the kind. Naming the standard makes the build
-# the same everywhere. The 2006 sources use nothing C++17 removed.
 	$(CXX) -O2 -std=c++17 -c `$(WX_CONFIG) --cxxflags` -o $@ $<
 
 all:    $(PROGRAM)
 
 $(PROGRAM):	$(OBJECTS)
-# SevenuP calls core and base only, so that is what is asked for. A default
-# `wx-config --libs` also hands over xrc, html, qa, xml and net, none of which
-# this program references; naming them here keeps those five out of the link,
-# and keeps wx-config from being asked for a library that a trimmed build of
-# wxWidgets did not produce.
 	$(CXX) -o $(PROGRAM) $(OBJECTS) `$(WX_CONFIG) --libs core,base`
 
 clean: 

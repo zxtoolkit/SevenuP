@@ -1,10 +1,3 @@
-# Windows build with MinGW-w64. Unlike makefile.gcc, which Bakefile generated
-# against wxWidgets 2.6 and which hardcodes that release's library names, this
-# asks wx-config what to link, so it follows whichever wxWidgets is installed.
-#
-# SevenuP.rc is not optional on Windows: wxBITMAP() resolves to a resource
-# lookup there, not to the XPM data the other ports compile in, so without the
-# compiled resources every toolbar and palette bitmap comes up empty.
 
 CXX = g++
 WINDRES = windres
@@ -14,25 +7,9 @@ PROGRAM = SevenuP
 
 OBJECTS = $(PROGRAM).o TheFrame.o OpenFile.o $(PROGRAM)_rc.o
 
-# -std=c++17 IS NOT OPTIONAL, and is pinned rather than left to the compiler.
-# wxWidgets 3 headers need C++11 at minimum -- they use override, = default and
-# = delete -- and `g++` with no -std picks whatever that compiler's default
-# happens to be. That default varies by toolchain and by year: a machine
-# defaulting to C++14 builds this fine while a CI runner defaulting to C++98
-# fails with hundreds of errors inside wx/string.h, which look like wxWidgets
-# is broken and are nothing of the kind. Naming the standard makes the build
-# the same everywhere. The 2006 sources use nothing C++17 removed.
 CXXFLAGS := -Os -std=c++17 `$(WX_CONFIG) --cxxflags`
 
-# -mwindows keeps a console from opening behind the GUI. The three -static
-# flags are what make the .exe self-contained: without them it needs
-# libgcc_s_seh-1.dll, libstdc++-6.dll and libwinpthread-1.dll beside it.
 LDFLAGS := -mwindows -static-libgcc -static-libstdc++ -static
-# SevenuP calls core and base only, so that is what is asked for. A default
-# `wx-config --libs` also hands over xrc, html, qa, xml and net, none of which
-# this program references; naming them here keeps those five out of the link,
-# and keeps wx-config from being asked for a library that a trimmed build of
-# wxWidgets did not produce.
 LDLIBS := `$(WX_CONFIG) --libs core,base`
 
 .SUFFIXES:	.o .cpp
@@ -42,6 +19,7 @@ all:    $(PROGRAM).exe
 $(PROGRAM).exe:	$(OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
+# Required: wxBITMAP() is a resource lookup on Windows, not compiled-in XPM data.
 $(PROGRAM)_rc.o: $(PROGRAM).rc
 	$(WINDRES) -i $< -o $@ -I. $(WX_RCFLAGS)
 

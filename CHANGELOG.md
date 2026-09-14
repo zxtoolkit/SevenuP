@@ -1,81 +1,54 @@
 # Changelog
 
 Changes this repository makes on top of the upstream SevenuP 1.21 WIP source.
+The program's own version history is in `SevenuP.txt` under "Version History".
 
-This is not the program's own changelog. Jaime Tejedor Gómez's version
-history, covering 0.0 alpha in 2002 through 1.21 WIP in 2009, is in
-`SevenuP.txt` under "Version History" and is left untouched.
-
-Nothing here is released or tagged; the entries below describe the commits
-that sit on top of the second import. See "Repository lineage" in `README.md`
-for how the history is ordered.
-
-The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
 ### Fixed
 
-- **`SevenuP.ini` was never read.** 1.21 commented out the `ifstream`
-  declaration and the whole read loop, but the `__WXMAC__` block below them
-  still called `inifile.fail()`, `.clear()` and `.open()`, so it did not
-  compile on Mac. On every platform `ValidIni` was left at 0, so
-  `GetIniValue()` always returned its default argument and every setting in
-  `SevenuP.ini` was silently ignored: zoom, grid, colours, export options.
-  Restored by uncommenting the author's own lines, which are already the
-  Unicode-aware version. Nothing was rewritten.
+- macOS build required macOS 14 and would not start on anything older. The
+  deployment target was set for wxWidgets only, not for the app itself.
 
-- **`_()` applied to a char literal.** `_('\0')` appears three times, twice in
-  `OpenFile.cpp` and once in `TheFrame.cpp`. `_()` is the gettext translation
-  macro and takes a string, not a char; wxWidgets 3 rejects it with a
-  `static_assert`. The intent is to append a NUL, not to translate one.
+## [v1.21.0-rc2] - 2026-09-13
 
-- **Build against wxWidgets 3**, 28 errors. `AddTool()` gained a label
-  parameter and replaced its toggle, position and clientData arguments with a
-  `wxItemKind`, affecting 16 calls. `wxBitmap::SetDepth()` was removed; the
-  loop calling it is dropped rather than replaced, because every element it
-  touched was overwritten by `wxBITMAP()` on the following lines and it had no
-  effect already. `wxSAVE` and `wxOVERWRITE_PROMPT` became `wxFD_SAVE` and
-  `wxFD_OVERWRITE_PROMPT`, 10 uses across 5 file dialogs.
+### Fixed
 
-- **`makefile.osx`.** `wx-config --static` finds no archives against a
-  Homebrew keg, which ships dylibs only, so the flag is dropped. The link rule
-  used `$(LINK.o)`, which expands to `$(CC)`; linking with `cc` leaves every
-  C++ runtime symbol undefined, so the variable is now `CXX` and the rule
-  calls it directly. `WX_CONFIG` is overridable. The bundle rule depends on
-  its inputs so it rebuilds when they change, and ad-hoc signs the result,
-  because unsigned binaries are killed on launch on Apple silicon; `install -s`
-  is dropped because stripping invalidates the signature.
+- macOS toolbar was drawn in the title bar, hiding most tools behind an
+  overflow chevron. It is now a child window on macOS; Windows and Linux
+  unchanged.
+- Nine toolbar icons were washed out or invisible on non-Windows platforms.
+  Their XPMs declared a transparent background where the artwork expects black.
+
+### Changed
+
+- CI keeps the cached wxWidgets build when a later step fails.
+
+## [v1.21.0-rc1] - 2026-09-13
 
 ### Added
 
-- **Opening files double-clicked in the Finder.** The code only ever read file
-  names from `argv`, and macOS does not put them there: the Finder sends an
-  `odoc` Apple Event, surfaced as `wxApp::MacOpenFiles()`, which nothing
-  overrode, so files opened from the Finder were silently discarded. The
-  override forwards to the frame's existing `OpenArrayFiles()`, the same entry
-  point the drag-and-drop target already used, passing the whole array at once
-  so the canvas is refreshed after the last file rather than once per file.
-  `~TheFrame` clears the cached frame pointer, so an Apple Event arriving
-  between the frame being deleted and the app exiting cannot dereference freed
-  memory.
+- Self-contained binaries for macOS, Linux and Windows, built and published by
+  GitHub Actions. wxWidgets is linked in statically, so nothing needs
+  installing to run them.
+- `makefile.mingw` for Windows; `makefile.unx` and `makefile.osx` fixed to link
+  with a C++ driver.
+- Files double-clicked in the Finder now open. `Info.plist` declares the `.sev`
+  and `.scr` document types.
+- `LICENSE`, `README.md`, `CHANGELOG.md`, `.gitignore`.
 
-- **`SRC/Info.plist`.** `makefile.osx` has always installed this file into the
-  bundle, but it is in neither source release, so the build stopped at the
-  bundle step. Reconstructed from the copy embedded in `SevenuP.pbproj`, plus
-  a bundle identifier, `NSPrincipalClass` and `NSHighResolutionCapable`. It
-  also declares `CFBundleDocumentTypes` and `UTExportedTypeDeclarations` for
-  `.sev` and `.scr`, so the Finder routes those files here at all. `.sev` is
-  rank Owner; `.scr` is Alternate, being a bare 6912-byte memory dump with no
-  magic number that other Spectrum tools also claim.
+### Fixed
 
-- **`LICENSE`**, a byte-identical copy of the `GNU-GPL License.txt` the
-  project has always shipped, under a name GitHub's licence detection
-  recognises. The original file is left in place.
+- `SevenuP.ini` was never read, so every setting fell back to its default.
+- `_()` applied to a char literal, rejected by wxWidgets 3.
+- 28 build errors against wxWidgets 3: `AddTool()`, `wxBitmap::SetDepth()`,
+  `wxSAVE` and `wxOVERWRITE_PROMPT`.
+- Sprite frame stepping was unreachable on Linux: GTK refuses bare arrow keys
+  as accelerators. The canvas now handles them directly.
+- New Graph dialog's spin controls were allocated negative width on GTK.
 
-- **`README.md`**, describing the program, the build, and the repository's
-  lineage. `README.TXT` is the author's own documentation and is left
-  untouched, though its build instructions no longer match this tree.
-
-- **`.gitignore`** for the object files, linked binary and app bundle that
-  `makefile.osx` leaves in the source directory.
+[Unreleased]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc2...HEAD
+[v1.21.0-rc2]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc1...v1.21.0-rc2
+[v1.21.0-rc1]: https://github.com/zxtoolkit/SevenuP/releases/tag/v1.21.0-rc1

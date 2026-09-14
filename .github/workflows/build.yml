@@ -1,26 +1,5 @@
 name: build
 
-# WHAT THIS BUILDS: one self-contained deliverable per platform, each holding a
-# SevenuP that runs on a machine with nothing installed on it. That is the whole
-# reason this file is as long as it is.
-#
-# SevenuP is a wxWidgets GUI program, and a wxWidgets GUI program linked the
-# ordinary way is not self-contained: it needs the exact wxWidgets it was built
-# against, present at runtime, in a version whose ABI matches. Nobody restoring
-# a 2006 Spectrum tool wants to install a widget toolkit first. So every job
-# here BUILDS WXWIDGETS FROM SOURCE AS A STATIC LIBRARY and links it in. That
-# costs 10-25 minutes the first time on each platform, which is why the result
-# is cached on the configure flags and the wxWidgets tag.
-#
-# "Self-contained" is then CHECKED rather than assumed, per platform, because
-# the failure mode is silent: a binary that quietly acquired a dependency runs
-# perfectly on the runner that built it and fails on the first machine that
-# downloads it. Each job inspects what its binary asks the loader for and fails
-# here instead.
-#
-# Callable from release.yml so the binaries that get attached to a release are
-# produced by this same file, not by a second copy of it that drifts.
-
 on:
   push:
     branches: [main]
@@ -31,40 +10,17 @@ on:
 permissions:
   contents: read
 
-# SUPERSEDED RUNS CANCEL THEMSELVES. Pushing a fix while the previous attempt
-# is still going leaves two runs building the same three platforms, and the
-# older one's answer is about code that no longer exists. On private minutes
-# that is billed twice over, and Windows bills at 2x and macOS at 10x, so the
-# duplicate costs several times what the push did.
-#   cancel-in-progress IS CONDITIONAL, and the condition is the point: a run
-# that is part of publishing a release must never be killed by somebody's push
-# landing mid-build, so only push and pull_request runs are cancellable.
-# Called from release.yml, github.workflow is the caller's name, which puts a
-# release in its own group regardless.
+# Not applied to release runs: a push must not kill a build that is publishing.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
 
 env:
-  # Pinned, not "latest". The 1.21 source needs the three wxWidgets 3 API
-  # fixes this repository carries, and a different major version is a
-  # different set of removals; this is the version the code is known to build
-  # against. Bumping it is a deliberate change, and the cache key follows it.
   WX_VERSION: v3.3.3
 
-  # EVERY wxWidgets SUBSYSTEM SevenuP DOES NOT CALL. Its whole API surface is
-  # core and base -- roughly 60 classes, checked against the source -- but a
-  # default configure builds the lot, and most of the build time goes into
-  # libraries this program never links. None of these is a feature being given
-  # up; they are code that was never reachable.
-  #   libpng, libjpeg and libtiff stay: wxImage's handlers are what import and
-  # export BMP, GIF, JPG, PNG, PCX, TIF, IFF and XPM, which is a feature.
-  #   CHANGING THIS LIST MEANS BUMPING THE CACHE KEYS BELOW. They end in a
-  # version suffix for exactly this reason: the cached tree is the output of
-  # these flags, and a stale hit would quietly restore the untrimmed build.
-  #   Every name here was checked against wxWidgets' own configure. There is
-  # deliberately no --disable-xml: wxWidgets has no such option, and passing
-  # one it does not recognise makes configure exit rather than warn.
+  # Must reach the app build too, not only wxWidgets.
+  MACOS_MIN: "11.0"
+
   WX_TRIM: >-
     --disable-html --disable-xrc --disable-sockets
     --disable-aui --disable-stc --disable-richtext --disable-propgrid
@@ -72,27 +28,13 @@ env:
     --disable-debugreport --without-opengl
 
 jobs:
-  # ---------------------------------------------------------------- macOS ---
-  # UNIVERSAL, because the audience splits across both architectures: Apple
-  # silicon for anyone on a current machine, Intel for the older hardware a
-  # Spectrum tool tends to live on. wxWidgets can build both slices in one
-  # pass, and the app bundle is a binary plus resources, so one bundle serves
-  # both rather than making somebody choose.
   macos:
     name: macos-universal
     runs-on: macos-14
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
-      # RESTORE AND SAVE ARE SPLIT, rather than the one cache action that does
-      # both. The combined action saves in a post-job step, which only runs
-      # when the job succeeded, so a failure anywhere after this -- the app
-      # build, a self-containment check, the smoke run -- threw away a
-      # perfectly good wxWidgets and made the next attempt build it again.
-      # Getting this workflow working cost that rebuild six times over.
-      #   Saving immediately after the build instead means the toolkit is kept
-      # on the strength of the toolkit building, which is the only thing that
-      # question depends on.
+      # Split from save so a later failure does not discard a built wxWidgets.
       - name: Restore the static wxWidgets build
         id: wxcache
         uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
@@ -100,22 +42,7 @@ jobs:
           path: wx-install
           key: wx-${{ env.WX_VERSION }}-macos14-universal-static-v3
 
-      # =builtin ON EVERY IMAGE LIBRARY, and this is not belt-and-braces. The
-      # runner has Homebrew on it, configure finds Homebrew's libtiff, libwebp
-      # and pcre2, and those are built for the runner's own architecture only.
-      # wxWidgets then links against them happily and the universal build dies
-      # much later, at the app link, as "symbol(s) not found for architecture
-      # x86_64" with the real cause four screens further up in ld warnings.
-      # Building wxWidgets' own bundled copies keeps the whole tree universal.
-      #   libwebp is dropped rather than built: SevenuP reads and writes BMP,
-      # GIF, JPG, PNG, PCX, TIF, IFF and XPM, and never WebP.
-      #
-      # --disable-shared is the whole point: it produces libwx_*.a, which
-      # wx-config then hands to the link as archives rather than as -lwx
-      # against a dylib somewhere in /opt/homebrew.
-      #   --with-macosx-version-min=11.0 sets the floor. Without it the floor
-      # becomes the runner's SDK and the binary refuses to start on anything
-      # older, which for this audience is the wrong default.
+      # =builtin: Homebrew ships single-arch libs, which break the universal link.
       - name: Build wxWidgets as a static universal library
         id: wxbuild
         if: steps.wxcache.outputs.cache-hit != 'true'
@@ -130,7 +57,7 @@ jobs:
             --disable-tests \
             $WX_TRIM \
             --with-osx_cocoa \
-            --with-macosx-version-min=11.0 \
+            --with-macosx-version-min=$MACOS_MIN \
             --enable-universal_binary=x86_64,arm64 \
             --with-libjpeg=builtin \
             --with-libpng=builtin \
@@ -143,9 +70,6 @@ jobs:
           make -j"$(sysctl -n hw.ncpu)"
           make install
 
-      # Skipped when the cache hit, because wxbuild did not run and its
-      # outcome is then 'skipped'; re-saving an unchanged key would only
-      # warn that it already exists.
       - name: Save the static wxWidgets build
         if: steps.wxbuild.outcome == 'success'
         uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
@@ -158,14 +82,9 @@ jobs:
           set -eux
           cd SRC
           make -f makefile.osx WX_CONFIG="$GITHUB_WORKSPACE/wx-install/bin/wx-config" \
-            ARCHFLAGS="-arch x86_64 -arch arm64"
+            ARCHFLAGS="-arch x86_64 -arch arm64" \
+            MACOS_MIN="$MACOS_MIN"
 
-      # THE CHECK. A dependency on anything outside /usr/lib and
-      # /System/Library is a dependency the downloader does not have. Homebrew
-      # is called out by name because it is the one that appears by accident:
-      # if the build ever picks up /opt/homebrew's wxWidgets instead of the
-      # static one above, everything still compiles and links, and only this
-      # step says so.
       - name: Check the app is self-contained, and both architectures are in it
         run: |
           set -eu
@@ -174,13 +93,14 @@ jobs:
           lipo -info "$bin"
           lipo -info "$bin" | grep -q 'x86_64' || { echo "::error::no x86_64 slice"; exit 1; }
           lipo -info "$bin" | grep -q 'arm64'  || { echo "::error::no arm64 slice";  exit 1; }
+          echo "--- oldest macOS it will start on ---"
+          otool -l "$bin" | grep -A3 LC_BUILD_VERSION | grep minos | sort -u
+          bad=$(otool -l "$bin" | grep -A3 LC_BUILD_VERSION | grep minos \
+                | grep -vc "minos $MACOS_MIN" || true)
+          [ "$bad" = "0" ] || { echo "::error::a slice does not target $MACOS_MIN"; exit 1; }
+
           echo "--- what it asks the loader for ---"
           otool -L "$bin"
-          # Only the indented lines are dependencies. otool prints a header per
-          # architecture for a fat binary, so `tail -n +2` drops the first one
-          # and leaves the second looking like a dependency that is neither in
-          # /usr/lib nor /System/Library -- which failed a binary that was
-          # perfectly fine.
           if otool -L "$bin" | grep -E '^[[:space:]]+/' | \
              grep -vE '^[[:space:]]+(/usr/lib/|/System/Library/)'; then
             echo "::error::the binary links something outside /usr/lib and /System/Library"
@@ -188,10 +108,6 @@ jobs:
           fi
           echo "self-contained: only system libraries and frameworks"
 
-      # It launched on the runner, which is more than `file` can tell you.
-      # SevenuP has no --version to run, so this starts the real GUI against a
-      # generated .scr, gives it a moment, and checks it is still alive: a
-      # missing symbol or a broken bundle kills it immediately.
       - name: Run it
         run: |
           set -eu
@@ -213,13 +129,7 @@ jobs:
             exit 1
           fi
 
-      # ZIPPED HERE, not by the packaging job. Artifact upload does not carry
-      # the executable bit or symlinks, and an app bundle is nothing but a
-      # directory tree that depends on both: uploaded as a directory it comes
-      # back down unrunnable, and the code signature with it. ditto is the
-      # macOS-aware archiver and is what `Compress-Archive`-style tooling is
-      # not; --keepParent puts SevenuP.app itself inside the zip rather than
-      # its contents.
+      # ditto: artifact upload drops the executable bit and symlinks.
       - name: Archive the bundle
         run: ditto -c -k --sequesterRsrc --keepParent SRC/SevenuP.app SevenuP-macos-universal.zip
 
@@ -229,18 +139,9 @@ jobs:
           path: SevenuP-macos-universal.zip
           if-no-files-found: error
 
-  # ---------------------------------------------------------------- Linux ---
-  # APPIMAGE, not a tarball. Static wxWidgets removes the wxWidgets dependency
-  # but not GTK, which wxWidgets' Linux port is built on and which cannot be
-  # statically linked in any sane way. An AppImage carries GTK and its stack
-  # along with the binary, which is what makes the download runnable on a
-  # machine that has not been prepared for it.
   linux:
     name: linux-x86_64
-    # PINNED, deliberately not ubuntu-latest. The runner's glibc becomes the
-    # floor for the AppImage, and an AppImage built on 24.04 does not start on
-    # Debian 12 or Ubuntu 22.04. 22.04 drops that floor to glibc 2.35 and costs
-    # this build nothing. Raising this label raises the floor for every user.
+    # Pinned: the runner glibc becomes the AppImage floor.
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -250,15 +151,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev imagemagick file desktop-file-utils
 
-      # RESTORE AND SAVE ARE SPLIT, rather than the one cache action that does
-      # both. The combined action saves in a post-job step, which only runs
-      # when the job succeeded, so a failure anywhere after this -- the app
-      # build, a self-containment check, the smoke run -- threw away a
-      # perfectly good wxWidgets and made the next attempt build it again.
-      # Getting this workflow working cost that rebuild six times over.
-      #   Saving immediately after the build instead means the toolkit is kept
-      # on the strength of the toolkit building, which is the only thing that
-      # question depends on.
+      # Split from save so a later failure does not discard a built wxWidgets.
       - name: Restore the static wxWidgets build
         id: wxcache
         uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
@@ -284,9 +177,6 @@ jobs:
           make -j"$(nproc)"
           make install
 
-      # Skipped when the cache hit, because wxbuild did not run and its
-      # outcome is then 'skipped'; re-saving an unchanged key would only
-      # warn that it already exists.
       - name: Save the static wxWidgets build
         if: steps.wxbuild.outcome == 'success'
         uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
@@ -301,11 +191,6 @@ jobs:
           make -f makefile.unx WX_CONFIG="$GITHUB_WORKSPACE/wx-install/bin/wx-config"
           file SevenuP
 
-      # linuxdeploy reads the .desktop file to name the AppImage and to decide
-      # what goes in it, so both it and an icon have to exist on disk first.
-      # The icon is converted from the 32x32 XPM the program already uses for
-      # its own window, so the AppImage, the window and the Windows build all
-      # show the same thing.
       - name: Stage an AppDir
         run: |
           set -eux
@@ -327,19 +212,7 @@ jobs:
           DESKTOP
           desktop-file-validate AppDir/usr/share/applications/sevenup.desktop
 
-      # glib looks for GIO modules in ONE directory, and left alone that is the
-      # host's /usr/lib/<triple>/gio/modules. Those are built against the
-      # host's glib, which on any reasonably current distribution is newer than
-      # the glib bundled here, so they fail to load and print on every start:
-      #
-      #   libgvfscommon.so: undefined symbol: g_task_set_static_name
-      #   Failed to load module: .../libgvfsdbus.so
-      #
-      # Nothing breaks -- the losses are gvfs volume monitoring and the dconf
-      # settings backend, neither of which a Spectrum bitmap editor uses -- but
-      # it looks like a broken program to whoever started it from a terminal.
-      # Pointing glib at the bundle's own directory keeps it from reaching for
-      # libraries built against a glib that is not the one running.
+      # Host GIO modules are built against a newer glib and fail to load.
       - name: Keep glib away from the host's GIO modules
         run: |
           set -eux
@@ -356,9 +229,6 @@ jobs:
           curl -fsSL -o linuxdeploy-plugin-gtk \
             https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
           chmod +x linuxdeploy linuxdeploy-plugin-gtk
-          # The runners have no FUSE, so the AppImages cannot mount themselves;
-          # extracting and running the payload directly is the documented way
-          # round it and is what every CI doing this ends up doing.
           export APPIMAGE_EXTRACT_AND_RUN=1
           export DEPLOY_GTK_VERSION=3
           ./linuxdeploy --appdir AppDir --plugin gtk --output appimage \
@@ -367,10 +237,6 @@ jobs:
           mv SevenuP*.AppImage SevenuP-linux-x86_64.AppImage
           chmod +x SevenuP-linux-x86_64.AppImage
 
-      # THE CHECK, in the only terms that mean anything for an AppImage: not
-      # what the inner binary links, which is allowed to name GTK, but whether
-      # the bundle carries those libraries itself. wxWidgets must not appear at
-      # all -- if it does, the static link silently did not happen.
       - name: Check the AppImage carries its dependencies
         run: |
           set -eu
@@ -388,7 +254,6 @@ jobs:
           fi
           echo "self-contained: GTK bundled, wxWidgets linked in"
 
-      # xvfb, because a GUI on a headless runner has no display to open on.
       - name: Run it
         run: |
           set -eu
@@ -418,12 +283,6 @@ jobs:
           path: SevenuP-linux-x86_64.AppImage
           if-no-files-found: error
 
-  # -------------------------------------------------------------- Windows ---
-  # ONE .EXE AND NOTHING ELSE. MSYS2's own wxWidgets package is a DLL build,
-  # which would mean shipping libwx_*.dll plus the three MinGW runtime DLLs and
-  # hoping nobody separates them from the program. Building wxWidgets static
-  # here, and linking the MinGW runtimes in as well, gets it down to a single
-  # file that runs where it is dropped.
   windows:
     name: windows-x86_64
     runs-on: windows-latest
@@ -442,15 +301,7 @@ jobs:
             mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-pkgconf
 
-      # RESTORE AND SAVE ARE SPLIT, rather than the one cache action that does
-      # both. The combined action saves in a post-job step, which only runs
-      # when the job succeeded, so a failure anywhere after this -- the app
-      # build, a self-containment check, the smoke run -- threw away a
-      # perfectly good wxWidgets and made the next attempt build it again.
-      # Getting this workflow working cost that rebuild six times over.
-      #   Saving immediately after the build instead means the toolkit is kept
-      # on the strength of the toolkit building, which is the only thing that
-      # question depends on.
+      # Split from save so a later failure does not discard a built wxWidgets.
       - name: Restore the static wxWidgets build
         id: wxcache
         uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
@@ -475,9 +326,6 @@ jobs:
           make -j"$(nproc)"
           make install
 
-      # Skipped when the cache hit, because wxbuild did not run and its
-      # outcome is then 'skipped'; re-saving an unchanged key would only
-      # warn that it already exists.
       - name: Save the static wxWidgets build
         if: steps.wxbuild.outcome == 'success'
         uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
@@ -485,10 +333,6 @@ jobs:
           path: wx-install
           key: wx-${{ env.WX_VERSION }}-mingw64-static-v2
 
-      # windres has to find wx/msw/wx.rc, which lives in the wxWidgets include
-      # tree, and the setup.h that belongs to this particular build. wx-config
-      # knows where both are; --cppflags is passed through so the resource
-      # compiler resolves the same headers the C++ did.
       - name: Build SevenuP.exe
         run: |
           set -eux
@@ -499,10 +343,6 @@ jobs:
             WX_RCFLAGS="$($WXC --cppflags)"
           file SevenuP.exe
 
-      # THE CHECK. objdump lists the DLLs the loader will go looking for. The
-      # Windows system DLLs are expected; anything else -- a libwx_*.dll, or
-      # the MinGW runtime trio -- means a file somebody has to keep next to the
-      # program, which is exactly what this build exists to avoid.
       - name: Check the .exe is self-contained
         run: |
           set -eu

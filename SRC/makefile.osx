@@ -5,30 +5,16 @@ PROGRAM = SevenuP
 
 OBJECTS = $(PROGRAM).o TheFrame.o OpenFile.o
 
-# implementation
-# -std=c++17 IS NOT OPTIONAL, and is pinned rather than left to the compiler.
-# wxWidgets 3 headers need C++11 at minimum -- they use override, = default and
-# = delete -- and `g++` with no -std picks whatever that compiler's default
-# happens to be. That default varies by toolchain and by year: a machine
-# defaulting to C++14 builds this fine while a CI runner defaulting to C++98
-# fails with hundreds of errors inside wx/string.h, which look like wxWidgets
-# is broken and are nothing of the kind. Naming the standard makes the build
-# the same everywhere. The 2006 sources use nothing C++17 removed.
-# ARCHFLAGS builds for architectures other than this machine's. Empty by
-# default, so an ordinary local build stays native and quick; CI sets
-# "-arch x86_64 -arch arm64" to get one universal binary out of a universal
-# wxWidgets. It has to reach BOTH the compile and the link: wx-config emits no
-# -arch of its own even when wxWidgets itself was built universal, so without
-# this the app silently comes out single-architecture against fat libraries,
-# which links and runs perfectly on the machine that built it.
 ARCHFLAGS ?=
-CXXFLAGS:= -Os -std=c++17 $(ARCHFLAGS) `$(WX_CONFIG) --cxxflags`
-LDFLAGS:= $(ARCHFLAGS)
-# SevenuP calls core and base only, so that is what is asked for. A default
-# `wx-config --libs` also hands over xrc, html, qa, xml and net, none of which
-# this program references; naming them here keeps those five out of the link,
-# and keeps wx-config from being asked for a library that a trimmed build of
-# wxWidgets did not produce.
+
+# Must reach both compile and link, or the binary claims the build host's SDK.
+MACOS_MIN ?=
+MINFLAG := $(if $(MACOS_MIN),-mmacosx-version-min=$(MACOS_MIN))
+
+# -std=c++17: wxWidgets 3 headers need C++11 or later; g++ may default to C++98.
+CXXFLAGS:= -Os -std=c++17 $(ARCHFLAGS) $(MINFLAG) `$(WX_CONFIG) --cxxflags`
+LDFLAGS:= $(ARCHFLAGS) $(MINFLAG)
+# core,base only; the default also links xrc, html, qa, xml and net.
 LDLIBS:=`$(WX_CONFIG) --libs core,base`
 
 .SUFFIXES:	.o .cpp
@@ -46,6 +32,8 @@ $(PROGRAM).app: $(PROGRAM) Info.plist SevenUp.icns
 
 $(PROGRAM):	$(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+.PHONY: all clean
+
 clean: 
 	rm -f *.o $(PROGRAM)
 	rm -Rf $(PROGRAM).app

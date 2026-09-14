@@ -48,13 +48,10 @@ bool SevenuP::OnInit()          // This is executed at startup
 
 #ifdef __WXMAC__
 
-// Files opened from the Finder arrive as an Apple Event, not in argv.
-// Hand the whole array to OpenArrayFiles at once, the same entry point
-// the drag and drop target uses, so the canvas is refreshed only after
-// the last file rather than once per file.
+// Finder opens arrive as an Apple Event, not in argv.
 void SevenuP::MacOpenFiles(const wxArrayString &fileNames)
 {
-        if (m_frame==NULL)      // event arrived before the frame exists
+        if (m_frame==NULL)
                 {
                 wxApp::MacOpenFiles(fileNames);
                 return;

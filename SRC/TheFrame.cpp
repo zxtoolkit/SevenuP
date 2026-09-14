@@ -468,12 +468,7 @@ TheFrame::TheFrame(int xpos, int ypos, int width, int height, int argc, wxChar *
         menuSprite->Append(SPR_MOVE,_("Move frame"),_("Move current frame to another position"));
         menuSprite->Append(SPR_REMOVE,_("Remove frame"),_("Remove current frame from sprite"));
         menuSprite->AppendSeparator();
-        // GTK reserves the bare arrow keys for moving focus and refuses to
-        // register them as menu accelerators, warning "\"Left\" must use
-        // modifiers to be used as a keyboard accelerator". Advertising a
-        // shortcut there that cannot fire is worse than showing none, so the
-        // accelerator is left out of the label on GTK. The keys themselves
-        // still work everywhere: MyWindow::OnKey handles them directly.
+        // GTK refuses bare arrow keys as accelerators; OnKey handles them.
 #ifdef __WXGTK__
         menuSprite->Append(SPR_SEL_PREV,_("Select previous frame"),_("Select previous sprite frame"));
         menuSprite->Append(SPR_SEL_NEXT,_("Select next frame"),_("Select next sprite frame"));
@@ -5458,14 +5453,9 @@ void MyWindow::OnKey(wxKeyEvent& event)
         key=event.GetKeyCode();
         switch (key)
                 {
-                // Sprite frame stepping. This used to exist only as the menu
-                // accelerator, which GTK refuses to register, so on Linux
-                // there was no way to reach it at all.
                 case WXK_LEFT:
                 case WXK_RIGHT: {
-                        // The menu ids are private to TheFrame, so the public
-                        // handlers are called directly rather than posting a
-                        // command event. They ignore the event argument.
+                        // Menu ids are private; call the handlers directly.
                         wxCommandEvent cmd;
                         if (key==WXK_LEFT) framee->SpritePrev(cmd);
                         else               framee->SpriteNext(cmd);

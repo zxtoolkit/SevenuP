@@ -1,21 +1,5 @@
 name: release
 
-# WHAT THIS SHIPS: three downloads -- a universal macOS app bundle, a Linux
-# AppImage and a single Windows .exe -- each of which runs on a machine with
-# nothing installed on it. None of them is an installer or a package. The
-# audience for a 2006 Spectrum art tool wants the program to open when they
-# double-click it, not a dependency to resolve first.
-#
-# The binaries are not built here. `build` below calls .github/workflows/
-# build.yml, the same file that runs on every push, so what gets attached to a
-# release is what CI has been building and checking all along rather than a
-# second copy of the build that drifts out of step with it.
-#
-# A RELEASE IS ALWAYS ASKED FOR. There is no `push` trigger: a tag on its own
-# builds nothing. The two ways in are publishing a release from the release
-# page and dispatching this by hand, both of which are somebody deciding to
-# release.
-
 on:
   release:
     types: [published]
@@ -46,22 +30,12 @@ jobs:
           esac
           mkdir -p pkg
 
-          # macOS arrives already zipped, by ditto, in the job that built it:
-          # see the note there about permissions and symlinks. Rezipping it
-          # anywhere else is how an app bundle stops being runnable, so this
-          # only renames.
           cp art/SevenuP-macos-universal/SevenuP-macos-universal.zip \
              "pkg/SevenuP-$ver-macos-universal.zip"
 
-          # An AppImage is meant to be downloaded and run as it is, so it is
-          # attached as a bare file rather than wrapped in an archive that the
-          # downloader would only have to undo.
           cp art/SevenuP-linux-x86_64/SevenuP-linux-x86_64.AppImage \
              "pkg/SevenuP-$ver-linux-x86_64.AppImage"
 
-          # The Windows build is one self-contained .exe, but it is zipped
-          # anyway: browsers and mail gateways treat a bare .exe download
-          # far more suspiciously than a zip holding one.
           (cd art/SevenuP-windows-x86_64 && zip -X -9 -q \
              "$GITHUB_WORKSPACE/pkg/SevenuP-$ver-windows-x86_64.zip" SevenuP.exe)
 
@@ -87,9 +61,6 @@ jobs:
 
   release:
     name: attach binaries to release
-    # A published release runs with github.ref set to its tag, and so does a
-    # dispatch made against one. A dispatch against a branch has no version to
-    # attach anything to, and stops here having built and checked the assets.
     if: startsWith(github.ref, 'refs/tags/')
     needs: [package]
     runs-on: ubuntu-latest
@@ -108,16 +79,10 @@ jobs:
           set -eu
           ls -l rel
 
-          # Written to a file rather than inlined: a heredoc nested inside
-          # $( ) is parsed for the closing paren, and an apostrophe in the
-          # prose breaks it. The heredoc is quoted, so the version goes in
-          # afterwards with sed.
           cat > release-notes.md <<'NOTES'
           SevenuP is a ZX Spectrum graphic editor by Jaime Tejedor Gómez
           (Metalbrain). Every download below is self-contained: wxWidgets is
           linked in, so there is nothing to install first.
-
-          ### Install
 
           **macOS** (Intel and Apple Silicon)
 
@@ -147,21 +112,12 @@ jobs:
           The AppImage carries GTK with it and needs glibc 2.35 or newer,
           which means Ubuntu 22.04, Debian 12 or anything more recent.
 
-          ### Verifying a download
-
           `SHA256SUMS` is attached alongside the assets.
           NOTES
           sed -i "s|VERSION|$GITHUB_REF_NAME|g" release-notes.md
 
-          # CREATE ONLY IF ABSENT, and never with a bare `|| true`, which
-          # swallows a real failure alongside the expected "already exists".
-          # The release object usually exists already, because publishing from
-          # the release page is what triggered this.
           if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "release $GITHUB_REF_NAME exists - uploading into it"
-            # The release page's body is a free text box that can be left
-            # blank. An empty one gets the install steps above; anything at
-            # all in it is somebody's writing and stands.
             body=$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
                      --json body --jq .body)
             if [ -z "$(printf '%s' "$body" | tr -d '[:space:]')" ]; then
@@ -170,7 +126,6 @@ jobs:
               echo "the body was empty - installed the release notes"
             fi
           else
-            # A hyphen marks a pre-release: v1.21-beta is one, v1.21 is not.
             case "$GITHUB_REF_NAME" in
               *-*) pre=--prerelease ;;
               *)   pre= ;;
@@ -181,8 +136,6 @@ jobs:
           fi
           gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --clobber rel/*
 
-      # WHAT A DOWNLOADER CAN CHECK. `rel/` is what was actually attached, so
-      # the hashes cover those exact bytes.
       - name: Publish SHA256SUMS
         env:
           GH_TOKEN: ${{ github.token }}
