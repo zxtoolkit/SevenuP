@@ -11,6 +11,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - macOS build required macOS 14 and would not start on anything older. The
   deployment target was set for wxWidgets only, not for the app itself.
+- Intel slice now targets macOS 10.13; arm64 targets 11.0, its lowest possible.
 
 ## [v1.21.0-rc2] - 2026-09-13
 

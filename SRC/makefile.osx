@@ -22,17 +22,21 @@ LDLIBS:=`$(WX_CONFIG) --libs core,base`
 all:    $(PROGRAM).app
 
 $(PROGRAM).app: $(PROGRAM) Info.plist SevenUp.icns
-	install -d $@/Contents
-	install -d $@/Contents/MacOS
-	install -d $@/Contents/Resources
-	install -m 644 Info.plist $@/Contents
-	install -m 644 SevenUp.icns $@/Contents/Resources
-	install $< $@/Contents/MacOS
-	codesign --force --sign - $@
+	$(MAKE) -f makefile.osx bundle
+
+# Assembles around an existing binary: the universal build lipos two slices first.
+bundle:
+	install -d $(PROGRAM).app/Contents
+	install -d $(PROGRAM).app/Contents/MacOS
+	install -d $(PROGRAM).app/Contents/Resources
+	install -m 644 Info.plist $(PROGRAM).app/Contents
+	install -m 644 SevenUp.icns $(PROGRAM).app/Contents/Resources
+	install $(PROGRAM) $(PROGRAM).app/Contents/MacOS
+	codesign --force --sign - $(PROGRAM).app
 
 $(PROGRAM):	$(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
-.PHONY: all clean
+.PHONY: all bundle clean
 
 clean: 
 	rm -f *.o $(PROGRAM)

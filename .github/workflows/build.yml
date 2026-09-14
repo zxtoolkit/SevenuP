@@ -18,8 +18,9 @@ concurrency:
 env:
   WX_VERSION: v3.3.3
 
-  # Must reach the app build too, not only wxWidgets.
-  MACOS_MIN: "11.0"
+  # arm64 cannot go below 11.0; clang clamps older targets. Intel can.
+  MACOS_MIN_INTEL: "10.13"
+  MACOS_MIN_ARM: "11.0"
 
   WX_TRIM: >-
     --disable-html --disable-xrc --disable-sockets
@@ -40,7 +41,7 @@ jobs:
         uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: wx-install
-          key: wx-${{ env.WX_VERSION }}-macos14-universal-static-v3
+          key: wx-${{ env.WX_VERSION }}-macos14-universal-static-min${{ env.MACOS_MIN_INTEL }}-v4
 
       # =builtin: Homebrew ships single-arch libs, which break the universal link.
       - name: Build wxWidgets as a static universal library
@@ -57,7 +58,7 @@ jobs:
             --disable-tests \
             $WX_TRIM \
             --with-osx_cocoa \
-            --with-macosx-version-min=$MACOS_MIN \
+            --with-macosx-version-min=$MACOS_MIN_INTEL \
             --enable-universal_binary=x86_64,arm64 \
             --with-libjpeg=builtin \
             --with-libpng=builtin \
@@ -75,15 +76,29 @@ jobs:
         uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: wx-install
-          key: wx-${{ env.WX_VERSION }}-macos14-universal-static-v3
+          key: wx-${{ env.WX_VERSION }}-macos14-universal-static-min${{ env.MACOS_MIN_INTEL }}-v4
 
-      - name: Build SevenuP.app
+      # One compile carries one deployment target, so each slice is built separately.
+      - name: Build SevenuP, once per architecture, then lipo them together
         run: |
           set -eux
           cd SRC
-          make -f makefile.osx WX_CONFIG="$GITHUB_WORKSPACE/wx-install/bin/wx-config" \
-            ARCHFLAGS="-arch x86_64 -arch arm64" \
-            MACOS_MIN="$MACOS_MIN"
+          WXC="$GITHUB_WORKSPACE/wx-install/bin/wx-config"
+
+          make -f makefile.osx clean
+          make -f makefile.osx SevenuP WX_CONFIG="$WXC" \
+            ARCHFLAGS="-arch x86_64" MACOS_MIN="$MACOS_MIN_INTEL"
+          mv SevenuP ../SevenuP.x86_64
+
+          make -f makefile.osx clean
+          make -f makefile.osx SevenuP WX_CONFIG="$WXC" \
+            ARCHFLAGS="-arch arm64" MACOS_MIN="$MACOS_MIN_ARM"
+          mv SevenuP ../SevenuP.arm64
+
+          lipo -create ../SevenuP.x86_64 ../SevenuP.arm64 -output SevenuP
+          lipo -info SevenuP
+
+          make -f makefile.osx bundle
 
       - name: Check the app is self-contained, and both architectures are in it
         run: |
@@ -93,11 +108,17 @@ jobs:
           lipo -info "$bin"
           lipo -info "$bin" | grep -q 'x86_64' || { echo "::error::no x86_64 slice"; exit 1; }
           lipo -info "$bin" | grep -q 'arm64'  || { echo "::error::no arm64 slice";  exit 1; }
-          echo "--- oldest macOS it will start on ---"
-          otool -l "$bin" | grep -A3 LC_BUILD_VERSION | grep minos | sort -u
-          bad=$(otool -l "$bin" | grep -A3 LC_BUILD_VERSION | grep minos \
-                | grep -vc "minos $MACOS_MIN" || true)
-          [ "$bad" = "0" ] || { echo "::error::a slice does not target $MACOS_MIN"; exit 1; }
+          echo "--- oldest macOS each slice will start on ---"
+          for a in x86_64:"$MACOS_MIN_INTEL" arm64:"$MACOS_MIN_ARM"; do
+            arch=${a%%:*}; want=${a##*:}
+            lipo -thin "$arch" "$bin" -output /tmp/slice.$arch
+            got=$(otool -l /tmp/slice.$arch \
+                  | grep -A3 -E 'LC_BUILD_VERSION|LC_VERSION_MIN_MACOSX' \
+                  | grep -E '^\s+(minos|version) ' | awk '{print $2}' | head -1)
+            echo "  $arch -> $got (wanted $want)"
+            [ "$got" = "$want" ] || {
+              echo "::error::$arch targets $got, not $want"; exit 1; }
+          done
 
           echo "--- what it asks the loader for ---"
           otool -L "$bin"
