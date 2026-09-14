@@ -7,6 +7,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v1.21.0-rc4] - 2026-09-14
+
 ### Added
 
 - Windows version resource, so `SevenuP.exe` carries a product name, version
@@ -63,7 +65,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   as accelerators. The canvas now handles them directly.
 - New Graph dialog's spin controls were allocated negative width on GTK.
 
-[Unreleased]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc3...HEAD
+[Unreleased]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc4...HEAD
+[v1.21.0-rc4]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc3...v1.21.0-rc4
 [v1.21.0-rc3]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc2...v1.21.0-rc3
 [v1.21.0-rc2]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc1...v1.21.0-rc2
 [v1.21.0-rc1]: https://github.com/zxtoolkit/SevenuP/releases/tag/v1.21.0-rc1
