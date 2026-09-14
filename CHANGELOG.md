@@ -7,6 +7,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Windows version resource, so `SevenuP.exe` carries a product name, version
+  and copyright in its file properties instead of showing none.
+
 ### Fixed
 
 - macOS build required macOS 14 and would not start on anything older. The

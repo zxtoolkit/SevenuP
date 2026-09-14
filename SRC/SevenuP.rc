@@ -2,6 +2,39 @@
 
 sevenup ICON "bitmaps/sevenup.ico"
 
+// Version resource. Windows shows these in the file properties dialog, and a
+// code signing service can require ProductName and ProductVersion to be set
+// and to match the release. Bump all four version fields together.
+// wx.rc above includes <windows.h>, so the VOS_/VFT_ names are defined here.
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     1,21,0,0
+PRODUCTVERSION  1,21,0,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS       0
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"    // U.S. English, Unicode
+        BEGIN
+            VALUE "CompanyName",      "Jaime Tejedor Gomez (Metalbrain)"
+            VALUE "FileDescription",  "SevenuP - a ZX Spectrum graphic editor"
+            VALUE "FileVersion",      "1.21.0.0"
+            VALUE "InternalName",     "SevenuP"
+            VALUE "LegalCopyright",   "Copyright (C) 2002-2007 Jaime Tejedor Gomez (Metalbrain). GPL-2.0-or-later."
+            VALUE "OriginalFilename", "SevenuP.exe"
+            VALUE "ProductName",      "SevenuP"
+            VALUE "ProductVersion",   "1.21.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
 erase   BITMAP "bitmaps/reset.bmp"
 save    BITMAP "bitmaps/save.bmp"
 zoomin  BITMAP "bitmaps/zoomin.bmp"
