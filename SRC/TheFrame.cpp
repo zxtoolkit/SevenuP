@@ -223,30 +223,30 @@ TheFrame::TheFrame(int xpos, int ypos, int width, int height, int argc, wxChar *
         // copy the one in SevenuP.app/contents/Resources/ there.
         if (inifile.fail())
             {
-                char path[PATH_MAX];
-                sprintf(path, _("%s/Library/SevenuP"),getenv(_("HOME")));
-                mkdir(path, 0755);
+                wxString IniDir = IniPath.BeforeLast('/');
+                mkdir(IniDir.mb_str(wxConvLocal), 0755);
                 
-                sprintf(path, _("%s/SevenuP.ini"), path);
-                FILE* ip = fopen(ExePath.Left(pathend+1)+_("../Resources/SevenuP.ini"), _("r"));
-                FILE* op = fopen(path, _("w"));
-                
-                if(ip && op) 
+                wxString Seed = ExePath.Left(pathend+1)+_("../Resources/SevenuP.ini");
+                FILE* ip = fopen(Seed.mb_str(wxConvLocal), "r");
+                if(ip)
                     {
-                    // Crude copy routine - works well enough though.
-                    char ch;
-                    while((ch = fgetc(ip)) != EOF)
+                    FILE* op = fopen(IniPath.mb_str(wxConvLocal), "w");
+                    if(op)
                         {
-                        fputc(ch, op);
+                        // Crude copy routine - works well enough though.
+                        int ch;
+                        while((ch = fgetc(ip)) != EOF)
+                            {
+                            fputc(ch, op);
+                            }
+                        fclose(op);
                         }
-                    
                     fclose(ip);
-                    fclose(op);
                     }
                     
                 // Try again...
                 inifile.clear();
-                inifile.open(path);
+                inifile.open(IniPath.mb_str(wxConvLocal));
             }
 #endif
 
