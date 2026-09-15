@@ -1392,20 +1392,21 @@ void TheFrame::FileSave(wxCommandEvent &event)
 {
         if (Files_open==0) return;
         lastx=-1;
-	wxFileDialog *dialog;
+	wxString wildcard;
 	wxString extensions[] = {_(".scr"),_(".sev")};
 	if ((Current->OpenGraph->GetSizeX()==256)&&(Current->OpenGraph->GetSizeY()==192))
                 {
-	        dialog = new wxFileDialog(this, _("Choose a file name to save"), SavePath, Current->OpenName, _("SCReen memory snapshot (*.scr)|*.scr|SEVenuP graphic format (*.sev)|*.sev"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+	        wildcard = _("SCReen memory snapshot (*.scr)|*.scr|SEVenuP graphic format (*.sev)|*.sev");
 		}
 	else	{
-	        dialog = new wxFileDialog(this,_("Choose a file name to save"), SavePath, Current->OpenName,_("SEVenuP graphic format (*.sev)|*.sev"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+	        wildcard = _("SEVenuP graphic format (*.sev)|*.sev");
 		extensions[0] =_(".sev");
 		}
-	dialog->CentreOnParent();
-        if (dialog->ShowModal() == wxID_OK)
+	wxFileDialog dialog(this, _("Choose a file name to save"), SavePath, Current->OpenName, wildcard, wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+	dialog.CentreOnParent();
+        if (dialog.ShowModal() == wxID_OK)
                 {
-                wxString s=dialog->GetPath();
+                wxString s=dialog.GetPath();
                 if (RememberSavePath==1)
                         {
                         int searchindxwin=s.rfind(_("\\"));
@@ -1416,7 +1417,7 @@ void TheFrame::FileSave(wxCommandEvent &event)
 	        wxString ext;
 	        ext = s.Right(4);
 	        ext = ext.Lower();
-	        int fi=dialog->GetFilterIndex();
+	        int fi=dialog.GetFilterIndex();
        		if (ext!=extensions[fi])
         	       	{
                		s+=extensions[fi];
