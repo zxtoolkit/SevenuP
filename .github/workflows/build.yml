@@ -161,7 +161,12 @@ jobs:
 
       # ditto: artifact upload drops the executable bit and symlinks.
       - name: Archive the bundle
-        run: ditto -c -k --sequesterRsrc --keepParent SRC/SevenuP.app SevenuP-macos-universal.zip
+        run: |
+          set -eux
+          mkdir dist
+          ditto SRC/SevenuP.app dist/SevenuP.app
+          cp "GNU-GPL License.txt" SevenuP.txt SevenuP-esp.txt dist/
+          ditto -c -k --sequesterRsrc dist SevenuP-macos-universal.zip
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
@@ -254,6 +259,8 @@ jobs:
           mkdir -p AppDir/usr/bin AppDir/usr/share/applications \
                    AppDir/usr/share/icons/hicolor/32x32/apps
           cp SRC/SevenuP AppDir/usr/bin/
+          mkdir -p AppDir/usr/share/doc/sevenup
+          cp "GNU-GPL License.txt" SevenuP.txt SevenuP-esp.txt AppDir/usr/share/doc/sevenup/
           convert SRC/bitmaps/sevenup.xpm \
             AppDir/usr/share/icons/hicolor/32x32/apps/sevenup.png
           cat > AppDir/usr/share/applications/sevenup.desktop <<'DESKTOP'
@@ -405,6 +412,12 @@ jobs:
             ls squashfs-root/usr/lib/ | grep -q "$lib" || {
               echo "::error::$lib is not bundled; the AppImage needs it installed"; exit 1; }
           done
+          echo "--- bundled documentation ---"
+          ls squashfs-root/usr/share/doc/sevenup/
+          for doc in "GNU-GPL License.txt" SevenuP.txt SevenuP-esp.txt; do
+            [ -s "squashfs-root/usr/share/doc/sevenup/$doc" ] || {
+              echo "::error::$doc did not survive into the AppImage"; exit 1; }
+          done
           if ls squashfs-root/usr/lib/ | grep -i '^libwx'; then
             echo "::error::wxWidgets is bundled as a shared library, so it was not linked statically"
             exit 1
@@ -526,8 +539,15 @@ jobs:
           fi
           echo "self-contained: system DLLs only"
 
+      - name: Stage the download
+        run: |
+          set -eux
+          mkdir -p dist
+          cp SRC/SevenuP.exe dist/
+          cp "GNU-GPL License.txt" SevenuP.txt SevenuP-esp.txt dist/
+
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: SevenuP-windows-x86_64
-          path: SRC/SevenuP.exe
+          path: dist/
           if-no-files-found: error

@@ -36,8 +36,8 @@ jobs:
           cp art/SevenuP-linux-x86_64/SevenuP-linux-x86_64.AppImage \
              "pkg/SevenuP-$ver-linux-x86_64.AppImage"
 
-          (cd art/SevenuP-windows-x86_64 && zip -X -9 -q \
-             "$GITHUB_WORKSPACE/pkg/SevenuP-$ver-windows-x86_64.zip" SevenuP.exe)
+          (cd art/SevenuP-windows-x86_64 && zip -X -9 -q -r \
+             "$GITHUB_WORKSPACE/pkg/SevenuP-$ver-windows-x86_64.zip" .)
 
           ls -l pkg
 
@@ -83,6 +83,10 @@ jobs:
           SevenuP is a ZX Spectrum graphic editor by Jaime Tejedor Gómez
           (Metalbrain). Every download below is self-contained: wxWidgets is
           linked in, so there is nothing to install first.
+
+          Each download carries `GNU-GPL License.txt` and the manual,
+          `SevenuP.txt` and `SevenuP-esp.txt`. In the AppImage they are inside
+          the image, under `usr/share/doc/sevenup`.
 
           **macOS** (Intel and Apple Silicon)
 
