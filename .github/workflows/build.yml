@@ -120,6 +120,15 @@ jobs:
               echo "::error::$arch targets $got, not $want"; exit 1; }
           done
 
+          # LaunchServices reads the plist, not the load commands.
+          echo "--- oldest macOS LaunchServices will start it on ---"
+          got=$(plutil -extract LSMinimumSystemVersion raw \
+                SRC/SevenuP.app/Contents/Info.plist)
+          echo "  Info.plist -> $got (wanted $MACOS_MIN_INTEL)"
+          [ "$got" = "$MACOS_MIN_INTEL" ] || {
+            echo "::error::Info.plist asks for $got, but the Intel slice targets $MACOS_MIN_INTEL"
+            exit 1; }
+
           echo "--- what it asks the loader for ---"
           otool -L "$bin"
           if otool -L "$bin" | grep -E '^[[:space:]]+/' | \
