@@ -99,6 +99,9 @@ jobs:
           has opened once, `.sev` and `.scr` files can be double-clicked
           straight into it.
 
+          One download for both: Intel needs macOS 10.13 High Sierra or newer,
+          Apple Silicon needs 11 Big Sur or newer.
+
           **Windows**
 
           1. Download **SevenuP-VERSION-windows-x86_64.zip**
@@ -106,6 +109,10 @@ jobs:
           3. Run `SevenuP.exe`
 
           One file, no DLLs to keep beside it.
+
+          The .exe is not signed, so the browser may ask you to keep the
+          download, and SmartScreen shows "Windows protected your PC" the
+          first time you run it: click **More info**, then **Run anyway**.
 
           **Linux**
 
