@@ -35,6 +35,7 @@
 
 #include "OpenFile.h"
 #include <stdlib.h>
+#include <vector>
 
 BYTE RPal[16]={28,28,200,200,28,28,200,200,28,28,248,248,28,28,248,248};
 BYTE GPal[16]={28,28,28,28,200,200,200,200,28,28,28,28,248,248,248,248};
@@ -79,7 +80,9 @@ OpenFile::OpenFile(int x_si, int y_si, bool masked, int newnumber)
 
 OpenFile::OpenFile(std::string path)      // Constructor for graph loading
         {
-        char LoadBuff[45000];
+        // Format maximum: 32 frames of 256x192 masked, 768 cells of 17
+        // bytes, after a 14 byte header.
+        std::vector<char> LoadBuff(14+768*17*32, 0);
         std::ifstream file(s2ws(path).mb_str(wxConvLocal),std::ios::binary);
 	int posn; // streampos posn;
         wxString ext;
@@ -106,7 +109,7 @@ OpenFile::OpenFile(std::string path)      // Constructor for graph loading
                 }
         if (ext==_("SCR"))
                 {               // Load .SCR file
-                file.read(LoadBuff,6913);
+                file.read(&LoadBuff[0],6913);
                 if(!file.eof())
                         {
                         file.close();
@@ -118,7 +121,7 @@ OpenFile::OpenFile(std::string path)      // Constructor for graph loading
                 else
                         {
 			  int highthird,highattr;
-			  posn = file.tellg();
+			  posn = file.gcount();
 			  if ( posn == 2048 ) {
 			    highthird = 1; highattr = 0;
 			  } else if ( posn == 2048 + 256 ) {
@@ -146,7 +149,7 @@ OpenFile::OpenFile(std::string path)      // Constructor for graph loading
                                                         {
                                                         OpenGraph->SetByte((third<<11)+(line<<8)+(character<<3)+charline,LoadBuff[parser++]);
                                                         }
-                        for(int character=0;character<highattr;character++)
+                        for(int character=0;character<768;character++)
                                 {			
 				  if ( character < highattr )
 				    OpenGraph->SetAttr(character,LoadBuff[parser++]);
@@ -159,9 +162,18 @@ OpenFile::OpenFile(std::string path)      // Constructor for graph loading
                 }
         else if (ext==_("SEV"))
                 {               // Load .SEV file
-                file.read(LoadBuff,45000);
+                file.read(&LoadBuff[0],(int)LoadBuff.size());
+                int loaded = file.gcount();
                 file.close();
                 flagsure=0;
+                if (loaded<14)
+                        {
+                        wxString strg;
+                        strg=s2ws(path)+_(" is an invalid file!");
+                        (void)wxMessageBox(strg, _("Warning!"));
+                        OpenGraph->Propied1=0;
+                        return;
+                        }
                 if(LoadBuff[0]!='S'||LoadBuff[1]!='e'||LoadBuff[2]!='v'||LoadBuff[3]!='\0')
                         {
                         wxString strg;
@@ -179,7 +191,11 @@ OpenFile::OpenFile(std::string path)      // Constructor for graph loading
                                 int P2=(unsigned char)LoadBuff[8]+256*(unsigned char)LoadBuff[9];
                                 int SX=(unsigned char)LoadBuff[10]+256*(unsigned char)LoadBuff[11];
                                 int SY=(unsigned char)LoadBuff[12]+256*(unsigned char)LoadBuff[13];
-                                if ((P1!=1)||(P2!=0)||(SX>256)||(SY>192))
+                                int C_SX=(SX/8)+(SX%8!=0);
+                                int C_SY=(SY/8)+(SY%8!=0);
+                                // 8 pixel bytes and an attribute per cell.
+                                long needed=14L+(long)C_SX*C_SY*9;
+                                if ((P1!=1)||(P2!=0)||(SX>256)||(SY>192)||(needed>loaded))
                                         {
                                         wxString strg;
                                         strg=s2ws(path)+_(" is an invalid file!");
@@ -192,8 +208,6 @@ OpenFile::OpenFile(std::string path)      // Constructor for graph loading
                                 OpenGraph->Propied2=P2;
                                 char *parser=&LoadBuff[14];
                                 int nonattrpointer=0;
-                                int C_SX=(SX/8)+(SX%8!=0);
-                                int C_SY=(SY/8)+(SY%8!=0);
                                 for (int i=0;i<C_SX*C_SY;i++)
                                         {
                                         for (int j=0;j<8;j++)
@@ -211,7 +225,11 @@ OpenFile::OpenFile(std::string path)      // Constructor for graph loading
                                 int P2=(unsigned char)LoadBuff[8]+256*(unsigned char)LoadBuff[9];
                                 int SX=(unsigned char)LoadBuff[10]+256*(unsigned char)LoadBuff[11];
                                 int SY=(unsigned char)LoadBuff[12]+256*(unsigned char)LoadBuff[13];
-                                if ((P1>2)||(P2>31)||(SX>256)||(SY>192))
+                                int C_SX=(SX/8)+(SX%8!=0);
+                                int C_SY=(SY/8)+(SY%8!=0);
+                                // 8 mask bytes per cell on top when P1 is 2.
+                                long needed=14L+(long)C_SX*C_SY*(P1==2?17:9)*(P2+1);
+                                if ((P1>2)||(P2>31)||(SX>256)||(SY>192)||(needed>loaded))
                                         {
                                         wxString strg;
                                         strg=s2ws(path)+_(" is an invalid file!");
@@ -222,8 +240,6 @@ OpenFile::OpenFile(std::string path)      // Constructor for graph loading
                                 OpenGraph= new SP_Graph(SX,SY,TRUE);
                                 LoadingGraph=OpenGraph;
                                 char *parser=&LoadBuff[14];
-                                int C_SX=(SX/8)+(SX%8!=0);
-                                int C_SY=(SY/8)+(SY%8!=0);
                                 for (int nfram=0;nfram<(P2+1);nfram++)
                                         {
                                         int nonattrpointer=0;
