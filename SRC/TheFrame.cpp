@@ -345,6 +345,13 @@ TheFrame::TheFrame(int xpos, int ypos, int width, int height, int argc, wxChar *
         ExportDataPath=GetIniValueS(IniFile,_("\nExportDataPath="),_("."));
         ExportImagePath=GetIniValueS(IniFile,_("\nExportImagePath="),_("."));
 
+        // "." resolves against the working directory, which is / under the
+        // Finder. Empty leaves the panel wherever the system last was.
+        wxString *dialogpaths[5]={&OpenFilePath,&ImportImagePath,&SavePath,
+                                  &ExportDataPath,&ExportImagePath};
+        for (int i=0;i<5;i++)
+                if (*dialogpaths[i]==_(".")) dialogpaths[i]->Clear();
+
         Warn_closefile=GetIniValue(IniFile,_("\nWarn_closefile="),0,1,1);
         Warn_exitprogram=GetIniValue(IniFile,_("\nWarn_exitprogram="),0,1,1);
         Warn_spriteremove=GetIniValue(IniFile,_("\nWarn_spriteremove="),0,1,1);
@@ -1069,7 +1076,7 @@ void TheFrame::FileImport(wxCommandEvent &event)
                 (void)wxMessageBox(_("Can't open more than 12 graphics"),_("SevenuP"));
                 return;
                 }
-        wxFileDialog dialog(this, _("Select an image file"), ImportImagePath, _(""),_("Any image|*.bmp;*.gif;*.jpg;*.png;*.pcx;*.tif;*.iff;*.xmp|BMP - Windows Bitmap|*.bmp|GIF - Compuserve Graphic Interchange Format|*.gif|JPG - Joint Picture Experts Group|*.jpg|PNG - Portable Network Graphic|*.png|PCX - Zsoft Paintbrush|*.pcx|TIF - Tagged Image File Format|*.tif|IFF - Amiga Interchange File Format|*.iff|XPM - X-Bitmap|*.xpm"), 0);
+        wxFileDialog dialog(this, _("Select an image file"), ImportImagePath, _(""),_("Any image|*.bmp;*.gif;*.jpg;*.png;*.pcx;*.tif;*.iff;*.xpm|BMP - Windows Bitmap|*.bmp|GIF - Compuserve Graphic Interchange Format|*.gif|JPG - Joint Picture Experts Group|*.jpg|PNG - Portable Network Graphic|*.png|PCX - Zsoft Paintbrush|*.pcx|TIF - Tagged Image File Format|*.tif|IFF - Amiga Interchange File Format|*.iff|XPM - X-Bitmap|*.xpm"), 0);
 
 	dialog.CentreOnParent();
         if (dialog.ShowModal() == wxID_OK)
