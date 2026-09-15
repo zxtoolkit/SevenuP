@@ -7,21 +7,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [v1.21.0-rc4] - 2026-09-14
+## [v1.21.0-rc5] - 2026-09-15
 
 ### Added
 
-- Windows version resource, so `SevenuP.exe` carries a product name, version
-  and copyright in its file properties instead of showing none.
 - Every download carries `GNU-GPL License.txt` and the manual, `SevenuP.txt`
   and `SevenuP-esp.txt`, as the original distribution did. In the AppImage they
   sit under `usr/share/doc/sevenup`.
-
-### Changed
-
-- Linux AppImage halved, 33 MB to 17 MB. It no longer carries ICU, which
-  nothing in it used, nor the CUPS print backend and the TLS, Kerberos and
-  Avahi stack behind it, which SevenuP has no way to reach.
 
 ### Fixed
 
@@ -35,6 +27,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `~/Library/SevenuP` left a zero-byte file.
 - "Any image" filter listed `*.xmp` instead of `*.xpm`.
 - Default dialog paths were ".", so dialogs opened at `/` under the Finder.
+
+## [v1.21.0-rc4] - 2026-09-14
+
+### Added
+
+- Windows version resource, so `SevenuP.exe` carries a product name, version
+  and copyright in its file properties instead of showing none.
+
+### Changed
+
+- Linux AppImage halved, 33 MB to 17 MB. It no longer carries ICU, which
+  nothing in it used, nor the CUPS print backend and the TLS, Kerberos and
+  Avahi stack behind it, which SevenuP has no way to reach.
 
 ## [v1.21.0-rc3] - 2026-09-14
 
@@ -81,7 +86,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   as accelerators. The canvas now handles them directly.
 - New Graph dialog's spin controls were allocated negative width on GTK.
 
-[Unreleased]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc4...HEAD
+[Unreleased]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc5...HEAD
+[v1.21.0-rc5]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc4...v1.21.0-rc5
 [v1.21.0-rc4]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc3...v1.21.0-rc4
 [v1.21.0-rc3]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc2...v1.21.0-rc3
 [v1.21.0-rc2]: https://github.com/zxtoolkit/SevenuP/compare/v1.21.0-rc1...v1.21.0-rc2
