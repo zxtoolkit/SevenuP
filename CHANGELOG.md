@@ -13,12 +13,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Windows version resource, so `SevenuP.exe` carries a product name, version
   and copyright in its file properties instead of showing none.
+- Every download carries `GNU-GPL License.txt` and the manual, `SevenuP.txt`
+  and `SevenuP-esp.txt`, as the original distribution did. In the AppImage they
+  sit under `usr/share/doc/sevenup`.
 
 ### Changed
 
 - Linux AppImage halved, 33 MB to 17 MB. It no longer carries ICU, which
   nothing in it used, nor the CUPS print backend and the TLS, Kerberos and
   Avahi stack behind it, which SevenuP has no way to reach.
+
+### Fixed
+
+- `.sev` loader read past its buffer when the header declared more than the
+  file carried. Valid files over 45000 bytes could not be opened either.
+- `.scr` loader took its size from `tellg()` after EOF, which returns -1, so
+  truncated files were read as whole screens.
+- macOS Save dialog leaked its `wxFileDialog` on every use.
+- `LSMinimumSystemVersion` was 11.0 while the Intel slice targets 10.13.
+- `SevenuP.ini` was not installed into the macOS bundle, so seeding
+  `~/Library/SevenuP` left a zero-byte file.
+- "Any image" filter listed `*.xmp` instead of `*.xpm`.
+- Default dialog paths were ".", so dialogs opened at `/` under the Finder.
 
 ## [v1.21.0-rc3] - 2026-09-14
 
